@@ -38,20 +38,17 @@ ob_start();
     $dataexpedicao = $obrigatorio->getDataExpedicao();
     $dataexpedicao = trata_data($dataexpedicao);
 
-    $datetime = date('d/m/Y H:i:s');
-    $data_hoje = date('d/m/Y');
-
 $html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
-    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
-    .titulo-principal { font-size: 15px; font-weight: bold; text-align: center; margin: 15px 0; }
-    .titulo-secundario { font-size: 13px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
-    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
-    .tabela-dados td { padding: 8px 10px; border: 1px solid #CCCCCC; }
-    .tabela-dados .secao-header { background-color: #E8E8E8; font-weight: bold; text-align: center; padding: 10px; }
+    .cabecalho { font-size: 10px; text-align: center; line-height: 1.4; margin-bottom: 8px; }
+    .titulo-principal { font-size: 12px; font-weight: bold; text-align: center; margin: 15px 0; }
+    .titulo-secundario { font-size: 12px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 12px; margin: 15px 0; }
+    .tabela-dados td { padding: 2px 4px; border: 1px solid #CCCCCC; }
+    .tabela-dados .secao-header { background-color: #E8E8E8; font-weight: bold; text-align: center; padding: 3px; }
     .tabela-dados .campo-label { font-weight: bold; }
-    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 30px; }
+    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 30px; }
     .tabela-assinatura td { text-align: center; padding: 5px; border: none; }
     .linha-assinatura { border-top: 1px solid #000000; display: inline-block; width: 280px; margin-top: 40px; }
     .campo-data { border-bottom: 1px solid #000000; display: inline-block; min-width: 150px; }

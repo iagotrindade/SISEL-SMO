@@ -41,12 +41,12 @@ $lista_presenca_obrigatorios = $conexao->findObrigatoriosParaListaPresenca();
 $html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
-    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
-    .titulo-ie { font-size: 14px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
-    .titulo-lista { font-size: 13px; font-weight: bold; text-align: center; margin: 5px 0 20px 0; }
-    .tabela-presenca { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
-    .tabela-presenca th { padding: 10px 8px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
-    .tabela-presenca td { padding: 12px 8px; border: 1px solid #DDDDDD; vertical-align: middle; }
+    .cabecalho { font-size: 10px; text-align: center; line-height: 1.4; margin-bottom: 8px; }
+    .titulo-ie { font-size: 12px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
+    .titulo-lista { font-size: 12px; font-weight: bold; text-align: center; margin: 5px 0 20px 0; }
+    .tabela-presenca { width: 100%; border-collapse: collapse; font-size: 12px; margin: 15px 0; }
+    .tabela-presenca th { padding: 2px 4px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
+    .tabela-presenca td { padding: 2px 4px; border: 1px solid #DDDDDD; vertical-align: middle; }
     .linha-separadora { border-top: 1px solid #CCCCCC; margin: 8px 0; }
 </style>
 

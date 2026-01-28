@@ -42,20 +42,37 @@ $data_final    = $_POST['date_final'] ?? '';
 $data          = $_POST['documento_dia'] ?? '';
 
 // Cabeçalho
-$cabecalho = "MINISTÉRIO DA DEFESA<br>EXÉRCITO BRASILEIRO<br>COMANDO MILITAR DO SUL<br>COMANDO DA 3ª REGIÃO MILITAR<br>(Gov das Armas Prov do RS/1821)<br>REGIÃO DOM DIOGO DE SOUZA<br>";
-
 $html = "
-<p style='text-align: center; font-size: 10px; margin-bottom: 5px;'>
-    <img src='../imagens/brasao.png' width='70px'><br>
-    $cabecalho
-</p>
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 10px; text-align: center; line-height: 1.4; margin-bottom: 8px; }
+    .titulo-principal { font-size: 12px; font-weight: bold; text-align: center; margin: 10px 0; }
+    .titulo-secundario { font-size: 12px; font-weight: bold; text-align: center; margin: 5px 0 15px 0; }
+    .texto-corpo { font-size: 12px; text-align: justify; line-height: 1.6; margin: 10px 0; text-indent: 60px; }
+    .texto-data { font-size: 12px; text-align: right; margin: 10px 0; }
+    .tabela-lista { width: 100%; border-collapse: collapse; font-size: 12px; margin: 15px 0; }
+    .tabela-lista th { padding: 2px 4px; border: 1px solid #CCCCCC; font-weight: bold; text-align: center; }
+    .tabela-lista td { padding: 2px 4px; border: 1px solid #DDDDDD; text-align: center; }
+</style>
 
-<h3 style='text-align: center;'>$titulo</h3>
-<h4 style='text-align: center;'>$subtitulo</h4>
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
+        MINISTÉRIO DA DEFESA<br>
+        EXÉRCITO BRASILEIRO<br>
+        COMANDO MILITAR DO SUL<br>
+        COMANDO DA 3ª REGIÃO MILITAR<br>
+        (Gov das Armas Prov do RS/1821)<br>
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
 
-<p style='font-size: 12px; text-align: justify; text-indent: 2em;'>$paragrafo_um</p>
-<p style='font-size: 12px; text-align: justify; text-indent: 2em;'>$paragrafo_dois</p>
-<p style='font-size: 12px; text-align: right;'>$data</p>";
+<div class='titulo-principal'>$titulo</div>
+<div class='titulo-secundario'>$subtitulo</div>
+
+<p class='texto-corpo'>$paragrafo_um</p>
+<p class='texto-corpo'>$paragrafo_dois</p>
+<p class='texto-data'>$data</p>";
 
 $mpdf->WriteHTML($html);
 
@@ -105,23 +122,23 @@ foreach ($todos_obrigatorios as $candidato) {
 // Geração da tabela de APTOS
 if (!empty($aptos)) {
     $html_aptos = "
-    <table border='1' style='width:100%; border-collapse: collapse; margin-bottom: 20px;'>
+    <table class='tabela-lista'>
         <tr>
-            <th colspan='4' style='text-align: center; background-color: #D8D8D8; font-size: 14px;'>APTOS</th>
+            <th colspan='3' style='background-color: #D8D8D8; font-size: 14px;'>APTOS</th>
         </tr>
         <tr>
-            <th style='width: 5%; text-align:center;'>Nº</th>
-            <th style='width: 15%; text-align:center;'>CPF</th>
-            <th style='width: 80%; text-align:center;'>NOME</th>
+            <th style='width: 5%;'>Nº</th>
+            <th style='width: 15%;'>CPF</th>
+            <th style='width: 80%;'>NOME</th>
         </tr>";
 
     $contador_aptos = 1;
     foreach ($aptos as $apto) {
         $html_aptos .= "
         <tr>
-            <td style='text-align:center;'>$contador_aptos</td>
-            <td style='text-align:center;'>{$apto['cpf']}</td>
-            <td style='text-align:center;'>{$apto['nome']}</td>
+            <td>$contador_aptos</td>
+            <td>{$apto['cpf']}</td>
+            <td>{$apto['nome']}</td>
         </tr>";
         $contador_aptos++;
     }
@@ -133,23 +150,23 @@ if (!empty($aptos)) {
 // Geração da tabela de INAPTOS
 if (!empty($inaptos)) {
     $html_inaptos = "
-    <table border='1' style='width:100%; border-collapse: collapse; margin-bottom: 20px;'>
+    <table class='tabela-lista'>
         <tr>
-            <th colspan='4' style='text-align: center; background-color: #D8D8D8; font-size: 14px;'>INAPTOS</th>
+            <th colspan='3' style='background-color: #D8D8D8; font-size: 14px;'>INAPTOS</th>
         </tr>
         <tr>
-            <th style='width: 5%; text-align:center;'>Nº</th>
-            <th style='width: 15%; text-align:center;'>CPF</th>
-            <th style='width: 80%; text-align:center;'>NOME</th>
+            <th style='width: 5%;'>Nº</th>
+            <th style='width: 15%;'>CPF</th>
+            <th style='width: 80%;'>NOME</th>
         </tr>";
 
     $contador_inaptos = 1;
     foreach ($inaptos as $inapto) {
         $html_inaptos .= "
         <tr>
-            <td style='text-align:center;'>$contador_inaptos</td>
-            <td style='text-align:center;'>{$inapto['cpf']}</td>
-            <td style='text-align:center;'>{$inapto['nome']}</td>
+            <td>$contador_inaptos</td>
+            <td>{$inapto['cpf']}</td>
+            <td>{$inapto['nome']}</td>
         </tr>";
         $contador_inaptos++;
     }

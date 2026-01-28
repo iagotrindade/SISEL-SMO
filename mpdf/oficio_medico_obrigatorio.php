@@ -1,9 +1,9 @@
-<?php 
+<?php
 
 ob_start();
 
 
-if(!isset($_SESSION)) session_start();
+if (!isset($_SESSION)) session_start();
 
 include_once '../funcoes.php';
 include_once '../dao/conecta_banco.php';
@@ -16,10 +16,9 @@ include_once '../dao/OficioDAO.php';
 include_once '../dao/AuxiliarDAO.php';
 include("mpdf60/mpdf.php");
 
-if($_SESSION['perfil_smo'] != "admin")
-{    
-    erro($BASE_URL, 2, 113551322, $pagina_atual, "usuario!admin", "Não foi possível acessar a página!");
-    exit();
+if ($_SESSION['perfil_smo'] != "admin") {
+  erro($BASE_URL, 2, 113551322, $pagina_atual, "usuario!admin", "Não foi possível acessar a página!");
+  exit();
 }
 
 $logDAO = new logDAO($conexao);
@@ -29,44 +28,34 @@ $auxiliar = new AuxiliarDAO($conexao);
 
 $oficio_atualiza = new Oficio();
 
-$oficio_atualiza->setIdObrigatorio(filtra_campo_post('id_obrigatorio')); 
-$oficio_atualiza->setBairroOm1Fase(filtra_campo_post('bairro_om_1_fase')); 
-$oficio_atualiza->setPresidenteComissao(filtra_campo_post('presidente_comissao')); 
-$oficio_atualiza->setCepCidadeom1Fase(filtra_campo_post('cep_cidade_om_1_fase')); 
-$oficio_atualiza->setCidadeOm1Fase(filtra_campo_post('cidade_om_1_fase')); 
-$oficio_atualiza->setDataApresentacao(trata_data(filtra_campo_post('data_apresentacao')));   
-$oficio_atualiza->setHoraApresentacao(filtra_campo_post('hora_apresentacao'));  
-$oficio_atualiza->setTelOm1Fase(filtra_campo_post('tel_om_1_fase')); 
+$oficio_atualiza->setIdObrigatorio(filtra_campo_post('id_obrigatorio'));
+$oficio_atualiza->setBairroOm1Fase(filtra_campo_post('bairro_om_1_fase'));
+$oficio_atualiza->setPresidenteComissao(filtra_campo_post('presidente_comissao'));
+$oficio_atualiza->setCepCidadeom1Fase(filtra_campo_post('cep_cidade_om_1_fase'));
+$oficio_atualiza->setCidadeOm1Fase(filtra_campo_post('cidade_om_1_fase'));
+$oficio_atualiza->setDataApresentacao(trata_data(filtra_campo_post('data_apresentacao')));
+$oficio_atualiza->setHoraApresentacao(filtra_campo_post('hora_apresentacao'));
+$oficio_atualiza->setTelOm1Fase(filtra_campo_post('tel_om_1_fase'));
 $oficio_atualiza->setDataCabecalho(trata_data(filtra_campo_post('data_cabecalho')));
 
 $oficio_existente = $oficioDAO->findByIdObrigatorio($oficio_atualiza->getIdObrigatorio());
 
-if ($oficio_existente == false) 
-{
-    $data = $oficioDAO->insert($oficio_atualiza);
-    if($data)
-    {
-        $alteracao = "Cadastrou o Ofício ID: " . $data['id_obrigatorio'] ;
-        $alteracao_detalahada = print_r($data, true);
-        $logDAO->insertLog(1005, "oficio", $data['id_obrigatorio'], $alteracao, $alteracao_detalahada);
-    }
-
-    else 
-        erro($BASE_URL, 3, 14786366, $pagina_atual, "oficio_nao_cadastrado", "Não foi possível cadastrar o ofício!");
-}
- 
-else 
-{
-    $data = $oficioDAO->update($oficio_atualiza);
-      if($data)
-      {
-          $alteracao = "Atualizou o Ofício ID: " . $data['id_obrigatorio'] ;
-          $alteracao_detalahada = print_r($data, true);
-          $logDAO->insertLog(3004, "oficio", $data['id_obrigatorio'], $alteracao, $alteracao_detalahada);
-      }
-      
-      else 
-          erro($BASE_URL, 3, 3486251, $pagina_atual, "oficio_nao_atualizado", "Não foi possível atualizar o ofício!");
+if ($oficio_existente == false) {
+  $data = $oficioDAO->insert($oficio_atualiza);
+  if ($data) {
+    $alteracao = "Cadastrou o Ofício ID: " . $data['id_obrigatorio'];
+    $alteracao_detalahada = print_r($data, true);
+    $logDAO->insertLog(1005, "oficio", $data['id_obrigatorio'], $alteracao, $alteracao_detalahada);
+  } else
+    erro($BASE_URL, 3, 14786366, $pagina_atual, "oficio_nao_cadastrado", "Não foi possível cadastrar o ofício!");
+} else {
+  $data = $oficioDAO->update($oficio_atualiza);
+  if ($data) {
+    $alteracao = "Atualizou o Ofício ID: " . $data['id_obrigatorio'];
+    $alteracao_detalahada = print_r($data, true);
+    $logDAO->insertLog(3004, "oficio", $data['id_obrigatorio'], $alteracao, $alteracao_detalahada);
+  } else
+    erro($BASE_URL, 3, 3486251, $pagina_atual, "oficio_nao_atualizado", "Não foi possível atualizar o ofício!");
 }
 
 $oficio = $oficioDAO->findByIdObrigatorio($oficio_atualiza->getIdObrigatorio());
@@ -80,33 +69,33 @@ $data_comparecimento_designacao = trata_data($obrigatorio->getDataComparecimento
 
 $data_hoje = date('d/m/Y');
 $ano = date("Y");
-if($data_comparecimento_sel_geral) $data_comparecimento_sel_geral = dataExtenso($data_comparecimento_sel_geral);
+if ($data_comparecimento_sel_geral) $data_comparecimento_sel_geral = dataExtenso($data_comparecimento_sel_geral);
 //$eb = strtoupper(md5($obrigatorio->getId()));
 
-$eb =               "10/" . $obrigatorio->getId() ."-"
-                    .strtoupper(substr(md5($obrigatorio->getId()) ,0,18))
-                    ."10";
-                    
-                    
+$eb =               "10/" . $obrigatorio->getId() . "-"
+  . strtoupper(substr(md5($obrigatorio->getId()), 0, 18))
+  . "10";
+
+
 set_time_limit(300);
 
-    $html = "
+$html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
-    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 25px; }
-    .data-oficio { font-size: 11px; font-weight: bold; text-align: right; margin: 15px 0; }
-    .numero-oficio { font-size: 11px; margin: 10px 0; }
-    .eb-numero { font-size: 11px; margin: 5px 0 15px 0; }
-    .tabela-oficio { width: 100%; border-collapse: collapse; font-size: 11px; margin: 15px 0; }
-    .tabela-oficio td { padding: 4px 0; vertical-align: top; border: none; }
-    .campo-oficio { font-weight: bold; }
-    .texto-oficio { font-size: 11px; text-align: justify; line-height: 1.6; margin: 12px 0; text-indent: 60px; }
-    .info-om { font-size: 11px; margin: 15px 0; line-height: 1.5; }
-    .assinatura-oficio { font-size: 11px; font-weight: bold; text-align: center; margin: 30px 0 5px 0; }
-    .cargo-oficio { font-size: 11px; text-align: center; margin: 0; }
-    .campo-assinatura { font-size: 11px; margin: 15px 0; line-height: 1.8; }
-    .quebra-pagina { page-break-before: always; }
-</style>
+      .cabecalho { font-size: 10px; text-align: center; line-height: 1.4; margin-bottom: 8px; }
+      .data-oficio { font-size: 12px; font-weight: bold; text-align: right; margin: 15px 0; }
+      .numero-oficio { font-size: 12px; margin: 10px 0; }
+      .eb-numero { font-size: 12px; margin: 5px 0 15px 0; }
+      .tabela-oficio { width: 100%; border-collapse: collapse; font-size: 12px; margin: 15px 0; }
+      .tabela-oficio td { padding: 4px 0; vertical-align: top; border: none; }
+      .campo-oficio { font-weight: bold; }
+      .texto-oficio { font-size: 12px; text-align: justify; line-height: 1.6; margin: 12px 0; text-indent: 60px; }
+      .info-om { font-size: 12px; margin: 15px 0; line-height: 1.5; }
+      .assinatura-oficio { font-size: 12px; font-weight: bold; text-align: center; margin: 30px 0 5px 0; }
+      .cargo-oficio { font-size: 12px; text-align: center; margin: 0; }
+      .campo-assinatura { font-size: 12px; margin: 15px 0; line-height: 1.8; }
+      .quebra-pagina { page-break-before: always; }
+  </style>
 
 <div style='text-align: center;'>
     <div class='cabecalho'>
@@ -121,11 +110,11 @@ set_time_limit(300);
 </div>
 ";
 
-$html = $html. "
+$html = $html . "
 <div class='data-oficio'>Porto Alegre-RS, " . $data_comparecimento_designacao . "</div>
 
-<div class='numero-oficio'>Ofício nº 10". $oficio->getIdObrigatorio() ." SSSMT/SSMR/Esc Pes</div>
-<div class='eb-numero'>EB: ".$eb. "</div>
+<div class='numero-oficio'>Ofício nº 10" . $oficio->getIdObrigatorio() . " SSSMT/SSMR/Esc Pes</div>
+<div class='eb-numero'>EB: " . $eb . "</div>
 
 <table class='tabela-oficio'>
   <tr>
@@ -134,7 +123,7 @@ $html = $html. "
   </tr>
   <tr>
     <td style='width:25%'></td>
-    <td><span class='campo-oficio'>Ao:</span> Sr Cmt /Ch / Dir do (a) ".$obrigatorio->getOm1Fase()->getAbreviatura()."</td>
+    <td><span class='campo-oficio'>Ao:</span> Sr Cmt /Ch / Dir do (a) " . $obrigatorio->getOm1Fase()->getAbreviatura() . "</td>
   </tr>
   <tr>
     <td style='width:25%'></td>
@@ -152,49 +141,51 @@ $html = $html. "
 
         
 <p class='texto-oficio'>
-1. Apresento a esse Comando o Sr ".$obrigatorio->getNomeCompleto().", ".$obrigatorio->getFormacao().", que após Seleção Especial de Médicos, Farmacêuticos, Dentistas e Veterinários (MFDV), está convocado à Incorporação para a prestação do Serviço Militar Obrigatório sob a forma da 1ª Fase do Estágio de Adaptação e Serviço (1ª Fase/EAS)
+1. Apresento a esse Comando o Sr " . $obrigatorio->getNomeCompleto() . ", " . $obrigatorio->getFormacao() . ", que após Seleção Especial de Médicos, Farmacêuticos, Dentistas e Veterinários (MFDV), está convocado à Incorporação para a prestação do Serviço Militar Obrigatório sob a forma da 1ª Fase do Estágio de Adaptação e Serviço (1ª Fase/EAS)
 </p>
 <p class='texto-oficio'>
 2. Comunico que as atividades de Seleção Complementar, Convocação à Incorporação, Incorporação e outras medidas administrativas estão reguladas em Ordem de Serviço específica.
 </p>
 <p class='texto-oficio'>
-3. Informo, também, que o ".$obrigatorio->getFormacao()." convocado tem conhecimento de que, conforme previsto no Art 183 do Decreto-Lei Nr 1.001, de 21 de outubro de 1969 (Código Penal Militar), incorrerá no crime de "insubmissão", caso deixe de apresentar-se à incorporação, dentro do prazo marcado, ou que, apresentando-se, ausente-se antes do ato oficial de incorporação. Adicionalmente, comunico que, conforme a Súmula 7 do Superior Tribunal Militar, incorrerá no mesmo crime citado (Insubmissão), caso não compareça à Seleção Complementar.
-</p>
+3. Informo, também, que o " . $obrigatorio->getFormacao() . " convocado tem conhecimento de que, conforme previsto no Art
+183 do Decreto-Lei Nr 1.001, de 21 de outubro de 1969 (Código Penal Militar), incorrerá no crime de “insubmissão”, caso
+deixe de apresentar-se à incorporação, dentro do prazo marcado, ou que, apresentando-se, ausente-se antes do ato oficial
+de incorporação. Adicionalmente, comunico que, conforme a Súmula 7 do Superior Tribunal Militar, incorrerá no mesmo
+crime citado (Insubmissão), caso não compareça à Seleção Complementar.
 
 
 <p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    4. A OM de 1ª Fase, após a realização da Seleção Complementar, deverá expedir Ofício convocando o ".$obrigatorio->getFormacao()." para a sua Incorporação, informando a data, horário e local de apresentação para a referida Incorporação.
+    4. A OM de 1ª Fase, após a realização da Seleção Complementar, deverá expedir Ofício convocando o " . $obrigatorio->getFormacao() . " para a sua Incorporação, informando a data, horário e local de apresentação para a referida Incorporação.
     <br>
     <br>
 
-OM DE APRESENTAÇÃO: ".$obrigatorio->getOm1Fase()->getAbreviatura()." <br>
+OM DE APRESENTAÇÃO: " . $obrigatorio->getOm1Fase()->getAbreviatura() . " <br>
 ENDEREÇO: " . $obrigatorio->getOm1Fase()->getEndereco() . " <br>
-CEP/CIDADE: ".$obrigatorio->getOm1Fase()->getCep(). " / ". $obrigatorio->getOm1Fase()->getCidade() . " <br>
-TELEFONE: ".$obrigatorio->getOm1Fase()->getTelefone()." <br>
-<br>
+CEP/CIDADE: " . $obrigatorio->getOm1Fase()->getCep() . " / " . $obrigatorio->getOm1Fase()->getCidade() . " <br>
+TELEFONE: " . $obrigatorio->getOm1Fase()->getTelefone() . " <br>
 <p style='font-size: 12px;'>
 </p>
-<br>
 
 
-<p class='center' style='font-size: 12px; text-align: center'><b> ".$oficio->getPresidenteComissao()." </b>
+<p class='center' style='font-size: 12px; text-align: center'><b> " . $oficio->getPresidenteComissao() . " </b>
 <br>
  Presidente da Comissão de Designação     
 </p>
 <br>
+
 <p style='font-size: 12px;'>
-Eu ".$obrigatorio->getNomeCompleto()." Recebi o ORIGINAL e declaro ter tomado ciência nesta data:______/______/______ <br><br>
+Eu " . $obrigatorio->getNomeCompleto() . " Recebi o ORIGINAL e declaro ter tomado ciência nesta data:______/______/______ <br><br>
 CPF ________._________._________-_________
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Ass: _______________________________________________
 </p>
-" ;
+";
 
 
-$html = $html. "
+$html = $html . "
 <center>
 <p class='center' style='font-size: 10px; text-align: center'>
    <img src='../imagens/brasao.png' width='70px'><br>
@@ -209,13 +200,13 @@ $html = $html. "
 </center>
 <br>";
 
-$html = $html. "
+$html = $html . "
         <strong>          
-        <p align='right'>Porto Alegre-RS, ". $data_comparecimento_designacao . "</p>
+        <p align='right'>Porto Alegre-RS, " . $data_comparecimento_designacao . "</p>
         </strong>
 
-<p> Ofício de Convocação nº 10". $oficio->getIdObrigatorio() . " SSSMT/SSMR/Esc Pes  <br></p>
-<p> EB: ".$eb. " <br></p>
+<p> Ofício de Convocação nº 10" . $oficio->getIdObrigatorio() . " SSSMT/SSMR/Esc Pes  <br></p>
+<p> EB: " . $eb . " <br></p>
     
 
 <table border='0' style='width:100%; font-size: 12px; font-family: Times New Roman; text-align: justify;'>
@@ -249,7 +240,7 @@ $html = $html. "
 <p style='font-size: 12px; font-family: Times New Roman;'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	2. Dessa forma, informo que V Sa deverá comparecer para a Seleção Complementar, às ".$oficio->getHoraApresentacao()."h, do dia ". $data_selecao_complementar .", portando os seguintes documentos:
+	2. Dessa forma, informo que V Sa deverá comparecer para a Seleção Complementar, às " . $oficio->getHoraApresentacao() . "h, do dia " . $data_selecao_complementar . ", portando os seguintes documentos:
     <br><br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Original e cópia do diploma de graduação;<br></span>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Original e cópia do documento militar, RG, CPF e comprovante de residência;<br></span>
@@ -264,10 +255,10 @@ $html = $html. "
   <br>
   <br>
 	
-  OM DE APRESENTAÇÃO: ".$obrigatorio->getOm1Fase()->getAbreviatura()." <br>
+  OM DE APRESENTAÇÃO: " . $obrigatorio->getOm1Fase()->getAbreviatura() . " <br>
   ENDEREÇO: " . $obrigatorio->getOm1Fase()->getEndereco() . " <br>
-  CEP/CIDADE: ".$obrigatorio->getOm1Fase()->getCep(). " / ". $obrigatorio->getOm1Fase()->getCidade() . " <br>
-  TELEFONE: ".$obrigatorio->getOm1Fase()->getTelefone()." <br>
+  CEP/CIDADE: " . $obrigatorio->getOm1Fase()->getCep() . " / " . $obrigatorio->getOm1Fase()->getCidade() . " <br>
+  TELEFONE: " . $obrigatorio->getOm1Fase()->getTelefone() . " <br>
 </p>
 <p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -280,37 +271,32 @@ $html = $html. "
 <p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    5. A sua Incorporação ocorrerá em ". $oficio_data_cabecalho . ".
+    5. A sua Incorporação ocorrerá em " . $oficio_data_cabecalho . ".
 
 
 <br><br>
-<p class='center' style='font-size: 12px; text-align: center'><b> ".$oficio->getPresidenteComissao()." </b>
+<p class='center' style='font-size: 12px; text-align: center'><b> " . $oficio->getPresidenteComissao() . " </b>
 <br>
  Presidente da Comissão de Designação     
 </p>
 
-<br>
-
 <p style='font-size: 12px;'>
-Eu ".$obrigatorio->getNomeCompleto()." Recebi o ORIGINAL e declaro ter tomado ciência nesta data:______/______/______ <br><br>
+Eu " . $obrigatorio->getNomeCompleto() . " Recebi o ORIGINAL e declaro ter tomado ciência nesta data:______/______/______ <br><br>
 CPF ________._________._________-_________
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Ass: _______________________________________________
 </p>
-" ;
+";
 
-$mpdf = new mPDF('C', 'A4'); 
+$mpdf = new mPDF('C', 'A4');
 $mpdf->WriteHTML($html);
 
 $cpf = $obrigatorio->getCpf();
 
-$alteracao_detalahada = "CPF do Obrigatório ". $obrigatorio->getCpf();
+$alteracao_detalahada = "CPF do Obrigatório " . $obrigatorio->getCpf();
 $insere_log = $logDAO->insertLog(4004, "PDF", $obrigatorio->getId(), "Gerou o Ofício do Obrigatório " . $obrigatorio->getCpf(), $alteracao_detalahada);
 
 ob_get_clean();
 $mpdf->Output();
 //$mpdf->Output($arquivo, 'F');
- 
-
-?>

@@ -50,14 +50,14 @@ if($get_exames_medico)
 $html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
-    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
-    .titulo-principal { font-size: 15px; font-weight: bold; text-align: center; margin: 15px 0; }
-    .titulo-secundario { font-size: 13px; font-weight: bold; text-align: center; margin: 10px 0; }
-    .subtitulo { font-size: 11px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
-    .tabela-lista { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
-    .tabela-lista th { padding: 8px 5px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
-    .tabela-lista td { padding: 6px 5px; border: 1px solid #DDDDDD; vertical-align: top; }
-    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 40px; }
+    .cabecalho { font-size: 10px; text-align: center; line-height: 1.4; margin-bottom: 8px; }
+    .titulo-principal { font-size: 12px; font-weight: bold; text-align: center; margin: 15px 0; }
+    .titulo-secundario { font-size: 12px; font-weight: bold; text-align: center; margin: 10px 0; }
+    .subtitulo { font-size: 12px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
+    .tabela-lista { width: 100%; border-collapse: collapse; font-size: 12px; margin: 15px 0; }
+    .tabela-lista th { padding: 2px 4px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
+    .tabela-lista td { padding: 2px 4px; border: 1px solid #DDDDDD; vertical-align: top; }
+    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 40px; }
     .tabela-assinatura td { text-align: center; padding: 5px; border: none; }
     .linha-assinatura { border-top: 1px solid #000000; display: inline-block; width: 320px; margin-top: 50px; }
 </style>
