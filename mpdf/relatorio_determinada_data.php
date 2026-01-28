@@ -48,64 +48,49 @@ if($get_exames_medico)
 //$html = ob_get_clean();
 
 $html = "
-<center>
-<p class='center' style='font-size: 10px; text-align: center;'>
-<img src='../imagens/brasao.png' width='70px'><br>
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
+    .titulo-principal { font-size: 15px; font-weight: bold; text-align: center; margin: 15px 0; }
+    .titulo-secundario { font-size: 13px; font-weight: bold; text-align: center; margin: 10px 0; }
+    .subtitulo { font-size: 11px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
+    .tabela-lista { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
+    .tabela-lista th { padding: 8px 5px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
+    .tabela-lista td { padding: 6px 5px; border: 1px solid #DDDDDD; vertical-align: top; }
+    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 40px; }
+    .tabela-assinatura td { text-align: center; padding: 5px; border: none; }
+    .linha-assinatura { border-top: 1px solid #000000; display: inline-block; width: 320px; margin-top: 50px; }
+</style>
+
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
         MINISTÉRIO DA DEFESA<br>
         EXÉRCITO BRASILEIRO<br>
         COMANDO MILITAR DO SUL<br>
         COMANDO DA 3ª REGIÃO MILITAR<br>
         (Gov das Armas Prov do RS/1821)<br>
-        REGIÃO DOM DIOGO DE SOUZA<br> 
-</p>
-</center>";
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
 
-$html = $html. "
- <table border='0' style='width:100%'>
-    <tr>
-    <th align='center'><strong>Relatório dos Inspecionados</strong></th>
-    </tr>
-    <tr>
-    <th align='center'><strong>Em $data_sel_geral</strong></th>
-</tr>
-</table> 
- <table border='0' style='width:100%'>
-  <tr>
-    <th align='center'><strong> <p style='font-size: 12px; font-family: Times New Roman;'>JISE:  Sessão Nº $sessao - CSE - Médicos Obrigatórios ".$_POST['data_inspecao']." 
-    na cidade de  $cidade. </p></strong></th>
-  </tr>
-</table> 
-
+<div class='titulo-principal'>Relatório dos Inspecionados</div>
+<div class='titulo-secundario'>Em $data_sel_geral</div>
+<div class='subtitulo'>JISE: Sessão Nº $sessao - CSE - Médicos Obrigatórios ".$_POST['data_inspecao']." na cidade de $cidade.</div>
 " ;
 
 $lista_obrigatorios = $conexao->findObrigatoriosPorDataCompSelGeral($data_tratada); 
 
-    $html = $html . " <br>
-        <table border='0' style='font-size: 10px; font-family: Times New Roman; width:100%' >
+    $html = $html . "
+        <table class='tabela-lista'>
             <tr>
-                <td style='background-color: #D8D8D8'>
-                    <b>Nº</b>
-                </td>
-                <td style='background-color: #D8D8D8'>
-                    <b>CPF</b>
-                </td>
-                <td style='background-color: #D8D8D8'>
-                    <b>NOME COMPLETO</b>
-                </td>
-              
-                <td style='background-color: #D8D8D8'>
-                    <b>NASCIMENTO</b>
-                </td>
-                <td style='background-color: #D8D8D8'>
-                    <b>NOME DA MÃE</b>
-                </td>
-                <td style='background-color: #D8D8D8'>
-                    <b>PARECER</b>
-                </td>
-                
-                <td style='background-color: #D8D8D8'>
-                    <b>CID</b>
-                </td>
+                <th width='5%'>Nº</th>
+                <th width='12%'>CPF</th>
+                <th width='30%'>NOME COMPLETO</th>
+                <th width='12%'>NASCIMENTO</th>
+                <th width='23%'>NOME DA MÃE</th>
+                <th width='10%'>PARECER</th>
+                <th width='8%'>CID</th>
             </tr>";
     
 $contador = 1;
@@ -125,29 +110,13 @@ foreach ($lista_obrigatorios as $candidato)
     
     $html = $html . "
         <tr>
-            <td>
-                ".$contador."
-            </td>
-            <td>
-                ".$candidato['cpf']."
-            </td>
-            <td>
-                ".mb_strtoupper($candidato['nome_completo'],"UTF-8")."
-            </td>
-        
-            <td>
-                ".$nascimento."
-            </td>
-            <td>
-                ".$candidato['nome_mae']."
-            </td>
-            <td>
-                ".$parecer."
-            </td>
-            
-            <td>
-                ".$cid."
-            </td>
+            <td style='text-align: center;'>".$contador."</td>
+            <td>".$candidato['cpf']."</td>
+            <td>".mb_strtoupper($candidato['nome_completo'],"UTF-8")."</td>
+            <td style='text-align: center;'>".$nascimento."</td>
+            <td>".$candidato['nome_mae']."</td>
+            <td style='text-align: center;'>".$parecer."</td>
+            <td style='text-align: center;'>".$cid."</td>
         </tr>";
     
     $contador++;
@@ -155,19 +124,19 @@ foreach ($lista_obrigatorios as $candidato)
 $html = $html . "</table>";
 
 
-$html = $html . " <br><br><br>
- <table border='0' style='font-size: 10px; font-family: Times New Roman; width:100%'>
+$html = $html . "
+<table class='tabela-assinatura'>
   <tr>
-    <th>_______________________________________________</th>
-    <th>_______________________________________________</th>
-    <th>_______________________________________________</th>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
   </tr>
   <tr>
-    <th width='33%'>$assinante_1</th>
-    <th width='33%'>$assinante_2</th>
-    <th width='33%'>$assinante_3</th>
+    <td>$assinante_1</td>
+    <td>$assinante_2</td>
+    <td>$assinante_3</td>
   </tr>
-</table> ";
+</table>";
 
 $mpdf = new mPDF('C', 'A4-L'); 
 $mpdf->WriteHTML($html);

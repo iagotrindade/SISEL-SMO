@@ -39,53 +39,42 @@ $lista_presenca_obrigatorios = $conexao->findObrigatoriosParaListaPresenca();
 //$html = ob_get_clean();
 
 $html = "
-<center>
-<p class='center' style='font-size: 10px; text-align: center;'>
-<img src='../imagens/brasao.png' width='70px'><br>
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
+    .titulo-ie { font-size: 14px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
+    .titulo-lista { font-size: 13px; font-weight: bold; text-align: center; margin: 5px 0 20px 0; }
+    .tabela-presenca { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
+    .tabela-presenca th { padding: 10px 8px; border: 1px solid #CCCCCC; background-color: #E8E8E8; font-weight: bold; text-align: center; }
+    .tabela-presenca td { padding: 12px 8px; border: 1px solid #DDDDDD; vertical-align: middle; }
+    .linha-separadora { border-top: 1px solid #CCCCCC; margin: 8px 0; }
+</style>
+
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
         MINISTÉRIO DA DEFESA<br>
         EXÉRCITO BRASILEIRO<br>
         COMANDO MILITAR DO SUL<br>
         COMANDO DA 3ª REGIÃO MILITAR<br>
         (Gov das Armas Prov do RS/1821)<br>
-        REGIÃO DOM DIOGO DE SOUZA<br> 
-</p>
-</center>";
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
 
-$html = $html. "
- <table border='0' style='width:100%'>
-    <tr>
-    <th align='center'><strong>$nome_instituicao_ensino </strong></th>
-    </tr>
-    <tr>
-    <th align='center'><strong>Lista de Presença em: ".$data." </strong></th>
-    </tr>
-</table> 
- 
-
+<div class='titulo-ie'>$nome_instituicao_ensino</div>
+<div class='titulo-lista'>Lista de Presença em: ".$data."</div>
 " ;
 
 
 
-    $html = $html . " <br>
-        <table border='0' style='font-size: 11px; font-family: Times New Roman; width:100%' >
+    $html = $html . "
+        <table class='tabela-presenca'>
             <tr>
-              
-                <td style='background-color: #D8D8D8'>
-                    <b>CPF</b>
-                </td>
-                <td style='background-color: #D8D8D8'>
-                    <b>NOME COMPLETO</b>
-                </td>
-
-                <td style='background-color: #D8D8D8'>
-                    <b>SITUAÇÃO MILITAR</b>
-                </td>
-
-                 <td style='background-color: #D8D8D8'>
-                    <b>ASSINATURA</b>
-                </td>
-              
-                
+                <th width='14%'>CPF</th>
+                <th width='35%'>NOME COMPLETO</th>
+                <th width='26%'>SITUAÇÃO MILITAR</th>
+                <th width='25%'>ASSINATURA</th>
             </tr>";
 
 //if ($todos_obrigatorios)
@@ -104,30 +93,10 @@ foreach ($todos_obrigatorios as $obrigatorio)
 
     $html = $html . "
         <tr>
-
-
-            <td width='10%'>
-                    ".$obrigatorio->getCPF()."
-            </td>
-
-            <td width='35%'>
-                    ".$obrigatorio->getNomeCompleto()."
-            </td>
-
-            <td width='30%'>
-                    ".$obrigatorio->getSituacaoMilitar()."
-            </td>
-
-            <td width='25%'>
-            </td>
-            
-        </tr>
-        
-        <tr>
-            <td colspan='4'>
-            <br>
-                <hr>
-            </td>
+            <td style='vertical-align: middle;'>".$obrigatorio->getCPF()."</td>
+            <td style='vertical-align: middle;'>".$obrigatorio->getNomeCompleto()."</td>
+            <td style='vertical-align: middle;'>".$obrigatorio->getSituacaoMilitar()."</td>
+            <td style='height: 35px;'></td>
         </tr>
         ";
 }

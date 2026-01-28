@@ -91,67 +91,74 @@ $eb =               "10/" . $obrigatorio->getId() ."-"
 set_time_limit(300);
 
     $html = "
-    <center>
-    <p class='center' style='font-size: 10px; text-align: center;'>
-    <img src='../imagens/brasao.png' width='70px'><br>
-    MINISTÉRIO DA DEFESA<br>
-    EXÉRCITO BRASILEIRO<br>
-    COMANDO MILITAR DO SUL<br>
-    COMANDO DA 3ª REGIÃO MILITAR<br>
-    (Gov das Armas Prov do RS/1821)<br>
-    REGIÃO DOM DIOGO DE SOUZA<br>
-    
-</p>
-</center>
-<br>";
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 25px; }
+    .data-oficio { font-size: 11px; font-weight: bold; text-align: right; margin: 15px 0; }
+    .numero-oficio { font-size: 11px; margin: 10px 0; }
+    .eb-numero { font-size: 11px; margin: 5px 0 15px 0; }
+    .tabela-oficio { width: 100%; border-collapse: collapse; font-size: 11px; margin: 15px 0; }
+    .tabela-oficio td { padding: 4px 0; vertical-align: top; border: none; }
+    .campo-oficio { font-weight: bold; }
+    .texto-oficio { font-size: 11px; text-align: justify; line-height: 1.6; margin: 12px 0; text-indent: 60px; }
+    .info-om { font-size: 11px; margin: 15px 0; line-height: 1.5; }
+    .assinatura-oficio { font-size: 11px; font-weight: bold; text-align: center; margin: 30px 0 5px 0; }
+    .cargo-oficio { font-size: 11px; text-align: center; margin: 0; }
+    .campo-assinatura { font-size: 11px; margin: 15px 0; line-height: 1.8; }
+    .quebra-pagina { page-break-before: always; }
+</style>
+
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
+        MINISTÉRIO DA DEFESA<br>
+        EXÉRCITO BRASILEIRO<br>
+        COMANDO MILITAR DO SUL<br>
+        COMANDO DA 3ª REGIÃO MILITAR<br>
+        (Gov das Armas Prov do RS/1821)<br>
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
+";
 
 $html = $html. "
-        <strong>          
-        <p align='right'>Porto Alegre-RS, " . $data_comparecimento_designacao . "</p>
-        </strong>
+<div class='data-oficio'>Porto Alegre-RS, " . $data_comparecimento_designacao . "</div>
 
-<p> Ofício nº 10". $oficio->getIdObrigatorio() ." SSSMT/SSMR/Esc Pes </p>
-<p> EB: ".$eb. "</p>
+<div class='numero-oficio'>Ofício nº 10". $oficio->getIdObrigatorio() ." SSSMT/SSMR/Esc Pes</div>
+<div class='eb-numero'>EB: ".$eb. "</div>
 
-
-<table border='0' style='width:100%; font-size: 12px; font-family: Times New Roman; text-align: justify;'>
+<table class='tabela-oficio'>
   <tr>
-    <th style='width:30%'></th>
-    <th align='left' style='width:10%; font-weight:normal'><b>Do:</b> Presidente da Comissão de Designação MFDV</th>
+    <td style='width:25%'></td>
+    <td style='width:75%'><span class='campo-oficio'>Do:</span> Presidente da Comissão de Designação MFDV</td>
   </tr>
   <tr>
-    <th style='width:30%'></th>
-    <th align='left' style='width:50%; font-weight:normal'><b>Ao:</b> Sr Cmt /Ch / Dir do (a) ".$obrigatorio->getOm1Fase()->getAbreviatura()."</th>
+    <td style='width:25%'></td>
+    <td><span class='campo-oficio'>Ao:</span> Sr Cmt /Ch / Dir do (a) ".$obrigatorio->getOm1Fase()->getAbreviatura()."</td>
   </tr>
   <tr>
-    <th style='width:30%'></th>
-    <th align='left' style='width:50; font-weight:normal'><b>Assunto:</b> Apresentação de MFDV para a Seleção Complementar para o Estágio de Adaptação e Serviço</th>
+    <td style='width:25%'></td>
+    <td><span class='campo-oficio'>Assunto:</span> Apresentação de MFDV para a Seleção Complementar para o Estágio de Adaptação e Serviço</td>
   </tr>
   <tr>
-    <th style='width:30%'></th>
-    <th align='left' style='width:50%; font-weight:normal'><b>Ref:</b> Decreto-Lei Nr 1.001, de 21 Out 69 - Código Penal Militar; <br>
-        - R L MFDV; e <br>
-        - Súmula 7 do Superior Tribunal Militar.<br>
-        - Ordem de Serviço</th>
+    <td style='width:25%'></td>
+    <td><span class='campo-oficio'>Ref:</span> Decreto-Lei Nr 1.001, de 21 Out 69 - Código Penal Militar;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- R L MFDV; e<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Súmula 7 do Superior Tribunal Militar.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Ordem de Serviço</td>
   </tr>
 </table> 
 
 
         
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class='texto-oficio'>
 1. Apresento a esse Comando o Sr ".$obrigatorio->getNomeCompleto().", ".$obrigatorio->getFormacao().", que após Seleção Especial de Médicos, Farmacêuticos, Dentistas e Veterinários (MFDV), está convocado à Incorporação para a prestação do Serviço Militar Obrigatório sob a forma da 1ª Fase do Estágio de Adaptação e Serviço (1ª Fase/EAS)
 </p>
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	2. Comunico que as atividades de Seleção Complementar, Convocação à Incorporação, Incorporação e outras medidas administrativas estão reguladas em Ordem de Serviço específica.
+<p class='texto-oficio'>
+2. Comunico que as atividades de Seleção Complementar, Convocação à Incorporação, Incorporação e outras medidas administrativas estão reguladas em Ordem de Serviço específica.
 </p>
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	3. Informo, também, que o ".$obrigatorio->getFormacao()." convocado tem conhecimento de que, conforme previsto no Art 183 do Decreto-Lei Nr 1.001, de 21 de outubro de 1969 (Código Penal Militar), incorrerá no crime de “insubmissão”, caso deixe de apresentar-se à incorporação, dentro do prazo marcado, ou que, apresentando-se, ausente-se antes do ato oficial de incorporação. Adicionalmente, comunico que, conforme a Súmula 7 do Superior Tribunal Militar, incorrerá no mesmo crime citado (Insubmissão), caso não compareça à Seleção Complementar.
+<p class='texto-oficio'>
+3. Informo, também, que o ".$obrigatorio->getFormacao()." convocado tem conhecimento de que, conforme previsto no Art 183 do Decreto-Lei Nr 1.001, de 21 de outubro de 1969 (Código Penal Militar), incorrerá no crime de "insubmissão", caso deixe de apresentar-se à incorporação, dentro do prazo marcado, ou que, apresentando-se, ausente-se antes do ato oficial de incorporação. Adicionalmente, comunico que, conforme a Súmula 7 do Superior Tribunal Militar, incorrerá no mesmo crime citado (Insubmissão), caso não compareça à Seleção Complementar.
 </p>
 
 

@@ -39,219 +39,211 @@ ob_start();
 
 
 $html = "
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
+    .titulo-nome { font-size: 14px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
+    .titulo-documento { font-size: 15px; font-weight: bold; text-align: center; margin: 5px 0 15px 0; }
+    .info-situacao { font-size: 11px; font-weight: bold; margin: 15px 0; }
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 9px; margin: 15px 0; }
+    .tabela-dados td { padding: 6px 8px; border: 1px solid #CCCCCC; }
+    .tabela-dados .secao-header { background-color: #E8E8E8; font-weight: bold; text-align: center; padding: 8px; }
+    .tabela-dados .campo-label { font-weight: bold; }
+    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 30px; }
+    .tabela-assinatura td { text-align: center; padding: 5px; border: none; }
+    .linha-assinatura { border-top: 1px solid #000000; display: inline-block; width: 280px; margin-top: 40px; }
+    .texto-assinatura { font-size: 11px; text-align: center; margin-top: 25px; }
+    .campo-data { border-bottom: 1px solid #000000; display: inline-block; min-width: 120px; }
+</style>
 
-<center>
-<p class='center' style='font-size: 10px; text-align: center'>
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
+        MINISTÉRIO DA DEFESA<br>
+        EXÉRCITO BRASILEIRO<br>
+        COMANDO MILITAR DO SUL<br>
+        COMANDO DA 3ª REGIÃO MILITAR<br>
+        (Gov das Armas Prov do RS/1821)<br>
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
 
-    <img src='../imagens/brasao.png' width='70px'><br>
-    MINISTÉRIO DA DEFESA<br>
-    EXÉRCITO BRASILEIRO<br>
-    COMANDO MILITAR DO SUL<br>
-    COMANDO DA 3ª REGIÃO MILITAR<br>
-    (Gov das Armas Prov do RS/1821)<br>
-    REGIÃO DOM DIOGO DE SOUZA<br>
-    
-</p>
-</center>
-<br>
-<table border='0' style='width:100%'>
-  <tr>
-    <th align='center'><strong>". $obrigatorio->getNomeCompleto() . "   </strong>
-  </tr>
-  <tr>
-    <th align='center'><strong>Ficha Completa</strong>
-  </tr>
-</table> 
+<div class='titulo-nome'>". $obrigatorio->getNomeCompleto() . "</div>
+<div class='titulo-documento'>Ficha Completa</div>
 
-<br>
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-   <b>Situação Militar</b>: ".$obrigatorio->getSituacaoMilitar()."
-</p>
-
+<div class='info-situacao'>
+   <span class='campo-label'>Situação Militar:</span> ".$obrigatorio->getSituacaoMilitar()."
+</div>
 ";
 
  $html = $html. "
-     
-<table border='0'  style='font-size: 10px; font-family: Times New Roman; width:100%' >
 
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>IDENTIFICAÇÃO</b></center></td>
+<table class='tabela-dados'>
+
+<tr>
+    <td colspan=\"3\" class='secao-header'>IDENTIFICAÇÃO</td>
 </tr>
 
 <tr>
-    <td><b>Nome Completo: </b> ".$obrigatorio->getNomeCompleto()."</td>
-    <td><b>CPF: </b> ".$obrigatorio->getCpf()."</td>
-    <td><b>Estado Civil: </b> ".$obrigatorio->getEstadoCivil()."</td>
+    <td width='33%'><span class='campo-label'>Nome Completo:</span> ".$obrigatorio->getNomeCompleto()."</td>
+    <td width='33%'><span class='campo-label'>CPF:</span> ".$obrigatorio->getCpf()."</td>
+    <td width='33%'><span class='campo-label'>Estado Civil:</span> ".$obrigatorio->getEstadoCivil()."</td>
 </tr>
 <tr>
-    <td><b>Data de Nascimento: </b>".$data_nascimento." </td>
-    <td><b>Identidade: </b>".$obrigatorio->getId()." </td>
-    <td><b>E-mail: </b>".$obrigatorio->getMail()." </td>
-</tr>
-
-<tr>
-    <td><b>Telefone: </b>".$obrigatorio->getTelefone()." </td>
-    <td><b>Nome Pai: </b>".$obrigatorio->getNomePai()." </td>
-    <td><b>Nome Mãe: </b>".$obrigatorio->getNomeMae()." </td>
+    <td><span class='campo-label'>Data de Nascimento:</span> ".$data_nascimento."</td>
+    <td><span class='campo-label'>Identidade:</span> ".$obrigatorio->getId()."</td>
+    <td><span class='campo-label'>E-mail:</span> ".$obrigatorio->getMail()."</td>
 </tr>
 
 <tr>
-    <td><b>Voluntário: </b>".$obrigatorio->getVoluntario()." </td>
-    <td><b>Nacionalidade: </b>".$obrigatorio->getNacionalidade()." </td>
-    <td><b>Naturalidade: </b>".$obrigatorio->getNaturalidade()." </td>
+    <td><span class='campo-label'>Telefone:</span> ".$obrigatorio->getTelefone()."</td>
+    <td><span class='campo-label'>Nome Pai:</span> ".$obrigatorio->getNomePai()."</td>
+    <td><span class='campo-label'>Nome Mãe:</span> ".$obrigatorio->getNomeMae()."</td>
 </tr>
 
 <tr>
-    <td><b>Endereço: </b>".$obrigatorio->getEndereco()." </td>
-    <td><b>Dependentes: </b>".$obrigatorio->getDependentes()." </td>
-    <td><b>Força: </b>".$obrigatorio->getForca()." </td>
-</tr>
-
-
-<tr style='background-color: #D8D8D8'>
-<td colspan=\"3\"> <center><b>FORMAÇÃO</b></center></td>
+    <td><span class='campo-label'>Voluntário:</span> ".$obrigatorio->getVoluntario()."</td>
+    <td><span class='campo-label'>Nacionalidade:</span> ".$obrigatorio->getNacionalidade()."</td>
+    <td><span class='campo-label'>Naturalidade:</span> ".$obrigatorio->getNaturalidade()."</td>
 </tr>
 
 <tr>
-    <td><b>IE Graduação: </b>".$obrigatorio->getNomeInstitutoEnsino()."</td>
-    <td><b>Ano de Formação: </b>".$obrigatorio->getAnoFormacao()."</td>
-    <td><b>Formação: </b>".$obrigatorio->getFormacao()."</td>
+    <td><span class='campo-label'>Endereço:</span> ".$obrigatorio->getEndereco()."</td>
+    <td><span class='campo-label'>Dependentes:</span> ".$obrigatorio->getDependentes()."</td>
+    <td><span class='campo-label'>Força:</span> ".$obrigatorio->getForca()."</td>
 </tr>
 
 <tr>
-    <td><b>Especialidade 1: </b>".$obrigatorio->getEspecialidade()."</td>
-    <td><b>Especialidade 2: </b>".$obrigatorio->getEspecialidade2()."</td>
-    <td><b>Especialidade 3: </b>".$obrigatorio->getEspecialidade3()."</td>
+    <td colspan=\"3\" class='secao-header'>FORMAÇÃO</td>
 </tr>
 
 <tr>
-    <td><b>Ano Especialidade 1: </b>".$obrigatorio->getAnoResEspe1()."</td>
-    <td><b>Ano Especialidade 2: </b>".$obrigatorio->getAnoResEspe2()."</td>
-    <td><b>Ano Especialidade 3: </b>".$obrigatorio->getAnoResEspe3()."</td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>ADIAMENTO SMO</b></center></td>
+    <td><span class='campo-label'>IE Graduação:</span> ".$obrigatorio->getNomeInstitutoEnsino()."</td>
+    <td><span class='campo-label'>Ano de Formação:</span> ".$obrigatorio->getAnoFormacao()."</td>
+    <td><span class='campo-label'>Formação:</span> ".$obrigatorio->getFormacao()."</td>
 </tr>
 
 <tr>
-    <td><b>Solicitou Adiamento?: </b>".$obrigatorio->getSolicitouAdiamento()."</td>
-    <td><b>Início Adiamento: </b>".$obrigatorio->getInicioAdiamento()." </td>
-    <td><b>fIM Adiamento: </b>".$obrigatorio->getFimAdiamento()." </td>
+    <td><span class='campo-label'>Especialidade 1:</span> ".$obrigatorio->getEspecialidade()."</td>
+    <td><span class='campo-label'>Especialidade 2:</span> ".$obrigatorio->getEspecialidade2()."</td>
+    <td><span class='campo-label'>Especialidade 3:</span> ".$obrigatorio->getEspecialidade3()."</td>
 </tr>
 
 <tr>
-    <td><b>Especialidade Adiamento?: </b>".$obrigatorio->getEspecialidadeAdiamento()."</td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>SELEÇÃO GERAL</b></center></td>
-</tr>
-
-<tr>
-    <td><b>Data Comparecimento Sel Geral: </b>".$obrigatorio->getDataComparecimentoSelecaoGeral()."</td>
-    <td><b>JISE: </b>".$obrigatorio->getJise()." </td>
-    <td><b>CID JISE: </b>".$obrigatorio->getCidJise()." </td>
+    <td><span class='campo-label'>Ano Especialidade 1:</span> ".$obrigatorio->getAnoResEspe1()."</td>
+    <td><span class='campo-label'>Ano Especialidade 2:</span> ".$obrigatorio->getAnoResEspe2()."</td>
+    <td><span class='campo-label'>Ano Especialidade 3:</span> ".$obrigatorio->getAnoResEspe3()."</td>
 </tr>
 
 <tr>
-    <td><b>Obs JISE: </b>".$obrigatorio->getObservacaoJise()."</td>
-    <td><b>JISR: </b>".$obrigatorio->getJisr()." </td>
-    <td><b>CID JISR: </b>".$obrigatorio->getCidJisr()." </td>
+    <td colspan=\"3\" class='secao-header'>ADIAMENTO SMO</td>
 </tr>
 
 <tr>
-    <td><b>Data JISR: </b>".$obrigatorio->getDataJisr()."</td>
-    <td><b>Obs JISR: </b>".$obrigatorio->getObsJisr()." </td>
-    <td><b>JISE A-1: </b>".$obrigatorio->getCidJisea1()." </td>
+    <td><span class='campo-label'>Solicitou Adiamento?:</span> ".$obrigatorio->getSolicitouAdiamento()."</td>
+    <td><span class='campo-label'>Início Adiamento:</span> ".$obrigatorio->getInicioAdiamento()."</td>
+    <td><span class='campo-label'>Fim Adiamento:</span> ".$obrigatorio->getFimAdiamento()."</td>
 </tr>
 
 <tr>
-    <td><b>CID JISE A-1: </b>".$obrigatorio->getCidJisea1()."</td>
-    <td><b>Data JISE A-1: </b>".$obrigatorio->getDataJisea1()." </td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>REVISÃO MÉDICA - OM 1ª FASE </b></center></td>
+    <td colspan=\"3\"><span class='campo-label'>Especialidade Adiamento?:</span> ".$obrigatorio->getEspecialidadeAdiamento()."</td>
 </tr>
 
 <tr>
-    <td><b>Data Revisão Médica: </b>".$obrigatorio->getData_revisao_medica()."</td>
-    <td><b>Resultado Revisão Médica: </b>".$obrigatorio->getResultadoRevisaoMedicaComplementar()." </td>
-    <td><b>CID Revisão Médica: </b>".$obrigatorio->getCid_revisao_medica()." </td>
+    <td colspan=\"3\" class='secao-header'>SELEÇÃO GERAL</td>
 </tr>
 
 <tr>
-    <td><b>Obs Revisão Médica: </b>".$obrigatorio->getObs_revisao_medica()."</td>
+    <td><span class='campo-label'>Data Comparecimento Sel Geral:</span> ".$obrigatorio->getDataComparecimentoSelecaoGeral()."</td>
+    <td><span class='campo-label'>JISE:</span> ".$obrigatorio->getJise()."</td>
+    <td><span class='campo-label'>CID JISE:</span> ".$obrigatorio->getCidJise()."</td>
 </tr>
 
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>FISEMI</b></center></td>
+<tr>
+    <td><span class='campo-label'>Obs JISE:</span> ".$obrigatorio->getObservacaoJise()."</td>
+    <td><span class='campo-label'>JISR:</span> ".$obrigatorio->getJisr()."</td>
+    <td><span class='campo-label'>CID JISR:</span> ".$obrigatorio->getCidJisr()."</td>
+</tr>
+
+<tr>
+    <td><span class='campo-label'>Data JISR:</span> ".$obrigatorio->getDataJisr()."</td>
+    <td><span class='campo-label'>Obs JISR:</span> ".$obrigatorio->getObsJisr()."</td>
+    <td><span class='campo-label'>JISE A-1:</span> ".$obrigatorio->getCidJisea1()."</td>
+</tr>
+
+<tr>
+    <td><span class='campo-label'>CID JISE A-1:</span> ".$obrigatorio->getCidJisea1()."</td>
+    <td colspan=\"2\"><span class='campo-label'>Data JISE A-1:</span> ".$obrigatorio->getDataJisea1()."</td>
+</tr>
+
+<tr>
+    <td colspan=\"3\" class='secao-header'>REVISÃO MÉDICA - OM 1ª FASE</td>
+</tr>
+
+<tr>
+    <td><span class='campo-label'>Data Revisão Médica:</span> ".$obrigatorio->getData_revisao_medica()."</td>
+    <td><span class='campo-label'>Resultado Revisão Médica:</span> ".$obrigatorio->getResultadoRevisaoMedicaComplementar()."</td>
+    <td><span class='campo-label'>CID Revisão Médica:</span> ".$obrigatorio->getCid_revisao_medica()."</td>
+</tr>
+
+<tr>
+    <td colspan=\"3\"><span class='campo-label'>Obs Revisão Médica:</span> ".$obrigatorio->getObs_revisao_medica()."</td>
+</tr>
+
+<tr>
+    <td colspan=\"3\" class='secao-header'>FISEMI</td>
 </tr>
 <tr>
-    <td><b>Transferência do FISEMI: </b>".$obrigatorio->getTransferenciaFisemi()."</td>
-    <td><b>Região Origem: </b>".$obrigatorio->getRmOrigemFisemi()." </td>
-    <td><b>Região Destino: </b>".$obrigatorio->getRmDestinoFisemi()." </td>
+    <td><span class='campo-label'>Transferência do FISEMI:</span> ".$obrigatorio->getTransferenciaFisemi()."</td>
+    <td><span class='campo-label'>Região Origem:</span> ".$obrigatorio->getRmOrigemFisemi()."</td>
+    <td><span class='campo-label'>Região Destino:</span> ".$obrigatorio->getRmDestinoFisemi()."</td>
 </tr>
 
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"3\"> <center><b>ISGRev</b></center></td>
+<tr>
+    <td colspan=\"3\" class='secao-header'>ISGRev</td>
 </tr>
 <tr>
-    <td><b>ISGRev: </b>".$obrigatorio->getCid_isgr()."</td>
-    <td><b>Data ISGRev: </b>".$obrigatorio->getData_isgr()." </td>
-    <td><b>Região Destino: </b>".$obrigatorio->getRmDestinoFisemi()." </td>
+    <td><span class='campo-label'>ISGRev:</span> ".$obrigatorio->getCid_isgr()."</td>
+    <td><span class='campo-label'>Data ISGRev:</span> ".$obrigatorio->getData_isgr()."</td>
+    <td><span class='campo-label'>Região Destino:</span> ".$obrigatorio->getRmDestinoFisemi()."</td>
 </tr>
 
-</table> ";
+</table>";
 
                       
-$html = $html. "  <br><br>
+$html = $html. "
 
-<table border='0' style='width:100%'>
+<div style='margin-top: 30px;'>
+    <p style='font-size: 11px; font-weight: bold;'>".$data_hoje." - " . $junta_cidade . "</p>
+</div>
+
+<table class='tabela-assinatura'>
   <tr>
-    <th align='left'><strong> <p style='font-size: 12px; font-family: Times New Roman;'>  ".$data_hoje." - " . $junta_cidade . "  </p></strong></th>
-  </tr>
-  
-</table> ";
-
-
-$html = $html . " <br><br>
- <table border='0' style='font-size: 10px; font-family: Times New Roman; width:100%'>
-  <tr>
-    <th width='33%'>______________________________________</th> 
-    <th width='33%'>______________________________________</th>
-    <th width='33%'>______________________________________</th>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
   </tr>";
 
 if ($junta)
 $html = $html . "
-
   <tr>
-    <th>" . $junta[0]['presidente'] . "</th>
-    <th>" . $junta[0]['membro_1'] . " </th>
-    <th>" . $junta[0]['membro_2'] . "</th>
+    <td>" . $junta[0]['presidente'] . "</td>
+    <td>" . $junta[0]['membro_1'] . "</td>
+    <td>" . $junta[0]['membro_2'] . "</td>
   </tr>
 ";
 
-$html = $html . " </table> <br>
+$html = $html . "</table>
 
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   &nbsp;&nbsp;&nbsp;
-   Eu, ". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8").", em _____/_____/20_____, tomei ciência do resultado deste parecer, e caso não  concorde, tenho até 15 dias para requerer Inspeção em grau de recurso.   
+<p class='texto-corpo' style='margin-top: 25px; text-align: justify; text-indent: 60px; font-size: 11px;'>
+   Eu, ". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8").", em <span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/<span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/<span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, tomei ciência do resultado deste parecer, e caso não concorde, tenho até 15 dias para requerer Inspeção em grau de recurso.
 </p>
 
-<br><br>
-
-<center>
-<p align='center' style='font-size: 12px; font-family: Times New Roman;'>
-_________________________________________<br>
-". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8")."
-<br>
-CPF: ".$obrigatorio->getCpf()." 
-</p>
-</center>
+<div class='texto-assinatura'>
+    <span class='linha-assinatura'></span><br>
+    <strong>". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8")."</strong><br>
+    CPF: ".$obrigatorio->getCpf()."
+</div>
 ";
 
 $mpdf = new mPDF('C', 'A4'); 

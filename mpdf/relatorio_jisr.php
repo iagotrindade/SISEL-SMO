@@ -42,167 +42,157 @@ ob_start();
     if($junta) $junta_cidade = $junta[0]['cidade'];
    
 $html = "
+<style>
+    body { font-family: 'Times New Roman', Times, serif; }
+    .cabecalho { font-size: 9px; text-align: center; line-height: 1.4; margin-bottom: 20px; }
+    .titulo-sessao { font-size: 14px; font-weight: bold; text-align: center; margin: 15px 0; }
+    .titulo-documento { font-size: 16px; font-weight: bold; text-align: center; margin: 10px 0 20px 0; }
+    .texto-corpo { font-size: 11px; text-align: justify; line-height: 1.6; margin: 15px 0; text-indent: 60px; }
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 10px; margin: 15px 0; }
+    .tabela-dados td { padding: 8px 10px; border: 1px solid #CCCCCC; }
+    .tabela-dados .secao-header { background-color: #E8E8E8; font-weight: bold; text-align: center; padding: 10px; }
+    .tabela-dados .campo-label { font-weight: bold; }
+    .tabela-assinatura { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 30px; }
+    .tabela-assinatura td { text-align: center; padding: 5px; border: none; }
+    .linha-assinatura { border-top: 1px solid #000000; display: inline-block; width: 280px; margin-top: 40px; }
+    .texto-assinatura { font-size: 11px; text-align: center; margin-top: 25px; }
+    .campo-data { border-bottom: 1px solid #000000; display: inline-block; min-width: 120px; }
+</style>
 
-<center>
-<p class='center' style='font-size: 10px; text-align: center'>
+<div style='text-align: center;'>
+    <div class='cabecalho'>
+        <img src='../imagens/brasao.png' width='85'><br>
+        MINISTÉRIO DA DEFESA<br>
+        EXÉRCITO BRASILEIRO<br>
+        COMANDO MILITAR DO SUL<br>
+        COMANDO DA 3ª REGIÃO MILITAR<br>
+        (Gov das Armas Prov do RS/1821)<br>
+        REGIÃO DOM DIOGO DE SOUZA
+    </div>
+</div>
 
-    <img src='../imagens/brasao.png' width='70px'><br>
-    MINISTÉRIO DA DEFESA<br>
-    EXÉRCITO BRASILEIRO<br>
-    COMANDO MILITAR DO SUL<br>
-    COMANDO DA 3ª REGIÃO MILITAR<br>
-    (Gov das Armas Prov do RS/1821)<br>
-    REGIÃO DOM DIOGO DE SOUZA<br>
-    
+<div class='titulo-sessao'>Sessão ". $junta_secao . " - SMO</div>
+<div class='titulo-documento'>JISR</div>
+
+<p class='texto-corpo'>
+   A Junta de Inspeção de Saúde Especial inspecionou na presente sessão, o abaixo declarado, para fins de incorporação sobre seu estado de saúde, proferiu o parecer abaixo:
 </p>
-</center>
-<br>
-<table border='0' style='width:100%'>
-  <tr>
-    <th align='center'><strong>Sessão ". $junta_secao . " - SMO</strong>
-  </tr>
-  <tr>
-    <th align='center'><strong>JISR</strong>
-  </tr>
-</table> 
-<br>
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   &nbsp;&nbsp;&nbsp;
-   A Junta de Inspeção de Saúde Especial inspecionou na presente sessão, o abaixo declarado, para fins de incorporação  sobre seu estado de saúde, proferiu o parecer abaixo:
-</p>
-<br>
 ";
 
  $html = $html. "
-     
-<table border='0'  style='font-size: 10px; font-family: Times New Roman; width:100%' >
 
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"2\"> <center><b>IDENTIFICAÇÃO</b></center></td>
+<table class='tabela-dados'>
+
+<tr>
+    <td colspan=\"2\" class='secao-header'>IDENTIFICAÇÃO</td>
 </tr>
 
 <tr>
-    <td><b>Nome Completo: </b> ".$obrigatorio->getNomeCompleto()."</td>
-    <td><b>CPF: </b> ".$obrigatorio->getCpf()."</td>
+    <td width='50%'><span class='campo-label'>Nome Completo:</span> ".$obrigatorio->getNomeCompleto()."</td>
+    <td width='50%'><span class='campo-label'>CPF:</span> ".$obrigatorio->getCpf()."</td>
 </tr>
 <tr>
-    <td><b>Naturalidade: </b>".$obrigatorio->getNaturalidade()." </td>
-    <td><b>Data de Nascimento: </b>".$data_nascimento." </td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-<td colspan=\"2\"> <center><b>INSTITUIÇÃO DE ENSINO</b></center></td>
+    <td><span class='campo-label'>Naturalidade:</span> ".$obrigatorio->getNaturalidade()."</td>
+    <td><span class='campo-label'>Data de Nascimento:</span> ".$data_nascimento."</td>
 </tr>
 
 <tr>
-    <td><b>Nome do Instituto de Ensino: </b>".$obrigatorio->getNomeInstitutoEnsino()."</td>
-    <td><b>Ano de Formação: </b>".$obrigatorio->getAnoFormacao()."</td>
+    <td colspan=\"2\" class='secao-header'>INSTITUIÇÃO DE ENSINO</td>
 </tr>
 
 <tr>
-    <td><b>Formação: </b>".$obrigatorio->getFormacao()."</td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"2\"> <center><b>CIVIL/MILTAR</b></center></td>
+    <td><span class='campo-label'>Nome do Instituto de Ensino:</span> ".$obrigatorio->getNomeInstitutoEnsino()."</td>
+    <td><span class='campo-label'>Ano de Formação:</span> ".$obrigatorio->getAnoFormacao()."</td>
 </tr>
 
 <tr>
-    <td><b>Situação Militar: </b>".$obrigatorio->getSituacaoMilitar()."</td>
-    <td><b>Documento Militar: </b>".$obrigatorio->getDocumentoMilitar()." </td>
+    <td colspan=\"2\"><span class='campo-label'>Formação:</span> ".$obrigatorio->getFormacao()."</td>
 </tr>
 
 <tr>
-    <td><b>Nº do Documento: </b>".$obrigatorio->getNumeroDocumentoMilitar()." </td>
-    <td><b>Data da Expedição: </b>".$data_expedicao."</td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"2\"> <center><b>EXAME DE SAÚDE</b></center></td>
+    <td colspan=\"2\" class='secao-header'>CIVIL/MILITAR</td>
 </tr>
 
 <tr>
-    <td><b>Grupo do Ex Med: </b>".$obrigatorio->getJise()."</td>
+    <td><span class='campo-label'>Situação Militar:</span> ".$obrigatorio->getSituacaoMilitar()."</td>
+    <td><span class='campo-label'>Documento Militar:</span> ".$obrigatorio->getDocumentoMilitar()."</td>
 </tr>
 
 <tr>
-    <td><b>CID: </b>".$obrigatorio->getCidJise()." </td>
-    <td><b>Data Inspeção de Saúde: </b>".$obrigatorio->imprimeDataComparecimentoSelecaoGeral()."</td>
+    <td><span class='campo-label'>Nº do Documento:</span> ".$obrigatorio->getNumeroDocumentoMilitar()."</td>
+    <td><span class='campo-label'>Data da Expedição:</span> ".$data_expedicao."</td>
 </tr>
 
 <tr>
-    <td colspan=\"2\"><b>Observação: </b>".$obrigatorio->getObservacaoJise()."</td>
-</tr>
-
-<tr style='background-color: #D8D8D8'>
-    <td colspan=\"2\"> <center><b>EXAME DE SAÚDE EM GRAU DE RECURSO</b></center></td>
+    <td colspan=\"2\" class='secao-header'>EXAME DE SAÚDE</td>
 </tr>
 
 <tr>
-    <td><b>JISR: </b>".$obrigatorio->getJisr()."</td>
+    <td colspan=\"2\"><span class='campo-label'>Grupo do Ex Med:</span> ".$obrigatorio->getJise()."</td>
 </tr>
 
 <tr>
-    <td><b>CID JISR: </b>".$obrigatorio->getCidJisR()." </td>
-    <td><b>Data do JISR: </b>".$obrigatorio->imprimeDataJisr()."</td>
+    <td><span class='campo-label'>CID:</span> ".$obrigatorio->getCidJise()."</td>
+    <td><span class='campo-label'>Data Inspeção de Saúde:</span> ".$obrigatorio->imprimeDataComparecimentoSelecaoGeral()."</td>
 </tr>
-
 
 <tr>
-    <td colspan=\"2\"><b>Observação JISR: </b>".$obrigatorio->getObsJisr()."</td>
+    <td colspan=\"2\"><span class='campo-label'>Observação:</span> ".$obrigatorio->getObservacaoJise()."</td>
 </tr>
 
+<tr>
+    <td colspan=\"2\" class='secao-header'>EXAME DE SAÚDE EM GRAU DE RECURSO</td>
+</tr>
+
+<tr>
+    <td colspan=\"2\"><span class='campo-label'>JISR:</span> ".$obrigatorio->getJisr()."</td>
+</tr>
+
+<tr>
+    <td><span class='campo-label'>CID JISR:</span> ".$obrigatorio->getCidJisR()."</td>
+    <td><span class='campo-label'>Data do JISR:</span> ".$obrigatorio->imprimeDataJisr()."</td>
+</tr>
+
+<tr>
+    <td colspan=\"2\"><span class='campo-label'>Observação JISR:</span> ".$obrigatorio->getObsJisr()."</td>
+</tr>
 
 </table> ";
 
 
-$html = $html. "  <br><br>
+$html = $html. "
 
-<table border='0' style='width:100%'>
+<div style='margin-top: 30px;'>
+    <p style='font-size: 11px; font-weight: bold;'>".$data_hoje." - " . $junta_cidade . "</p>
+</div>
+
+<table class='tabela-assinatura'>
   <tr>
-    <th align='left'><strong> <p style='font-size: 12px; font-family: Times New Roman;'>  ".$data_hoje." - " . $junta_cidade . "  </p></strong></th>
-  </tr>
-  
-</table> ";
-
-
-$html = $html . " <br><br>
- <table border='0' style='font-size: 10px; font-family: Times New Roman; width:100%'>
-  <tr>
-    <th width='33%'>______________________________________</th>
-    <th width='33%'>______________________________________</th>
-    <th width='33%'>______________________________________</th>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
+    <td width='33%'><span class='linha-assinatura'></span></td>
   </tr>";
 
 if ($junta)
 $html = $html . "
-
   <tr>
-    <th>" . $junta[0]['presidente'] . "</th>
-    <th>" . $junta[0]['membro_1'] . " </th>
-    <th>" . $junta[0]['membro_2'] . "</th>
+    <td>" . $junta[0]['presidente'] . "</td>
+    <td>" . $junta[0]['membro_1'] . "</td>
+    <td>" . $junta[0]['membro_2'] . "</td>
   </tr>
 ";
 
-$html = $html . " </table> <br>
+$html = $html . "</table>
 
-<p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   &nbsp;&nbsp;&nbsp;
-   Eu, ". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8").", em _____/_____/20_____, tomei ciência do resultado deste parecer, e caso não  concorde, tenho até 15 dias para requerer Inspeção em grau de recurso.   
+<p class='texto-corpo' style='margin-top: 25px;'>
+   Eu, ". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8").", em <span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/<span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/<span class='campo-data'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>, tomei ciência do resultado deste parecer, e caso não concorde, tenho até 15 dias para requerer Inspeção em grau de recurso.
 </p>
 
-<br><br>
-
-<center>
-<p align='center' style='font-size: 12px; font-family: Times New Roman;'>
-_________________________________________<br>
-". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8")."
-<br>
-CPF: ".$obrigatorio->getCpf()." 
-</p>
-</center>
+<div class='texto-assinatura'>
+    <span class='linha-assinatura'></span><br>
+    <strong>". mb_strtoupper($obrigatorio->getNomeCompleto(), "UTF-8")."</strong><br>
+    CPF: ".$obrigatorio->getCpf()."
+</div>
 ";
 
 $mpdf = new mPDF('C', 'A4'); 
