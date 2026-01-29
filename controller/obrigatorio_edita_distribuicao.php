@@ -77,6 +77,7 @@ catch(Exception $e)
 
 $data = $obrigatorioDAO->update($obrigatorio_editar);
 
+
 if($data)
 {
     $alteracao = "Atualizou a Distribuição do obrigatório " . $obrigatorio_editar;

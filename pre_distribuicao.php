@@ -16,6 +16,7 @@ $todos_obrigatorios = $ObrigatorioDAO->findAllAtivos();
 
 
 $AuxiliarDAO = new AuxiliarDAO($conexao);
+$todas_cid = $AuxiliarDAO->findAllCidades();
 $todas_oms_1_fase = $AuxiliarDAO->findAllOM1Fase();
 $todas_oms_2_fase = $AuxiliarDAO->findAllOM2Fase();
 $todas_cid_inst = $AuxiliarDAO->findAllCidInst();
@@ -159,19 +160,11 @@ if (isset($_GET['local_compareceu_designacao_filtro'])) $local_compareceu_design
                 <select name="local_compareceu_designacao_filtro" style="width: 100%" class="chosen-select" multiple>
                     <option value="">Selecione a Opção</option>
                     <?php
-                    foreach ($todas_oms_1_fase as $value) {
-                        if ($value['nome'] == $local_compareceu_designacao_filtro)
-                            echo "<option value='" . $value['nome'] . "' selected>" . $value['abreviatura'] . "</option>";
-                        else
-                            echo "<option value='" . $value['nome'] . "' >" . $value['abreviatura'] . "</option>";
-                    }
-                    ?>
-
-                    <?php foreach ($todas_cid_inst as $value) {
+                    foreach ($todas_cid as $value) {
                         if ($value['nome'] == $local_compareceu_designacao_filtro)
                             echo "<option value='" . $value['nome'] . "' selected>" . $value['nome'] . "</option>";
                         else
-                            echo "<option value='" . $value['nome'] . "' >" . $value['nome'] . "</option>";
+                            echo "<option value='" . $value['nome'] . "' >" . $value['nome'] . '/' . $value['uf'] . "</option>";
                     }
                     ?>
                 </select>
@@ -391,7 +384,7 @@ if (isset($_GET['local_compareceu_designacao_filtro'])) $local_compareceu_design
     </form>
     <br>
     <form method="post" action="controller/pre_disposicao_atualiza.php">
-        <table id="tabela_dinamica" class="display responsive nowrap" style="width:100%; font-size: 10px;">
+        <table id="tabela_dinamica" style="width:100%; font-size: 10px;">
             <thead>
                 <tr>
                     <th>#</th>
@@ -403,8 +396,7 @@ if (isset($_GET['local_compareceu_designacao_filtro'])) $local_compareceu_design
                     <th>Ano Conc Resid</th>
                     <th>Dias Vida</th>
                     <th>Sit Militar</th>
-                    <th>Res Rev Médica</th>
-                    <th>Compareceu?</th>
+                    <th>Compareceu Distr</th>
                     <th>Distribuição</th>
                     <th>Prioridade Gu</th>
                     <th>Trans Fisemi</th>
@@ -478,8 +470,8 @@ if (isset($_GET['local_compareceu_designacao_filtro'])) $local_compareceu_design
                         $cor = null;
                         if ($obrigatorio->getSituacaoMilitar() != null) {
                             if (strpos($obrigatorio->getSituacaoMilitar(), "Quite") !== false)
-                                $cor = "#98FB98";
-                            else $cor = "#FFDEAD";
+                                $cor = "rgba(0, 100, 0, 0.10)";
+                            else $cor = "rgba(255, 222, 173, 0.25)";
                         }
 
                         $dataNascimento = $obrigatorio->getDataNascimento();
@@ -497,8 +489,7 @@ if (isset($_GET['local_compareceu_designacao_filtro'])) $local_compareceu_design
                         <td> " . $obrigatorio->imprime_ano_res_mais_recente() . " </td>
                         <td> " . $diasDeVida . " </td>
                         <td> " . $obrigatorio->getSituacaoMilitar() . " </td>
-                          <td> " . $obrigatorio->getResultadoRevisaoMedicaComplementar() . " </td>
-                            <td> " . $obrigatorio->getIncorporacao() . " </td>
+                        <td> " . mb_strtoupper($obrigatorio->getCompareceuDesignacao()) . " </td>
                         <td> " . $obrigatorio->getDistribuicao() . " </td>
                         <td> " . $nome_gu . "  " . $prioridade_gu . "  </td>
                         <td> ";

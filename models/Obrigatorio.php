@@ -438,16 +438,17 @@ class Obrigatorio
     public function setSituacaoMilitar($situacao_militar)
     {
 
+
         if (
             $situacao_militar == "" ||
             $situacao_militar == "Em Débito - REFRATÁRIO" ||
             $situacao_militar == "Em Débito - INSUBMISSO" ||
+            $situacao_militar == "Em Dia - JUDICIAL LIMINAR" ||
             $situacao_militar == "Em Dia - JUDICIAL" ||
             $situacao_militar == "Em Dia - ALISTADO MFDV (FISEMI)" ||
             $situacao_militar == "Em Dia - TRANSFERÊNCIA FISEMI" ||
             $situacao_militar == "Em Dia - ADIADO CURSANDO RESIDÊNCIA" ||
             $situacao_militar == "Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO" ||
-            $situacao_militar == "Em Dia - LIMINAR JUDICIAL" ||
             $situacao_militar == "Quite SMO - EXCESSO - CONTINGENTE" ||
             $situacao_militar == "Quite SMO - EXCESSO - INCAPAZ SAÚDE" ||
             $situacao_militar == "Quite SMO - DESOBRIGADO - MAIOR 38 ANOS" ||

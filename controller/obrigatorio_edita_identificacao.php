@@ -187,9 +187,9 @@ try
     $obrigatorio_editar->setData_isgr($data_isgr);
     $obrigatorio_editar->setCid_isgr($cid_isgr);
     $obrigatorio_editar->setObservacao_isgr($observacao_isgr);
-
-    
 }
+
+
 catch(Exception $e) 
 {
     erro($BASE_URL, 3, 23675689, $pagina_atual, "catch", $e->getMessage());

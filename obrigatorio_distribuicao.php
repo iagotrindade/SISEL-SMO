@@ -1,4 +1,4 @@
-<section id="contact" class="contact">
+<section>
     <div class="row  justify-content-center">
         <form action="controller/obrigatorio_edita_distribuicao.php" method="post" role="form">
             <input hidden type="text" value="<?php echo $obrigatorio->getId() ?>" name="id_obrigatorio">
@@ -16,6 +16,7 @@
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Débito - REFRATÁRIO") echo " selected " ?> value="Em Débito - REFRATÁRIO">Em Débito - REFRATÁRIO</option>
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Débito - INSUBMISSO") echo " selected " ?> value="Em Débito - INSUBMISSO">Em Débito - INSUBMISSO</option>
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Dia - JUDICIAL") echo " selected " ?> value="Em Dia - JUDICIAL">Em Dia - JUDICIAL</option>
+                            <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Dia - JUDICIAL LIMINAR") echo " selected " ?> value="Em Dia - JUDICIAL LIMINAR">Em Dia - JUDICIAL LIMINAR</option>
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Dia - ALISTADO MFDV (FISEMI)") echo " selected " ?> value="Em Dia - ALISTADO MFDV (FISEMI)">Em Dia - ALISTADO MFDV (FISEMI)</option>
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Dia - TRANSFERÊNCIA FISEMI") echo " selected " ?> value="Em Dia - TRANSFERÊNCIA FISEMI">Em Dia - TRANSFERÊNCIA FISEMI</option>
                             <option <?php if ($obrigatorio->getSituacaoMilitar() == "Em Dia - ADIADO CURSANDO RESIDÊNCIA") echo " selected " ?> value="Em Dia - ADIADO CURSANDO RESIDÊNCIA">Em Dia - ADIADO CURSANDO RESIDÊNCIA</option>
@@ -53,22 +54,14 @@
 
                     <div class="col-md-4 form-group">
                         <b>Local Comparec Designação</b>
-                        <select name="local_compareceu_designacao" class="form-control">
+                        <select name="local_compareceu_designacao" class="chosen-select" >
                             <option value="">Selecione a Opção</option>
                             <?php
-                            foreach ($todas_oms_1_fase as $value) {
-                                if ($value['nome'] == $obrigatorio->getLocalCompareceuDesignacao())
-                                    echo "<option value='" . $value['nome'] . "' selected>" . $value['abreviatura'] . "</option>";
-                                else
-                                    echo "<option value='" . $value['nome'] . "' >" . $value['abreviatura'] . "</option>";
-                            }
-                            ?>
-
-                            <?php foreach ($todas_cid_inst as $value) {
+                            foreach ($todas_cid as $value) {
                                 if ($value['nome'] == $obrigatorio->getLocalCompareceuDesignacao())
                                     echo "<option value='" . $value['nome'] . "' selected>" . $value['nome'] . "</option>";
                                 else
-                                    echo "<option value='" . $value['nome'] . "' >" . $value['nome'] . "</option>";
+                                    echo "<option value='" . $value['nome'] . "' >" . $value['nome'] . '/' . $value['uf'] . "</option>";
                             }
                             ?>
                         </select>
@@ -113,6 +106,8 @@
                 </div>
             </div>
 
+            <br>
+            
             <div class="card">
                 <div class="row">
                     <div class="text-center text-success">

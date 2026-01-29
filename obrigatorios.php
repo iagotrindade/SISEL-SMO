@@ -383,7 +383,7 @@ if (isset($_GET['prioridade_forca_filtro'])) $prioridade_forca_filtro = (array)$
     </form>
     <br>
     <div class="">
-        <table id="tabela_dinamica" class="display responsive nowrap" style="width:100%; font-size: 11px;">
+        <table id="tabela_dinamica" style="width:100%; font-size: 11px;">
             <thead>
                 <tr>
                     <th>Nome</th>
@@ -446,12 +446,12 @@ if (isset($_GET['prioridade_forca_filtro'])) $prioridade_forca_filtro = (array)$
                         $cor = null;
                         if ($obrigatorio->getSituacaoMilitar() != null) {
                             if (strpos($obrigatorio->getSituacaoMilitar(), "Quite") !== false)
-                                $cor = "#98FB98";
-                            else $cor = "#FFDEAD";
+                                $cor = "rgba(0, 100, 0, 0.10)";
+                            else $cor = "rgba(255, 222, 173, 0.25)";
                         }
 
                         echo "  
-                        <tr style='background-color:$cor'>
+                        <tr style='background:$cor'>
                         <td> <a href ='obrigatorio.php?crip=$criptografia&id_obrigatorio=" . $obrigatorio->getId() . "'><font color='black'> " . $obrigatorio->getNomeCompleto() . "</font></a> </td>
                             <td> <a href ='obrigatorio.php?crip=$criptografia&id_obrigatorio=" . $obrigatorio->getId() . "'><font color='black'>" . $obrigatorio->getCPF() . "</font></a> </td>
                             <td> " . $obrigatorio->getFormacao() . " / " . $obrigatorio->getAnoFormacao() . " </td>

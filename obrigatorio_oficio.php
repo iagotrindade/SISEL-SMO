@@ -1,5 +1,3 @@
-<br>
-
 <form action="mpdf/oficio_medico_obrigatorio.php" method="post" target="_blank" role="form" class="card">
     <input name="id_obrigatorio" hidden value="<?php echo $obrigatorio->getId(); ?>">
 

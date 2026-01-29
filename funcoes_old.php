@@ -275,19 +275,20 @@ function erro($BASE_URL, $nivel, $codigo, $arquivo, $descricao, $retorno_usuario
 {
     require $BASE_URL . '/dao/conecta_banco.php';
     include_once $BASE_URL . '/dao/LogDAO.php';
-    
-    $id_usuario_erro = null;
-    if(isset($_SESSION['id_usuario_smo']))
-        $id_usuario_erro = $_SESSION['id_usuario_smo'];
-    
-    $logDAO = new logDAO($conexao);
-    
+
+    // Garante que a sessão está ativa
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $logDAO = new LogDAO($conexao);
+
     $_SESSION['erro_retorno_usuario'] = $retorno_usuario;
     $_SESSION['erro_codigo'] = $codigo;
-    
-    $resultado = $logDAO->insertErro($nivel, $codigo, $arquivo, $descricao, $retorno_usuario);
-  
-    echo '<meta http-equiv="refresh" content="0; URL=/smo/erro.php">';
+
+    $logDAO->insertErro($nivel, $codigo, $arquivo, $descricao, $retorno_usuario);
+
+    header('Location: /smo/erro.php');
     exit();
 }
 
