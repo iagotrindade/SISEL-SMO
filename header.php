@@ -11,7 +11,9 @@ ini_set('session.cookie_lifetime', $lifetime);
 // Define o tempo de vida da sessão no servidor
 ini_set('session.gc_maxlifetime', $lifetime);
 
-if (!isset($_SESSION)) session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // GERAÇÃO DE CHAVE DE SEGURANÇA
 $rand = rand(100, 10000);
