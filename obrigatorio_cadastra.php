@@ -17,7 +17,7 @@ $todas_espec = $especDAO->findAllEspec();
   <section class="breadcrumbs">
     <div class="container">
       <div class="section-title" data-aos="fade-up">
-        <h1><b><i class="bi bi-person-plus-fill"></i> Cadastro de Obrigatório</b></h1>
+        <h1><b><i class="fas fa-user-md"></i> Cadastro de Obrigatório</b></h1>
       </div>
     </div>
   </section>

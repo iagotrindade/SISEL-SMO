@@ -52,7 +52,7 @@ $total_distribuidos = $ObrigatorioDAO->countObrigatoriosIncorporadosAnoAtual();
                 <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="icon-box" style="background: linear-gradient(135deg, rgba(0, 100, 0, 0.15), rgba(34, 139, 34, 0.08)); border-color: #228b22;">
                         <div class="icon" style="background: linear-gradient(135deg, #006400, #228b22);">
-                            <i class="bi bi-people-fill"></i>
+                            <i class="fas fa-user-md"></i>
                         </div>
                         <h4 class="title">
                             <a href="obrigatorios.php" style="color: var(--text-primary);">Obrigatórios <?= date('Y') ?></a>
@@ -115,7 +115,7 @@ $total_distribuidos = $ObrigatorioDAO->countObrigatoriosIncorporadosAnoAtual();
 
                                 <div class="col-md-3 mb-3" data-aos="fade-up" data-aos-delay="100">
                                     <a href="obrigatorio_cadastra.php" class="btn btn-primary w-100" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-                                        <i class="bi bi-person-plus-fill" style="font-size: 2rem;"></i>
+                                        <i class="fas fa-user-md" style="font-size: 2rem;"></i>
                                         <span>Cadastrar Obrigatório</span>
                                     </a>
                                 </div>

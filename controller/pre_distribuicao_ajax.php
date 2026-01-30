@@ -194,6 +194,14 @@ try {
         }
     }
 
+    // Filtro: Comparecimento Designação
+    if (isset($_GET['comp_designacao_filtro']) && is_array($_GET['comp_designacao_filtro'])) {
+        $comp = array_filter($_GET['comp_designacao_filtro']);
+        if (!empty($comp)) {
+            $filters['comp_designacao_filtro'] = $comp;
+        }
+    }
+
     // ==================== BUSCAR DADOS ====================
     $recordsTotal = $ObrigatorioDAO->countAtivos();
     $recordsFiltered = $ObrigatorioDAO->countAtivosComFiltros($filters, $search_term);
@@ -268,7 +276,6 @@ try {
         "recordsFiltered" => $recordsFiltered,
         "data" => $data
     ], JSON_UNESCAPED_UNICODE);
-
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
@@ -276,4 +283,3 @@ try {
         'message' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 }
-?>

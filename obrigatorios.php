@@ -36,7 +36,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
     <section class="breadcrumbs">
         <div class="container">
             <div class="section-title" data-aos="fade-up">
-                <h1><b><i class="fas fa-stethoscope"></i> Obrigatórios</b></h1>
+                <h1><b><i class="fas fa-user-md"></i> Obrigatórios</b></h1>
             </div>
         </div>
     </section>
@@ -135,7 +135,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="Em Dia - ALISTADO MFDV (FISEMI)">Em Dia - ALISTADO MFDV (FISEMI)</option>
                         <option value="Em Dia - ADIADO CURSANDO RESIDÊNCIA">Em Dia - ADIADO CURSANDO RESIDÊNCIA</option>
                         <option value="Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO">Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO</option>
-                        <option value="Em Dia - LIMINAR JUDICIAL">Em Dia - LIMINAR JUDICIAL</option>
+                        <option value="Em Dia - JUDICIAL LIMINAR">Em Dia - LIMINAR JUDICIAL</option>
                         <option value="Quite SMO - EXCESSO - CONTINGENTE">Quite SMO - EXCESSO - CONTINGENTE</option>
                         <option value="Quite SMO - EXCESSO - INCAPAZ SAÚDE">Quite SMO - EXCESSO - INCAPAZ SAÚDE</option>
                         <option value="Quite SMO - DESOBRIGADO - MAIOR 38 ANOS">Quite SMO - DESOBRIGADO - MAIOR 38 ANOS</option>
@@ -375,7 +375,6 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                 },
                 {
                     data: 'ano_residencia',
-                    orderable: false
                 },
                 {
                     data: 'especialidade'
@@ -388,7 +387,6 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                 },
                 {
                     data: 'transferencia',
-                    orderable: false
                 }
             ],
             order: [
