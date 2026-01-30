@@ -6,11 +6,11 @@
             <!-- Informações do Sistema -->
             <div class="col-md-4 mb-3" style="text-align: left;">
                 <h5 style="color: var(--text-primary); font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center;">
-                    <i class="bi bi-shield-check me-2" style="color: var(--accent-green);"></i>
+                    <i class="fa fa-stethoscope me-2" style="color: var(--accent-green);"></i>
                     SiSel - SMO
                 </h5>
                 <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
-                    Sistema de Seleção Serviço Militar Obrigatório<br>
+                    Sistema de Seleção Serviço Médico Obrigatório<br>
                 </p>
             </div>
 

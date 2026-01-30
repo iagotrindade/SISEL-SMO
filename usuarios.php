@@ -282,9 +282,9 @@ if (isset($_GET['crip']) && (isset($_GET['id']))) {
                                     <td>" . htmlspecialchars($usuario->getAbreviatura_om()) . "</td>
                                     <td>" . htmlspecialchars($usuario->getPerfil()) . "</td>
                                     <td>" . htmlspecialchars($usuario->imprimeValidade()) . "</td>
-                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&senha=1&id=" . $usuario->getId() . "' class='btn btn-sm btn-outline-secondary' title='Alterar Senha'><i class='fas fa-key'></i></a></td>
-                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&id=" . $usuario->getId() . "' class='btn btn-sm btn-outline-primary' title='Editar'><i class='fas fa-edit'></i></a></td>
-                                    <td class='text-center'><a href='controller/usuario_apaga.php?crip=$criptografia&id_usuario=" . $usuario->getId() . "' class='btn btn-sm btn-outline-danger' title='Apagar'><i class='fas fa-trash-alt'></i></a></td>
+                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&senha=1&id=" . $usuario->getId() . "' class='btn btn-sm' style='color: #006400; border-color: #006400;' title='Editar'><i class='fas fa-key'></i></a></td>
+                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&id=" . $usuario->getId() . "' class='btn btn-sm' style='color: #006400; border-color: #006400;' title='Editar' title='Editar'><i class='fas fa-edit'></i></a></td>
+                                    <td class='text-center'><a href='controller/usuario_apaga.php?crip=$criptografia&id_usuario=" . $usuario->getId() . "' class='btn btn-sm' style='color: #006400; border-color: #006400;' title='Editar' title='Apagar'><i class='fas fa-trash-alt'></i></a></td>
                                 </tr>
                                 ";
                             }

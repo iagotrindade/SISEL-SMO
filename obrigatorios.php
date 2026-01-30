@@ -299,7 +299,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
                 <div class="col-12 mt-3">
-                    <button type="button" id="btn-limpar" class="btn btn-outline-secondary">
+                    <button type="button" id="btn-limpar" class="btn btn-outline-secondary border border-secondary">
                         <i class="fas fa-eraser me-2"></i>Limpar Filtros
                     </button>
                 </div>

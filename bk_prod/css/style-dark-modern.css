@@ -1,0 +1,344 @@
+/**
+* SMO - Sistema Moderno Dark Theme
+* Apenas estilos específicos do tema escuro
+*/
+
+:root {
+  /* Cores Primárias - Tema Militar Verde Escuro */
+  --primary-dark: #001a00;
+  --primary-darker: #000d00;
+  --secondary-dark: #0a2f0a;
+  --accent-blue: #3d8b3d;
+  --accent-gold: #9acd32;
+
+  /* Tons de Verde/Cinza */
+  --gray-darker: #0d1a0d;
+  --gray-dark: #1a2d1a;
+  --gray-medium: #2d4a2d;
+  --gray-light: #3d5a3d;
+  --gray-lighter: #5a7a5a;
+  --gray-text: #a8c3a8;
+
+  /* Estados */
+  --success: #228b22;
+  --warning: #daa520;
+  --danger: #dc143c;
+  --info: #4682b4;
+
+  /* Texto */
+  --text-primary: #e6edf3;
+  --text-secondary: #adbac7;
+  --text-muted: #768390;
+
+  /* Bordas */
+  --border-color: #373e47;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background: var(--primary-dark);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-light);
+  border: 2px solid var(--gray-darker);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-lighter);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--accent-blue);
+}
+
+a:hover {
+  color: #90ee90;
+}
+
+#header {
+  background: rgba(0, 26, 0, 0.95);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar a,
+.navbar a:focus {
+  color: var(--text-secondary);
+}
+
+.navbar a:hover,
+.navbar .active,
+.navbar li:hover>a {
+  color: #90ee90;
+}
+
+.navbar .dropdown ul {
+  background: var(--secondary-dark);
+  border-color: var(--border-color);
+}
+
+.navbar .dropdown ul a {
+  color: var(--text-secondary);
+}
+
+.navbar .dropdown ul a:hover {
+  color: #90ee90;
+}
+
+.breadcrumbs {
+  background: linear-gradient(135deg, var(--primary-darker), var(--secondary-dark));
+  border-color: var(--border-color);
+}
+
+.breadcrumbs h1 {
+  color: var(--text-primary);
+}
+
+.card,
+.icon-box {
+  background: var(--secondary-dark);
+  border-color: var(--border-color);
+}
+
+.icon-box .title {
+  color: var(--text-primary);
+}
+
+.icon-box .description {
+  color: var(--accent-green);
+}
+
+.form-control,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  background: var(--gray-dark) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  background: var(--gray-medium);
+}
+
+.form-control::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.form-label,
+label,
+.form-group b {
+  color: var(--text-secondary);
+}
+
+.btn-secondary {
+  background: var(--gray-medium);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-light);
+}
+
+.dataTables_wrapper {
+  background: var(--secondary-dark);
+  border-color: var(--border-color);
+}
+
+table.dataTable thead th {
+  background: var(--gray-dark);
+  color: var(--text-primary);
+}
+
+table.dataTable tbody td {
+  color: #fff;
+  background: var(--secondary-dark);
+}
+
+table.dataTable tbody tr:hover {
+  background: rgba(0, 100, 0, 0.1);
+}
+
+table.dataTable tbody tr:hover td {
+  background: rgba(0, 100, 0, 0.1);
+  color: #fff;
+}
+
+.dataTables_length select,
+.dataTables_filter input {
+  background: var(--gray-dark);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dataTables_length,
+.dataTables_filter,
+.dataTables_info,
+.dataTables_paginate {
+  color: var(--text-secondary);
+}
+
+.dataTables_paginate .paginate_button {
+  background: var(--gray-dark);
+  border-color: var(--border-color);
+  color: var(--text-primary) !important;
+}
+
+.dataTables_paginate .paginate_button:hover {
+  background: var(--gray-medium);
+  color: #90ee90 !important;
+}
+
+.chosen-container-multi .chosen-choices {
+  background: var(--gray-dark);
+  border-color: var(--border-color);
+}
+
+.chosen-container-multi .chosen-choices li.search-field input[type="text"] {
+  color: var(--text-primary);
+}
+
+.chosen-container .chosen-drop {
+  background: var(--gray-dark);
+  border-color: var(--border-color);
+}
+
+.chosen-container .chosen-results li {
+  color: var(--text-secondary);
+}
+
+.chosen-container .chosen-results li.highlighted {
+  color: #90ee90;
+}
+
+.chosen-single {
+  background: var(--gray-dark) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.chosen-single span {
+  color: var(--text-primary);
+}
+
+.alert-success {
+  background: rgba(63, 185, 80, 0.1);
+  border-left-color: var(--success);
+  color: var(--success);
+}
+
+.alert-danger {
+  background: rgba(248, 81, 73, 0.1);
+  border-left-color: var(--danger);
+  color: var(--danger);
+}
+
+.alert-warning {
+  background: rgba(210, 153, 34, 0.1);
+  border-left-color: var(--warning);
+  color: var(--warning);
+}
+
+.alert-info {
+  background: rgba(88, 166, 255, 0.1);
+  border-left-color: var(--info);
+  color: var(--info);
+}
+
+font[color="green"] {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--success) !important;
+  border-color: rgba(63, 185, 80, 0.3);
+}
+
+font[color="red"] {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--danger) !important;
+  border-color: rgba(248, 81, 73, 0.3);
+}
+
+#footer {
+  background: var(--primary-darker);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.section-bg {
+  background: var(--primary-dark);
+}
+
+.badge-success {
+  background: rgba(63, 185, 80, 0.2);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: rgba(210, 153, 34, 0.2);
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: rgba(248, 81, 73, 0.2);
+  color: var(--danger);
+}
+
+.badge-info {
+  background: rgba(88, 166, 255, 0.2);
+  color: var(--info);
+}
+
+/* Mobile Menu Styles para tema escuro */
+@media (max-width: 991px) {
+  .navbar ul {
+    background: var(--secondary-dark);
+    border-color: var(--border-color);
+  }
+
+  .navbar .dropdown ul {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+.loading-overlay {
+  background: rgba(10, 14, 39, 0.95);
+}
+
+.loading-spinner {
+  border-color: var(--border-color);
+}
+
+.card {
+  background: var(--secondary-dark);
+  border-color: var(--border-color);
+}

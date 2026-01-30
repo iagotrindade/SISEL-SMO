@@ -2,7 +2,7 @@
     <div class="container d-flex justify-content-between">
 
         <div class="logo d-flex align-items-center">
-            <h1><a href="<?= $_SESSION['perfil_smo'] == 'admin' ? 'index.php' : 'distribuidos_om_1_fase.php' ?>">SiSel MFDV - SMO</a></h1>
+            <h1><a href="<?= $_SESSION['perfil_smo'] == 'admin' ? 'index.php' : 'distribuidos_om_1_fase.php' ?>"><i class="fa fa-stethoscope"></i> SiSel - SMO</a></h1>
         </div>
 
         <nav id="navbar" class="navbar">
