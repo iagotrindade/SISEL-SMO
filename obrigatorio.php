@@ -154,10 +154,13 @@ if ($aba == 10) {
 </main>
 
 <?php if ($_SESSION['mensagem'] != null): ?>
-    <center>
-        <font size="4" color="green" size="4px"><?php echo $_SESSION['mensagem'];
-                                                $_SESSION['mensagem'] = null; ?></font>
-    </center>
+    <div class="container">
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <div><?php echo $_SESSION['mensagem']; $_SESSION['mensagem'] = null; ?></div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    </div>
 <?php endif; ?>
 
 <section id="contact" class="contact">
@@ -235,17 +238,20 @@ if ($aba == 10) {
 
                 <br>
 
-                <div class="card" id="aba8">
-                    <center>
-                        <div class="text-center text-success">
-                            <h3 color="green">APAGAR</h3>
+                <div class="tab-pane fade" id="aba8">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Zona de Perigo</h5>
                         </div>
-
-                        <br>
-
-                        <a href="controller/obrigatorio_apaga.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>"><i class="fas fa-trash-alt fs-2"></i></a>
-                        <br>
-                    </center>
+                        <div class="card-body text-center">
+                            <p class="text-muted mb-3">Esta ação é irreversível. Todos os dados deste obrigatório serão permanentemente excluídos.</p>
+                            <a href="controller/obrigatorio_apaga.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>"
+                               class="btn btn-outline-danger"
+                               onclick="return confirm('Tem certeza que deseja apagar este obrigatório? Esta ação não pode ser desfeita.')">
+                                <i class="fas fa-trash-alt me-2"></i>Apagar Obrigatório
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

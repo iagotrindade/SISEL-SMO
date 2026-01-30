@@ -342,3 +342,25 @@ font[color="red"] {
   background: var(--secondary-dark);
   border-color: var(--border-color);
 }
+
+/* Card Header - Override Bootstrap bg-light */
+.card-header,
+.card-header.bg-light,
+.card > .card-header,
+.card > .card-header.bg-light,
+body .bg-light.card-header {
+  background: var(--gray-dark) !important;
+  background-color: var(--gray-dark) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.card-header h5,
+.card-header .mb-0 {
+  color: var(--text-primary) !important;
+}
+
+/* Override Bootstrap bg-light utility in dark mode */
+.bg-light {
+  background-color: var(--gray-dark) !important;
+}

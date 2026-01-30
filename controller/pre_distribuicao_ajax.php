@@ -1,7 +1,7 @@
 <?php
 // =========================================================================
-// ARQUIVO: controller/obrigatorios_ajax.php
-// Processa requisições AJAX do DataTables para obrigatorios.php
+// ARQUIVO: controller/pre_distribuicao_ajax.php
+// Processa requisições AJAX do DataTables para pre_distribuicao.php
 // =========================================================================
 
 header('Content-Type: application/json; charset=utf-8');
@@ -17,30 +17,29 @@ if (session_status() === PHP_SESSION_NONE) {
 try {
     include_once '../dao/conecta_banco.php';
     include_once '../dao/ObrigatorioDAO.php';
+    include_once '../dao/AuxiliarDAO.php';
     include_once '../funcoes.php';
 } catch (Exception $e) {
     http_response_code(500);
-    die(json_encode(['error' => 'Erro ao incluir arquivos', 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE));
+    die(json_encode(['error' => 'Erro ao incluir arquivos'], JSON_UNESCAPED_UNICODE));
 }
 
 // Verificar permissão
 if (!isset($_SESSION['perfil_smo']) || $_SESSION['perfil_smo'] != "admin" || !isset($_SESSION['id_usuario_smo'])) {
     http_response_code(403);
-    die(json_encode([
-        'error' => 'Sem permissão',
-        'perfil' => $_SESSION['perfil_smo'] ?? 'não definido'
-    ], JSON_UNESCAPED_UNICODE));
+    die(json_encode(['error' => 'Sem permissão'], JSON_UNESCAPED_UNICODE));
 }
 
 try {
     $ObrigatorioDAO = new ObrigatorioDAO($conexao);
+    $AuxiliarDAO = new AuxiliarDAO($conexao);
 
     // ==================== PARÂMETROS DATATABLE ====================
     $draw = isset($_GET['draw']) ? intval($_GET['draw']) : 1;
     $start = isset($_GET['start']) ? intval($_GET['start']) : 0;
-    $length = isset($_GET['length']) ? intval($_GET['length']) : 50;
+    $length = isset($_GET['length']) ? intval($_GET['length']) : 25;
 
-    // BUSCA: DataTables envia como search[value]
+    // Busca global
     $search_term = '';
     if (isset($_GET['search']['value']) && !empty($_GET['search']['value'])) {
         $search_term = trim($_GET['search']['value']);
@@ -51,7 +50,7 @@ try {
     $orderDir = 'ASC';
     if (isset($_GET['order'][0])) {
         $columnIndex = intval($_GET['order'][0]['column']);
-        $columns = ['nome_completo', 'cpf', 'formacao', 'nome_instituicao_ensino', '', '', 'data_nascimento', 'situacao_militar', ''];
+        $columns = ['', 'nome_completo', 'formacao', '', 'nome_instituicao_ensino', 'especialidade_1', '', 'data_nascimento', 'situacao_militar', '', '', '', ''];
         if (isset($columns[$columnIndex]) && !empty($columns[$columnIndex])) {
             $orderColumn = $columns[$columnIndex];
         }
@@ -61,12 +60,9 @@ try {
     // ==================== PREPARAR FILTROS ====================
     $filters = [];
 
-    // Filtro: Voluntário
-    if (isset($_GET['voluntario_filtro']) && is_array($_GET['voluntario_filtro'])) {
-        $voluntary = array_filter($_GET['voluntario_filtro']);
-        if (!empty($voluntary)) {
-            $filters['voluntario_filtro'] = $voluntary;
-        }
+    // Filtro: Voluntário (texto simples, não array)
+    if (isset($_GET['voluntario_filtro']) && !empty($_GET['voluntario_filtro'])) {
+        $filters['voluntario_filtro'] = [$_GET['voluntario_filtro']];
     }
 
     // Filtro: Dependentes
@@ -78,7 +74,7 @@ try {
     if (isset($_GET['faculdade_filtro']) && is_array($_GET['faculdade_filtro'])) {
         $faculty = array_filter($_GET['faculdade_filtro']);
         if (!empty($faculty)) {
-            $filters['faculdade_filtro'] = $faculty;
+            $filters['faculdade_filtro'] = array_values($faculty);
         }
     }
 
@@ -86,7 +82,7 @@ try {
     if (isset($_GET['jise_filtro']) && is_array($_GET['jise_filtro'])) {
         $jise = array_filter($_GET['jise_filtro']);
         if (!empty($jise)) {
-            $filters['jise_filtro'] = $jise;
+            $filters['jise_filtro'] = array_values($jise);
         }
     }
 
@@ -94,7 +90,7 @@ try {
     if (isset($_GET['jisr_filtro']) && is_array($_GET['jisr_filtro'])) {
         $jisr = array_filter($_GET['jisr_filtro']);
         if (!empty($jisr)) {
-            $filters['jisr_filtro'] = $jisr;
+            $filters['jisr_filtro'] = array_values($jisr);
         }
     }
 
@@ -102,7 +98,7 @@ try {
     if (isset($_GET['distribuicao_filtro']) && is_array($_GET['distribuicao_filtro'])) {
         $dist = array_filter($_GET['distribuicao_filtro']);
         if (!empty($dist)) {
-            $filters['distribuicao_filtro'] = $dist;
+            $filters['distribuicao_filtro'] = array_values($dist);
         }
     }
 
@@ -110,7 +106,7 @@ try {
     if (isset($_GET['om_1_fase_filtro']) && is_array($_GET['om_1_fase_filtro'])) {
         $om = array_filter($_GET['om_1_fase_filtro']);
         if (!empty($om)) {
-            $filters['om_1_fase_filtro'] = $om;
+            $filters['om_1_fase_filtro'] = array_values($om);
         }
     }
 
@@ -118,15 +114,7 @@ try {
     if (isset($_GET['resultado_revisao_filtro']) && is_array($_GET['resultado_revisao_filtro'])) {
         $rev = array_filter($_GET['resultado_revisao_filtro']);
         if (!empty($rev)) {
-            $filters['resultado_revisao_filtro'] = $rev;
-        }
-    }
-
-    // Filtro: ISGRev
-    if (isset($_GET['isgr_filtro']) && is_array($_GET['isgr_filtro'])) {
-        $isgr = array_filter($_GET['isgr_filtro']);
-        if (!empty($isgr)) {
-            $filters['isgr_filtro'] = $isgr;
+            $filters['resultado_revisao_filtro'] = array_values($rev);
         }
     }
 
@@ -134,15 +122,7 @@ try {
     if (isset($_GET['sel_geral_filtro']) && is_array($_GET['sel_geral_filtro'])) {
         $sel = array_filter($_GET['sel_geral_filtro']);
         if (!empty($sel)) {
-            $filters['sel_geral_filtro'] = $sel;
-        }
-    }
-
-    // Filtro: Comparecimento Designação
-    if (isset($_GET['comp_designacao_filtro']) && is_array($_GET['comp_designacao_filtro'])) {
-        $comp = array_filter($_GET['comp_designacao_filtro']);
-        if (!empty($comp)) {
-            $filters['comp_designacao_filtro'] = $comp;
+            $filters['sel_geral_filtro'] = array_values($sel);
         }
     }
 
@@ -150,15 +130,7 @@ try {
     if (isset($_GET['incorporacao_filtro']) && is_array($_GET['incorporacao_filtro'])) {
         $incorp = array_filter($_GET['incorporacao_filtro']);
         if (!empty($incorp)) {
-            $filters['incorporacao_filtro'] = $incorp;
-        }
-    }
-
-    // Filtro: Seleção Complementar
-    if (isset($_GET['sel_complementar_filtro']) && is_array($_GET['sel_complementar_filtro'])) {
-        $selcomp = array_filter($_GET['sel_complementar_filtro']);
-        if (!empty($selcomp)) {
-            $filters['sel_complementar_filtro'] = $selcomp;
+            $filters['incorporacao_filtro'] = array_values($incorp);
         }
     }
 
@@ -166,32 +138,41 @@ try {
     if (isset($_GET['situacao_militar']) && is_array($_GET['situacao_militar'])) {
         $situacao = array_filter($_GET['situacao_militar']);
         if (!empty($situacao)) {
-            $filters['situacao_militar'] = $situacao;
+            $filters['situacao_militar'] = array_values($situacao);
         }
     }
 
-    // Filtro: RM Destino
-    if (isset($_GET['rm_destino']) && is_array($_GET['rm_destino'])) {
-        $rm = array_filter($_GET['rm_destino']);
-        if (!empty($rm)) {
-            $filters['rm_destino_filtro'] = $rm;
-        }
+    // Filtro: RM Destino (texto simples)
+    if (isset($_GET['rm_destino']) && !empty($_GET['rm_destino'])) {
+        $filters['rm_destino_filtro'] = [$_GET['rm_destino']];
     }
 
     // Filtro: Especialidade
     if (isset($_GET['especialidade_filtro']) && is_array($_GET['especialidade_filtro'])) {
         $espec = array_filter($_GET['especialidade_filtro']);
         if (!empty($espec)) {
-            $filters['especialidade_filtro'] = $espec;
+            $filters['especialidade_filtro'] = array_values($espec);
         }
     }
 
-    // Filtro: Prioridade Força
-    if (isset($_GET['prioridade_forca_filtro']) && is_array($_GET['prioridade_forca_filtro'])) {
-        $prioridade = array_filter($_GET['prioridade_forca_filtro']);
-        if (!empty($prioridade)) {
-            $filters['prioridade_forca_filtro'] = $prioridade;
-        }
+    // Filtro: Prioridade Força (texto simples)
+    if (isset($_GET['prioridade_forca_filtro']) && !empty($_GET['prioridade_forca_filtro'])) {
+        $filters['prioridade_forca_filtro'] = [$_GET['prioridade_forca_filtro']];
+    }
+
+    // Filtro: Formação
+    if (isset($_GET['formacao_filtro']) && !empty($_GET['formacao_filtro'])) {
+        $filters['formacao_filtro'] = $_GET['formacao_filtro'];
+    }
+
+    // Filtro: Compareceu Designação
+    if (isset($_GET['compareceu_designacao_filtro']) && !empty($_GET['compareceu_designacao_filtro'])) {
+        $filters['compareceu_designacao_filtro'] = $_GET['compareceu_designacao_filtro'];
+    }
+
+    // Filtro: Local Compareceu Designação
+    if (isset($_GET['local_compareceu_designacao_filtro']) && !empty($_GET['local_compareceu_designacao_filtro'])) {
+        $filters['local_compareceu_designacao_filtro'] = $_GET['local_compareceu_designacao_filtro'];
     }
 
     // Processar filtro de semestre
@@ -207,7 +188,7 @@ try {
             'um_semestre_vinteseis' => ['2026-01-01', '2026-06-30'],
             'dois_semestre_vinteseis' => ['2026-07-01', '2026-12-31']
         ];
-        
+
         if (isset($ranges[$semestre])) {
             $filters['data_semestre'] = $ranges[$semestre];
         }
@@ -225,6 +206,13 @@ try {
         foreach ($results as $row) {
             $criptografia = hash('sha256', $row['id'] . "criptografia");
 
+            // Cor de fundo baseada na situação militar
+            $cor = "rgba(255, 222, 173, 0.25)";
+            if (isset($row['situacao_militar']) && strpos($row['situacao_militar'], "Quite") !== false) {
+                $cor = "rgba(0, 100, 0, 0.10)";
+            }
+
+            // Ano de residência mais recente
             $anos = array_filter([
                 $row['ano_residencia_espe_1'] ?? '',
                 $row['ano_residencia_espe_2'] ?? '',
@@ -232,26 +220,42 @@ try {
             ]);
             $ano_residencia = !empty($anos) ? max($anos) : '';
 
+            // Especialidade (pegar a primeira preenchida)
             $especialidade = $row['especialidade_1'] ?? ($row['especialidade_2'] ?? ($row['especialidade_3'] ?? ''));
 
-            $data_nascimento = isset($row['data_nascimento']) && !empty($row['data_nascimento'])
-                ? trata_data($row['data_nascimento'])
-                : '';
+            // Calcular dias de vida
+            $diasDeVida = '';
+            if (!empty($row['data_nascimento'])) {
+                $hoje = date("Y-m-d");
+                $diasDeVida = floor((strtotime($hoje) - strtotime($row['data_nascimento'])) / (60 * 60 * 24));
+            }
 
+            // Transferência FISEMI
             $transferencia = '';
             if (!empty($row['rm_origem_fisemi']) && !empty($row['rm_destino_fisemi'])) {
                 $transferencia = $row['rm_origem_fisemi'] . "ª à " . $row['rm_destino_fisemi'] . "ª";
             }
 
+            // OM 1ª Fase
+            $om_1_fase = $row['abreviatura_om_1_fase'] ?? '';
+
+            // Compareceu designação
+            $compareceu_desig = mb_strtoupper($row['compareceu_designacao'] ?? '');
+
             $data[] = [
-                'nome' => "<a href='obrigatorio.php?crip=$criptografia&id_obrigatorio=" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['nome_completo'] ?? '') . "</a>",
-                'cpf' => htmlspecialchars($row['cpf'] ?? ''),
+                'DT_RowStyle' => "background-color: $cor",
+                'checkbox' => "<input type='checkbox' name='ids[]' value='" . htmlspecialchars($row['id']) . "'>",
+                'nome' => "<a href='obrigatorio.php?crip=$criptografia&id_obrigatorio=" . htmlspecialchars($row['id']) . "'><font color='black'>" . htmlspecialchars($row['nome_completo'] ?? '') . "</font></a>",
                 'formacao' => htmlspecialchars(($row['formacao'] ?? '') . " / " . ($row['ano_formacao'] ?? '')),
+                'om_1_fase' => htmlspecialchars($om_1_fase),
                 'instituicao' => htmlspecialchars($row['nome_instituicao_ensino'] ?? ''),
-                'ano_residencia' => htmlspecialchars($ano_residencia),
                 'especialidade' => htmlspecialchars($especialidade),
-                'nascimento' => htmlspecialchars($data_nascimento),
+                'ano_residencia' => htmlspecialchars($ano_residencia),
+                'dias_vida' => htmlspecialchars($diasDeVida),
                 'situacao_militar' => htmlspecialchars($row['situacao_militar'] ?? ''),
+                'compareceu_desig' => htmlspecialchars($compareceu_desig),
+                'distribuicao' => htmlspecialchars($row['distribuicao'] ?? ''),
+                'prioridade_gu' => '', // Seria necessário uma query adicional para isso
                 'transferencia' => htmlspecialchars($transferencia)
             ];
         }

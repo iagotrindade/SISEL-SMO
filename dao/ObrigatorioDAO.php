@@ -862,6 +862,347 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
 
         return 0;
     }
+
+    /**
+     * Conta o total de obrigatórios ativos para uma OM
+     * @return int
+     */
+    public function countAtivos()
+    {
+        $stmt = $this->conexao->prepare("
+            SELECT COUNT(*) as total
+            FROM obrigatorio
+            WHERE apagado = 0 AND id_om = :id_om
+        ");
+        $stmt->bindValue(":id_om", $_SESSION['id_om_smo']);
+        $stmt->execute();
+        $data = $stmt->fetch();
+        return (int)($data['total'] ?? 0);
+    }
+
+    /**
+     * Busca obrigatórios com filtros, paginação e busca
+     * @param array $filters Filtros a aplicar
+     * @param int $start Offset para paginação
+     * @param int $length Quantidade de registros
+     * @param string $search Termo de busca
+     * @param string $orderColumn Coluna para ordenação
+     * @param string $orderDir Direção da ordenação (ASC/DESC)
+     * @return array
+     */
+    public function findAtivosComFiltrosPaginado($filters, $start, $length, $search = '', $orderColumn = 'nome_completo', $orderDir = 'ASC')
+    {
+        $params = [];
+        $where = ["o.apagado = 0", "o.id_om = :id_om"];
+        $params[':id_om'] = $_SESSION['id_om_smo'];
+
+        // Filtro de busca global (nome ou CPF)
+        if (!empty($search)) {
+            $where[] = "(o.nome_completo LIKE :search OR o.cpf LIKE :search_cpf)";
+            $params[':search'] = '%' . $search . '%';
+            $params[':search_cpf'] = '%' . $search . '%';
+        }
+
+        // Aplicar filtros
+        $this->aplicarFiltros($filters, $where, $params);
+
+        // Colunas permitidas para ordenação
+        $allowedColumns = [
+            'nome_completo' => 'o.nome_completo',
+            'cpf' => 'o.cpf',
+            'formacao' => 'o.formacao',
+            'nome_instituicao_ensino' => 'o.nome_instituicao_ensino',
+            'data_nascimento' => 'o.data_nascimento',
+            'situacao_militar' => 'o.situacao_militar'
+        ];
+
+        $orderCol = $allowedColumns[$orderColumn] ?? 'o.nome_completo';
+        $orderDirection = strtoupper($orderDir) === 'DESC' ? 'DESC' : 'ASC';
+
+        $sql = "
+            SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                   om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                   om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+            FROM obrigatorio o
+            LEFT JOIN om ON om.id = o.id_om_1_fase
+            WHERE " . implode(" AND ", $where) . "
+            ORDER BY $orderCol $orderDirection
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->conexao->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', (int)$length, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$start, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Conta obrigatórios com filtros e busca aplicados
+     * @param array $filters Filtros a aplicar
+     * @param string $search Termo de busca
+     * @return int
+     */
+    public function countAtivosComFiltros($filters, $search = '')
+    {
+        $params = [];
+        $where = ["o.apagado = 0", "o.id_om = :id_om"];
+        $params[':id_om'] = $_SESSION['id_om_smo'];
+
+        // Filtro de busca global
+        if (!empty($search)) {
+            $where[] = "(o.nome_completo LIKE :search OR o.cpf LIKE :search_cpf)";
+            $params[':search'] = '%' . $search . '%';
+            $params[':search_cpf'] = '%' . $search . '%';
+        }
+
+        // Aplicar filtros
+        $this->aplicarFiltros($filters, $where, $params);
+
+        $sql = "
+            SELECT COUNT(*) as total
+            FROM obrigatorio o
+            LEFT JOIN om ON om.id = o.id_om_1_fase
+            WHERE " . implode(" AND ", $where);
+
+        $stmt = $this->conexao->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $data = $stmt->fetch();
+        return (int)($data['total'] ?? 0);
+    }
+
+    /**
+     * Aplica filtros à query
+     * @param array $filters Filtros
+     * @param array &$where Referência para condições WHERE
+     * @param array &$params Referência para parâmetros
+     */
+    private function aplicarFiltros($filters, &$where, &$params)
+    {
+        // Voluntário
+        if (!empty($filters['voluntario_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['voluntario_filtro'] as $i => $val) {
+                $key = ":vol_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.voluntario IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Dependentes
+        if (!empty($filters['dependentes_filtro'])) {
+            if ($filters['dependentes_filtro'] === 'nenhum') {
+                $where[] = "(o.dependentes = 0 OR o.dependentes IS NULL)";
+            } elseif ($filters['dependentes_filtro'] === 'possui_dependente') {
+                $where[] = "(o.dependentes > 0)";
+            }
+        }
+
+        // Faculdade
+        if (!empty($filters['faculdade_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['faculdade_filtro'] as $i => $val) {
+                $key = ":fac_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.nome_instituicao_ensino IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // JISE
+        if (!empty($filters['jise_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['jise_filtro'] as $i => $val) {
+                $key = ":jise_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.jise IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // JISR
+        if (!empty($filters['jisr_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['jisr_filtro'] as $i => $val) {
+                $key = ":jisr_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.jisr IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Distribuição
+        if (!empty($filters['distribuicao_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['distribuicao_filtro'] as $i => $val) {
+                $key = ":dist_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.distribuicao IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // OM 1ª Fase
+        if (!empty($filters['om_1_fase_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['om_1_fase_filtro'] as $i => $val) {
+                $key = ":om1_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "om.abreviatura IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Resultado Revisão
+        if (!empty($filters['resultado_revisao_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['resultado_revisao_filtro'] as $i => $val) {
+                $key = ":rev_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.resultado_revisao_medica_complementar IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // ISGR
+        if (!empty($filters['isgr_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['isgr_filtro'] as $i => $val) {
+                $key = ":isgr_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.resultado_isgr IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Data Seleção Geral
+        if (!empty($filters['sel_geral_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['sel_geral_filtro'] as $i => $val) {
+                $key = ":sel_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.data_selecao_geral IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Comparecimento Designação
+        if (!empty($filters['comp_designacao_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['comp_designacao_filtro'] as $i => $val) {
+                $key = ":comp_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.data_comparecimento_designacao IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Incorporação
+        if (!empty($filters['incorporacao_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['incorporacao_filtro'] as $i => $val) {
+                $key = ":incorp_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.data_incorporacao IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Seleção Complementar
+        if (!empty($filters['sel_complementar_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['sel_complementar_filtro'] as $i => $val) {
+                $key = ":selcomp_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.data_selecao_complementar IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Situação Militar
+        if (!empty($filters['situacao_militar'])) {
+            $placeholders = [];
+            foreach ($filters['situacao_militar'] as $i => $val) {
+                $key = ":sit_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.situacao_militar IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // RM Destino
+        if (!empty($filters['rm_destino_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['rm_destino_filtro'] as $i => $val) {
+                $key = ":rm_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.rm_destino_fisemi IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Especialidade
+        if (!empty($filters['especialidade_filtro'])) {
+            if (!in_array('todas_espec', $filters['especialidade_filtro'])) {
+                $placeholders = [];
+                foreach ($filters['especialidade_filtro'] as $i => $val) {
+                    $key = ":esp_$i";
+                    $placeholders[] = $key;
+                    $params[$key] = $val;
+                }
+                $where[] = "o.especialidade_1 IN (" . implode(',', $placeholders) . ")";
+            } else {
+                $where[] = "o.especialidade_1 IS NOT NULL";
+            }
+        }
+
+        // Prioridade Força
+        if (!empty($filters['prioridade_forca_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['prioridade_forca_filtro'] as $i => $val) {
+                $key = ":prio_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "o.prioridade_forca IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Semestre (range de datas)
+        if (!empty($filters['data_semestre'])) {
+            $where[] = "o.data_selecao_geral BETWEEN :sem_inicio AND :sem_fim";
+            $params[':sem_inicio'] = $filters['data_semestre'][0];
+            $params[':sem_fim'] = $filters['data_semestre'][1];
+        }
+
+        // Formação
+        if (!empty($filters['formacao_filtro'])) {
+            $where[] = "o.formacao = :formacao";
+            $params[':formacao'] = $filters['formacao_filtro'];
+        }
+
+        // Compareceu Designação (sim/nao)
+        if (!empty($filters['compareceu_designacao_filtro'])) {
+            $where[] = "o.compareceu_designacao = :comp_desig";
+            $params[':comp_desig'] = $filters['compareceu_designacao_filtro'];
+        }
+
+        // Local Compareceu Designação
+        if (!empty($filters['local_compareceu_designacao_filtro'])) {
+            $where[] = "o.local_compareceu_designacao = :local_comp";
+            $params[':local_comp'] = $filters['local_compareceu_designacao_filtro'];
+        }
+    }
 }
 
 

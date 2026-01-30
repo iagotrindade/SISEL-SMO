@@ -1082,3 +1082,31 @@ main {
     display: none;
   }
 }
+
+/* ==========================================================================
+   DataTables - Customização da Paginação
+   ========================================================================== */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 4px !important;
+  margin: 0 2px !important;
+  transition: var(--transition-fast);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: linear-gradient(135deg, #006400 0%, #004d00 100%) !important;
+  border-color: #006400 !important;
+  color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+  border-color: #6c757d !important;
+  color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

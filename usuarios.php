@@ -57,45 +57,55 @@ if (isset($_GET['crip']) && (isset($_GET['id']))) {
     </section>
 </main>
 
-<?php
-if ($_SESSION['mensagem']) : ?>
-    <center>
-        <font color="green" size="6px"><?php echo $_SESSION['mensagem'];
-                                        $_SESSION['mensagem'] = null; ?></font>
-    </center>
-
+<?php if ($_SESSION['mensagem']): ?>
+    <div class="container">
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <div><?php echo $_SESSION['mensagem']; $_SESSION['mensagem'] = null; ?></div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    </div>
 <?php endif; ?>
 
 <section id="contact" class="contact" <?php if ($tela_senha) echo " hidden " ?>>
     <div class="container">
-        <div class="row  justify-content-center">
-            <div class="col-lg-12">
-                <form action="controller/<?php echo $destino ?>" method="post" role="form" class="card">
-
-                    <div class="row">
-                        <div class="col-md-3 form-group">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-<?php echo $tela_editar ? 'edit' : 'user-plus'; ?> me-2"></i>
+                    <?php echo $tela_editar ? 'Editar Usuário' : 'Cadastrar Novo Usuário'; ?>
+                </h5>
+            </div>
+            <div class="card-body">
+                <form action="controller/<?php echo $destino ?>" method="post" role="form">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Nome Completo</label>
                             <input type="text" class="form-control" name="nome_completo" value="<?php if ($usuario_edita) echo $usuario_edita->getNomeCompleto(); ?>" placeholder="Nome Completo" required>
                         </div>
 
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Nome de Guerra</label>
                             <input type="text" class="form-control" name="nome_guerra" value="<?php if ($usuario_edita) echo $usuario_edita->getNomeGuerra(); ?>" placeholder="Nome de Guerra" required>
                         </div>
 
-
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Usuário</label>
                             <input type="text" class="form-control" name="usuario" <?php if ($usuario_edita) echo " disabled " ?> value="<?php if ($usuario_edita) echo $usuario_edita->getUsuario(); ?>" placeholder="Usuário para acessar o sistema" required>
                         </div>
 
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">CPF</label>
                             <input type="text" class="form-control" name="cpf" value="<?php if ($usuario_edita) echo $usuario_edita->getCPF(); ?>" placeholder="CPF" required>
                         </div>
 
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">E-Mail</label>
                             <input type="text" class="form-control" name="mail" value="<?php if ($usuario_edita) echo $usuario_edita->getMail(); ?>" placeholder="E-Mail" required>
                         </div>
 
-
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Posto/Graduação</label>
                             <select name="posto_grad" class="form-control" required>
                                 <option value="">Selecione o Posto/Graduação</option>
                                 <option <?php if ($usuario_edita && $usuario_edita->getPostoGrad() == "Sd") echo " selected " ?> value="Sd">Soldado</option>
@@ -114,15 +124,18 @@ if ($_SESSION['mensagem']) : ?>
                             </select>
                         </div>
 
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Telefone</label>
                             <input type="text" class="form-control" id="telefone" name="telefone" value="<?php if ($usuario_edita) echo $usuario_edita->getTelefone(); ?>" placeholder="Telefone" required>
                         </div>
 
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Data de Validade</label>
                             <input type="text" class="form-control" name="data_validade" value="<?php if ($usuario_edita) echo $usuario_edita->imprimeValidade(); ?>" placeholder="Data de validade" required>
                         </div>
 
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Perfil</label>
                             <select name="perfil" class="form-control" required>
                                 <option value="">Selecione o Perfil</option>
                                 <option <?php if ($usuario_edita && $usuario_edita->getPerfil() == "admin") echo " selected " ?> value="admin">Administrador</option>
@@ -131,7 +144,8 @@ if ($_SESSION['mensagem']) : ?>
                             </select>
                         </div>
 
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">OM</label>
                             <select name="id_om" style="width: 100%" class="form-control" required>
                                 <option value="">Seleciona a OM</option>
                                 <?php
@@ -143,30 +157,24 @@ if ($_SESSION['mensagem']) : ?>
                             </select>
                         </div>
 
-                        <div class="col-md-12 form-group">
-                            <br>
-                            <div style="display: block;
-                                        padding: 1rem 1.5rem;
-                                        border-radius: var(--border-radius);
-                                        margin: 1rem auto;
-                                        max-width: 600px;
-                                        text-align: center;
-                                        font-weight: 600;
-                                        animation: slideDown 0.3s ease;
-                                        background: rgba(63, 185, 80, 0.15);
-                                        color: var(--success) !important;
-                                        border: 1px solid rgba(63, 185, 80, 0.3);">
-                                A senha padrão será 123@smo
+                        <?php if (!$tela_editar): ?>
+                        <div class="col-md-12">
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span>A senha padrão será <strong>123@smo</strong></span>
                             </div>
                         </div>
-
+                        <?php endif; ?>
                     </div>
 
                     <input name="crip" hidden value="<?php echo  hash('sha256', $_SESSION['chave'] . "usuario"); ?>">
                     <input name="id_usuario_edita" hidden value="<?php echo  $id_usuario_edita ?>">
 
-                    <div class="text-center"><button type="submit"><?php echo $botao ?></button></div>
-
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-<?php echo $tela_editar ? 'save' : 'plus'; ?> me-2"></i><?php echo $botao ?>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -175,39 +183,53 @@ if ($_SESSION['mensagem']) : ?>
 
 <section id="contact" class="contact" <?php if (!$tela_senha) echo " hidden " ?>>
     <div class="container">
-        <div class="row  justify-content-center ">
-            <div class="col-lg-12">
-                <form action="controller/usuario_altera_senha.php" method="post" role="form" class="card">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-key me-2"></i>Alterar Senha
+                </h5>
+            </div>
+            <div class="card-body">
+                <form action="controller/usuario_altera_senha.php" method="post" role="form">
                     <input name="crip" hidden value="<?php echo  hash('sha256', $_SESSION['chave'] . "usuario"); ?>">
                     <input name="id_usuario_edita" hidden value="<?php echo  $id_usuario_edita ?>">
 
-                    <center>
-                        <font color="red"><b>A senha deve ter pelo menos </b>
-                            <br>
-                            8 caracteres
-                            <br>
-                            uma letra MAIÚSCULA
-                            <br>
-                            um número
-                            <br>
-                            um caractere especial
-
-                        </font>
-                    </center><br>
-
-                    <div class="row">
-                        <div class="col-md-3 form-group">
-                            <label>Militar: <?php if (isset($usuario_edita)) echo $usuario_edita->getPostoGrad() . " " . $usuario_edita->getNomeGuerra()  ?></label>
-                            <label>Usuário: <?php if (isset($usuario_edita)) echo $usuario_edita->getUsuario()  ?></label>
+                    <div class="alert alert-warning d-flex align-items-start mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                        <div>
+                            <strong>A senha deve conter:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>8 caracteres</li>
+                                <li>Uma letra MAIÚSCULA</li>
+                                <li>Um número</li>
+                                <li>Um caractere especial</li>
+                            </ul>
                         </div>
-                        <div class="col-md-3 form-group">
+                    </div>
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Militar</label>
+                                <p class="form-control-plaintext"><?php if (isset($usuario_edita)) echo $usuario_edita->getPostoGrad() . " " . $usuario_edita->getNomeGuerra(); ?></p>
+                            </div>
+                            <div>
+                                <label class="form-label fw-semibold">Usuário</label>
+                                <p class="form-control-plaintext"><?php if (isset($usuario_edita)) echo $usuario_edita->getUsuario(); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Nova Senha</label>
                             <input type="password" class="form-control" name="senha1" placeholder="Digite a nova senha">
                         </div>
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Confirmar Senha</label>
                             <input type="password" class="form-control" name="senha2" placeholder="Repita a nova senha">
                         </div>
-                        <div class="col-md-3 form-group">
-                            <div class="text-center"><button type="submit">Atualizar senha</button></div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>Atualizar Senha
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -219,51 +241,58 @@ if ($_SESSION['mensagem']) : ?>
 
 <section id="contact" class="contact">
     <div class="container">
-        <table id="tabela_dinamica" class="display responsive nowrap" style="width:100%">
-            <thead>
-                <tr>
-                    <th>Nome Guerra</th>
-                    <th>Usuário</th>
-                    <th>CPF</th>
-                    <th>Telefone</th>
-                    <th>E-Mail</th>
-                    <th>OM</th>
-                    <th>Perfil</th>
-                    <th>Validade</th>
-                    <th>Senha</th>
-                    <th>Editar</th>
-                    <th>Apagar</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if ($todos_usuarios)
-                    foreach ($todos_usuarios as $usuario) {
-                        //if($_SESSION['perfil_smo'] != 'admin' && $usuario->getPerfil() == 'admin') continue;
-
-                        $letra = "";
-                        if ($usuario->getPerfil() == 'admin') $letra = "A";
-
-                        $criptografia = hash('sha256', $usuario->getId() . "criptografia");
-                        echo "  
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Usuários Cadastrados
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <table id="tabela_dinamica" class="table table-hover mb-0" style="width:100%">
+                    <thead>
                         <tr>
-                            <td> " . $usuario->getPostoGrad() . " " . $usuario->getNomeGuerra() . " </td>
-                            <td> " . $usuario->getUsuario() . " </td>
-                            <td> " . $usuario->getCPF() . " </td>
-                            <td> " . $usuario->getTelefone() . " </td>
-                            <td> " . $usuario->getMail() . " </td>
-                            <td> " . $usuario->getAbreviatura_om() . " </td>
-                            <td> " . $usuario->getPerfil() . " </td>
-                            <td> " . $usuario->imprimeValidade() . " </td>
-                            <td> <a href ='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&senha=1&id=" . $usuario->getId() . "'><center><i class='fas fa-key'></i></center></a> </td>                            
-                            <td> <a href ='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&id=" . $usuario->getId() . "'><center><i class='fas fa-edit'></i></center></a> </td>
-                            <td> <a href ='controller/usuario_apaga.php?crip=$criptografia&id_usuario=" . $usuario->getId() . "'><center><i class='fas fa-trash-alt'></i></center></a> </td>
+                            <th>Nome Guerra</th>
+                            <th>Usuário</th>
+                            <th>CPF</th>
+                            <th>Telefone</th>
+                            <th>E-Mail</th>
+                            <th>OM</th>
+                            <th>Perfil</th>
+                            <th>Validade</th>
+                            <th class="text-center">Senha</th>
+                            <th class="text-center">Editar</th>
+                            <th class="text-center">Apagar</th>
                         </tr>
-                          ";
-                    }
-                ?>
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($todos_usuarios)
+                            foreach ($todos_usuarios as $usuario) {
+                                $letra = "";
+                                if ($usuario->getPerfil() == 'admin') $letra = "A";
+
+                                $criptografia = hash('sha256', $usuario->getId() . "criptografia");
+                                echo "
+                                <tr>
+                                    <td>" . htmlspecialchars($usuario->getPostoGrad() . " " . $usuario->getNomeGuerra()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getUsuario()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getCPF()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getTelefone()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getMail()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getAbreviatura_om()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->getPerfil()) . "</td>
+                                    <td>" . htmlspecialchars($usuario->imprimeValidade()) . "</td>
+                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&senha=1&id=" . $usuario->getId() . "' class='btn btn-sm btn-outline-secondary' title='Alterar Senha'><i class='fas fa-key'></i></a></td>
+                                    <td class='text-center'><a href='" . $_SERVER['PHP_SELF'] . "?crip=$criptografia&id=" . $usuario->getId() . "' class='btn btn-sm btn-outline-primary' title='Editar'><i class='fas fa-edit'></i></a></td>
+                                    <td class='text-center'><a href='controller/usuario_apaga.php?crip=$criptografia&id_usuario=" . $usuario->getId() . "' class='btn btn-sm btn-outline-danger' title='Apagar'><i class='fas fa-trash-alt'></i></a></td>
+                                </tr>
+                                ";
+                            }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -271,7 +300,11 @@ if ($_SESSION['mensagem']) : ?>
 <script type="text/javascript">
     $(document).ready(function() {
         $('#tabela_dinamica').DataTable({
-            "aaSorting": []
+            "aaSorting": [],
+            "responsive": true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json"
+            }
         });
     });
 </script>
