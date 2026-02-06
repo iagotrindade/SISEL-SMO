@@ -9,20 +9,25 @@ include_once 'header.php';
 </section>
 <section id="contact" class="contact">
   <div class="container">
-    <center data-aos="fade-up">
-      <img src="imagens/erro.png" height="50px">
+    <div class="text-center" data-aos="fade-up">
+      <img src="imagens/erro.png" height="50px" alt="Erro" class="mb-3">
 
-      <h2 class="h4 mb-0">
-        <font color="red"><?php if (isset($_SESSION['erro_retorno_usuario'])) echo $_SESSION['erro_retorno_usuario'] ?></font>
+      <h2 class="h4 mb-3 text-danger">
+        <?php if (isset($_SESSION['erro_retorno_usuario'])) echo $_SESSION['erro_retorno_usuario'] ?>
       </h2>
-      <br>
-      <?php echo "<font size='3'>Erro: ";
-      if (isset($_SESSION['erro_codigo'])) echo $_SESSION['erro_codigo'] ?>
-      <br>
-      <br>
-      <a href="javascript:history.back()"><button class="btn btn-secondary">VOLTAR</button></a>
-      <a href="/smo/login.php"><button class="btn btn-primary">IR PARA LOGIN</button></a>
-    </center>
+
+      <p class="text-muted mb-4">
+        <?php echo "Erro: ";
+        if (isset($_SESSION['erro_codigo'])) echo $_SESSION['erro_codigo'] ?>
+      </p>
+
+<?php
+      $pagina_retorno = isset($_SESSION['erro_pagina_retorno']) ? $_SESSION['erro_pagina_retorno'] : '/smo/login.php';
+      unset($_SESSION['erro_pagina_retorno']);
+      ?>
+      <a href="<?php echo $pagina_retorno; ?>" class="btn btn-secondary me-2">VOLTAR</a>
+      <a href="/smo/login.php" class="btn btn-primary">IR PARA LOGIN</a>
+    </div>
   </div>
 </section>
 

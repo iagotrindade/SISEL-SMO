@@ -36,7 +36,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
     <section class="breadcrumbs">
         <div class="container">
             <div class="section-title" data-aos="fade-up">
-                <h1><b><i class="bi bi-arrow-left-right"></i> Pré Distribuição MFDV - OM 1ª Fase</b></h1>
+                <h1><b><i class="fas fa-map-marker-alt"></i> Pré Distribuição - OM 1ª Fase</b></h1>
             </div>
         </div>
     </section>
@@ -78,12 +78,12 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="">Situação Militar</option>
                         <option value="Em Débito - REFRATÁRIO">Em Débito - REFRATÁRIO</option>
                         <option value="Em Débito - INSUBMISSO">Em Débito - INSUBMISSO</option>
-                        <option value="Em Dia - JUDICIAL LIMINAR">Em Dia - LIMINAR JUDICIAL</option>
+                        <option value="Em Dia - JUDICIAL">Em Dia - JUDICIAL</option>
+                        <option value="Em Dia - JUDICIAL LIMINAR">Em Dia - JUDICIAL LIMINAR</option>
                         <option value="Em Dia - TRANSFERÊNCIA FISEMI">Em Dia - TRANSFERÊNCIA FISEMI</option>
                         <option value="Em Dia - ALISTADO MFDV (FISEMI)">Em Dia - ALISTADO MFDV (FISEMI)</option>
                         <option value="Em Dia - ADIADO CURSANDO RESIDÊNCIA">Em Dia - ADIADO CURSANDO RESIDÊNCIA</option>
                         <option value="Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO">Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO</option>
-                        <option value="Em Dia - LIMINAR JUDICIAL">Em Dia - LIMINAR JUDICIAL</option>
                         <option value="Quite SMO - EXCESSO - CONTINGENTE">Quite SMO - EXCESSO - CONTINGENTE</option>
                         <option value="Quite SMO - EXCESSO - INCAPAZ SAÚDE">Quite SMO - EXCESSO - INCAPAZ SAÚDE</option>
                         <option value="Quite SMO - DESOBRIGADO - MAIOR 38 ANOS">Quite SMO - DESOBRIGADO - MAIOR 38 ANOS</option>
@@ -181,6 +181,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     <label class="form-label fw-semibold">Especialidade</label>
                     <select id="especialidade_filtro" name="especialidade_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Especialidade</option>
+                        <option value="todas_espec">Todas as Especialidades</option>
                         <?php
                         foreach ($todas_espec as $value) {
                             echo "<option value='" . htmlspecialchars($value['nome']) . "'>" . htmlspecialchars($value['nome']) . "</option>";
@@ -257,7 +258,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">Prioridade da Força</label>
                     <select id="prioridade_forca_filtro" name="prioridade_forca_filtro" style="width: 100%" class="chosen-select">
                         <option value="">Prioridade da Força</option>
@@ -270,7 +271,20 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="col-lg-3">
+                    <label class="form-label fw-semibold">Prioridade de Guarnição</label>
+                    <select id="guarnicao_filtro" name="guarnicao_filtro[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">Prioridade de Guarnição</option>
+                        <?php
+                        if ($todas_gu != false)
+                            foreach ($todas_gu as $gu) {
+                                echo "<option value='" . htmlspecialchars($gu['id']) . "'>" . htmlspecialchars($gu['nome']) . "</option>";
+                            }
+                        ?>
+                    </select>
+                </div>
+
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">IE Graduação</label>
                     <select id="faculdade_filtro" name="faculdade_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">IE Graduação</option>
@@ -298,7 +312,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">Distribuição</label>
                     <select id="distribuicao_filtro" name="distribuicao_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Distribuição</option>
@@ -315,6 +329,9 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                 <div class="col-12 mt-3">
                     <button type="button" id="btn-limpar" class="btn btn-outline-secondary border border-secondary">
                         <i class="fas fa-eraser me-2"></i>Limpar Filtros
+                    </button>
+                    <button type="button" id="btn-exportar-excel" class="btn btn-primary ms-2">
+                        <i class="fas fa-file-excel me-2"></i>Exportar Excel
                     </button>
                 </div>
             </div>
@@ -418,10 +435,12 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     d.prioridade_forca_filtro = $('#prioridade_forca_filtro').val();
                     d.faculdade_filtro = $('#faculdade_filtro').val();
                     d.distribuicao_filtro = $('#distribuicao_filtro').val();
+                    d.guarnicao_filtro = $('#guarnicao_filtro').val();
                 }
             },
             columns: [{
-                    data: 'checkbox'
+                    data: 'checkbox',
+                    orderable: false
                 },
                 {
                     data: 'nome'
@@ -500,6 +519,52 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
             });
             // Recarrega a tabela sem filtros
             tabela.ajax.reload();
+        });
+
+        // Botão Exportar Excel
+        $('#btn-exportar-excel').click(function() {
+            // Monta a URL com os filtros atuais
+            var params = new URLSearchParams();
+
+            var filtros = {
+                'om_1_fase_filtro[]': $('#om_1_fase_filtro').val(),
+                'situacao_militar[]': $('#situacao_militar').val(),
+                'resultado_revisao_filtro[]': $('#resultado_revisao_filtro').val(),
+                'compareceu_designacao_filtro': $('#compareceu_designacao_filtro').val(),
+                'local_compareceu_designacao_filtro': $('#local_compareceu_designacao_filtro').val(),
+                'incorporacao_filtro[]': $('#incorporacao_filtro').val(),
+                'data_selecao_geral_semestre_filtro': $('#data_selecao_geral_semestre_filtro').val(),
+                'sel_geral_filtro[]': $('#sel_geral_filtro').val(),
+                'comp_designacao_filtro[]': $('#comp_designacao_filtro').val(),
+                'especialidade_filtro[]': $('#especialidade_filtro').val(),
+                'formacao_filtro': $('#formacao_filtro').val(),
+                'voluntario_filtro': $('#voluntario_filtro').val(),
+                'dependentes_filtro': $('#dependentes_filtro').val(),
+                'rm_destino': $('#rm_destino').val(),
+                'jise_filtro[]': $('#jise_filtro').val(),
+                'jisr_filtro[]': $('#jisr_filtro').val(),
+                'prioridade_forca_filtro': $('#prioridade_forca_filtro').val(),
+                'faculdade_filtro[]': $('#faculdade_filtro').val(),
+                'distribuicao_filtro[]': $('#distribuicao_filtro').val(),
+                'guarnicao_filtro[]': $('#guarnicao_filtro').val()
+            };
+
+            // Adiciona apenas filtros com valor
+            for (var key in filtros) {
+                var val = filtros[key];
+                if (val && val.length > 0) {
+                    if (Array.isArray(val)) {
+                        val.forEach(function(v) {
+                            if (v) params.append(key, v);
+                        });
+                    } else {
+                        params.append(key, val);
+                    }
+                }
+            }
+
+            // Abre a URL de exportação
+            window.location.href = 'controller/pre_distribuicao_export_excel.php?' + params.toString();
         });
     });
 </script>

@@ -33,7 +33,8 @@ include_once 'header.php';
                                     <i class="bi bi-envelope-fill" style="color: #228b22;"></i>
                                     <span>E-mail</span>
                                 </label>
-                                <div style="position: relative;">
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <i class="bi bi-envelope" style="position: absolute; left: 1rem; color: var(--text-muted);"></i>
                                     <input
                                         type="text"
                                         class="form-control"
@@ -43,7 +44,6 @@ include_once 'header.php';
                                         required
                                         autocomplete="email"
                                         style="padding-left: 2.75rem; text-transform: uppercase;">
-                                    <i class="bi bi-envelope" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                                 </div>
                             </div>
 
@@ -53,7 +53,8 @@ include_once 'header.php';
                                     <i class="bi bi-person-vcard-fill" style="color: #228b22;"></i>
                                     <span>CPF</span>
                                 </label>
-                                <div style="position: relative;">
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <i class="bi bi-card-text" style="position: absolute; left: 1rem; color: var(--text-muted);"></i>
                                     <input
                                         type="text"
                                         class="form-control"
@@ -61,9 +62,7 @@ include_once 'header.php';
                                         id="cpf"
                                         placeholder="Digite seu CPF (somente números)"
                                         required
-                                        maxlength="11"
                                         style="padding-left: 2.75rem;">
-                                    <i class="bi bi-card-text" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                                 </div>
                                 <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
                                     <i class="bi bi-info-circle me-1"></i>

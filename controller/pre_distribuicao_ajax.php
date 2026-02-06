@@ -50,7 +50,8 @@ try {
     $orderDir = 'ASC';
     if (isset($_GET['order'][0])) {
         $columnIndex = intval($_GET['order'][0]['column']);
-        $columns = ['', 'nome_completo', 'formacao', '', 'nome_instituicao_ensino', 'especialidade_1', '', 'data_nascimento', 'situacao_militar', '', '', '', ''];
+        // Colunas: checkbox, nome, formacao, om_1_fase, instituicao, especialidade, ano_residencia, dias_vida, situacao_militar, compareceu_desig, distribuicao, prioridade_gu, transferencia
+        $columns = ['', 'nome_completo', 'formacao', 'abreviatura_om_1_fase', 'nome_instituicao_ensino', 'especialidade_1', 'ano_residencia_espe_1', 'data_nascimento', 'situacao_militar', 'compareceu_designacao', 'distribuicao', 'prioridade_gu', 'rm_destino_fisemi'];
         if (isset($columns[$columnIndex]) && !empty($columns[$columnIndex])) {
             $orderColumn = $columns[$columnIndex];
         }
@@ -160,6 +161,16 @@ try {
         $filters['prioridade_forca_filtro'] = [$_GET['prioridade_forca_filtro']];
     }
 
+    // Filtro: Guarnição (prioridade de guarnição)
+    $guarnicao_filtro_ids = [];
+    if (isset($_GET['guarnicao_filtro']) && is_array($_GET['guarnicao_filtro'])) {
+        $guarnicao = array_filter($_GET['guarnicao_filtro']);
+        if (!empty($guarnicao)) {
+            $filters['guarnicao_filtro'] = array_values($guarnicao);
+            $guarnicao_filtro_ids = array_values($guarnicao);
+        }
+    }
+
     // Filtro: Formação
     if (isset($_GET['formacao_filtro']) && !empty($_GET['formacao_filtro'])) {
         $filters['formacao_filtro'] = $_GET['formacao_filtro'];
@@ -250,6 +261,22 @@ try {
             // Compareceu designação
             $compareceu_desig = mb_strtoupper($row['compareceu_designacao'] ?? '');
 
+            // Buscar prioridades de guarnição (só mostra se o filtro estiver ativo)
+            $prioridade_gu_str = '';
+            if (!empty($guarnicao_filtro_ids)) {
+                $prioridades_gu = $ObrigatorioDAO->findAllGuarnicaoPrioridade($row['id']);
+                if ($prioridades_gu && is_array($prioridades_gu)) {
+                    $partes = [];
+                    foreach ($prioridades_gu as $pgu) {
+                        // Mostrar apenas as guarnições que estão no filtro
+                        if (in_array($pgu['id_guarnicao'], $guarnicao_filtro_ids)) {
+                            $partes[] = $pgu['prioridade'] . 'ª ' . $pgu['guarnicao'];
+                        }
+                    }
+                    $prioridade_gu_str = implode(', ', $partes);
+                }
+            }
+
             $data[] = [
                 'DT_RowStyle' => "background-color: $cor",
                 'checkbox' => "<input type='checkbox' name='ids[]' value='" . htmlspecialchars($row['id']) . "'>",
@@ -263,7 +290,7 @@ try {
                 'situacao_militar' => htmlspecialchars($row['situacao_militar'] ?? ''),
                 'compareceu_desig' => htmlspecialchars($compareceu_desig),
                 'distribuicao' => htmlspecialchars($row['distribuicao'] ?? ''),
-                'prioridade_gu' => '', // Seria necessário uma query adicional para isso
+                'prioridade_gu' => htmlspecialchars($prioridade_gu_str),
                 'transferencia' => htmlspecialchars($transferencia)
             ];
         }

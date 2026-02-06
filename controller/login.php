@@ -1,4 +1,4 @@
-<?php	
+<?php
     include_once '../funcoes.php';
 
     session_start();
@@ -7,8 +7,10 @@
     include_once $BASE_URL.'/models/Usuario.php';
     include_once $BASE_URL.'/dao/UsuarioDAO.php';
     include_once $BASE_URL.'/dao/LogDAO.php';
+    include_once $BASE_URL.'/dao/ConfiguracaoDAO.php';
 
     $logDAO = new logDAO($conexao);
+    $configuracaoDAO = new ConfiguracaoDAO($conexao);
     $usuarioDAO = new UsuarioDAO($conexao);
     $data_atual = date("Y-m-d");
 
@@ -27,15 +29,18 @@
 
     if($ip != null)
     {
-        $quantidade_logins = $logDAO->quantidadeTentativasLogin($ip);  
-        if($quantidade_logins && count($quantidade_logins) >= 25)
+        $quantidade_logins = $logDAO->quantidadeTentativasLogin($ip);
+        if($quantidade_logins >= 25)
         {
             erro($BASE_URL, 2, 252323, $pagina_atual, "ip_bloqueado", "O limite de tentativas diárias foi atingido!");
             exit();
         }
     }
     else
+    {
         erro($BASE_URL, 3, 45685678, $pagina_atual, "ip==null", "Não foi possível fazer o seu login! <br>Tente em outro dispositivo!");
+        exit();
+    }
 
 
     $senha = $senha."senha_smo_criptografada";
@@ -44,10 +49,17 @@
     $usuario_login = $usuarioDAO->findByLogin($usuario, $senha);  
 
 
-    if($usuario_login) 
+    if($usuario_login)
     {
         if($usuario_login->getValidade() != null && ($data_atual > $usuario_login->getValidade())) erro($BASE_URL, 1, 235464576, $pagina_atual, "senha_null", "Seu usuário expirou");
 
+        // Verificar se operadores podem fazer login
+        if ($usuario_login->getPerfil() == 'operador') {
+            $login_operador_liberado = $configuracaoDAO->isAtivo('login_operador_om');
+            if (!$login_operador_liberado) {
+                erro($BASE_URL, 1, 235464577, $pagina_atual, "operador_bloqueado", "O acesso para operadores de OM está temporariamente bloqueado.");
+            }
+        }
 
         $_SESSION['id_usuario_smo'] = $usuario_login->getId();
         $_SESSION['usuario_smo'] = $usuario_login->getUsuario();
@@ -67,14 +79,16 @@
             exit();
         }
 
-        if ($usuario_login->getPerfil() == 'operador') 
+        if ($usuario_login->getPerfil() == 'operador')
         {
-            header("Location: ../distribuidos_om_1_fase.php");
+            header("Location: ../dashboard_operador.php");
+            exit();
         }
-        else {
+        else
+        {
             header("Location: ../index.php");
+            exit();
         }
-      
     }
     else
     {

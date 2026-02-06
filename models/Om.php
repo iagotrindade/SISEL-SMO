@@ -1,15 +1,17 @@
 <?php
 
 class OM
-{   
+{
     private $id;
+    private $rm;
+    private $fase;
+    private $codom;
     private $nome;
     private $abreviatura;
-    private $telefone; 
-    private $rm;  
-    private $endereco; 
+    private $telefone;
+    private $endereco;
+    private $cidade;
     private $cep;
-    private $cidade;  
     private $apagado;
    
     /**
@@ -108,6 +110,46 @@ class OM
     public function setRm($rm)
     {
         $this->rm = $rm;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of fase
+     */
+    public function getFase()
+    {
+        return $this->fase;
+    }
+
+    /**
+     * Set the value of fase
+     *
+     * @return  self
+     */
+    public function setFase($fase)
+    {
+        $this->fase = $fase;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of codom
+     */
+    public function getCodom()
+    {
+        return $this->codom;
+    }
+
+    /**
+     * Set the value of codom
+     *
+     * @return  self
+     */
+    public function setCodom($codom)
+    {
+        $this->codom = $codom;
 
         return $this;
     }

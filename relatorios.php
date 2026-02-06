@@ -270,6 +270,119 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
     </div>
 </section>
 
+<section id="contact" class="contact">
+    <div class="container">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-file-signature me-2"></i>Aditamento ao BAR - Convocacao EAS</h5>
+            </div>
+            <div class="card-body">
+                <form action="mpdf/relatorio_aditamento_bar.php" method="POST" target="_blank" role="form">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Cabecalho do Documento</label>
+                            <input type="text" class="form-control" name="texto_cabecalho" value="Quartel em Porto Alegre - RS, XX de XXXX de 20XX - XXXX-feira." required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Nr do Aditamento</label>
+                            <input type="text" class="form-control" name="nr_aditamento" placeholder="Ex: 2" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Nr do BAR</label>
+                            <input type="text" class="form-control" name="nr_bar" placeholder="Ex: 4" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Data do BAR</label>
+                            <input type="text" class="form-control" name="quando_bar" placeholder="Ex: 22 JAN 25" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Tempo de Servico (Incorporacao)</label>
+                            <input type="text" class="form-control" name="tempo_servico" value="Por 12 meses, a contar de 1º FEV 25" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tipo de Distribuicao</label>
+                            <select name="tipo_distribuicao" class="form-select" required>
+                                <option value="DESIGNADO - 1ª Distribuição">DESIGNADO - 1ª Distribuição</option>
+                                <option value="DESIGNADO - 2ª Distribuição">DESIGNADO - 2ª Distribuição</option>
+                                <option value="MAJORADO - 1ª Distribuição">MAJORADO - 1ª Distribuição</option>
+                                <option value="MAJORADO - 2ª Distribuição">MAJORADO - 2ª Distribuição</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ano Filtro (data_comparecimento_designacao)</label>
+                            <input type="text" class="form-control" name="ano_filtro" value="<?php echo date('Y'); ?>" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nome do General</label>
+                            <input type="text" class="form-control" name="nome_general" value="ANYSIO LUIZ CRESPO ALVES NEGRÃO" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nome do Coronel</label>
+                            <input type="text" class="form-control" name="nome_coronel" value="CARLOS REGIS CARNEIRO BORGES" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Titulo Item 1 (3a Parte)</label>
+                            <input type="text" class="form-control" name="titulo_item1" value="1. CONVOCAÇÃO DE MÉDICOS DO SERVIÇO MILITAR OBRIGATÓRIO (SMO) PARA O ESTÁGIO DE ADAPTAÇÃO E SERVIÇO (EAS)" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Paragrafo Principal</label>
+                            <textarea class="form-control" name="paragrafo_principal" rows="4" required>O Comandante da 3ª Região Militar, de acordo com prescrito nos Art 27 e 28 do RLMFDV, por atenderem as condições estabelecidas no parágrafo 2 do Art 14 do mesmo Regulamento e as prescrições do Plano Geral de Convocação para o Serviço Militar Inicial nas Forças Armadas em 2024-2025 (PGC 2024-2025) para a prestação do Serviço Militar Inicial sob a forma de Estágio de Adaptação e Serviço (EAS). AUTORIZOU as Organizações Militares (OM) responsáveis pela 1ª Fase do Estágio (EAS) a INCORPORAR no serviço militar ativo, os médicos e dentistas a seguir nominados, nas Organizações Militares abaixo discriminadas:</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia a.</label>
+                            <textarea class="form-control" name="providencia_a" rows="2" required>As OM deverão Cadastrar/Atualizar as Fichas Cadastro (F Cdtr) do SiCAPEx dos Oficiais Temporários, conforme a Portaria 147-DGP, de 23 DEZ 11 (IR 30-87):</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia b.</label>
+                            <textarea class="form-control" name="providencia_b" rows="2" required>Os interessados tomem conhecimento e providências: e</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia c.</label>
+                            <textarea class="form-control" name="providencia_c" rows="2" required>Em consequência, as OM de 1ª Fase do EAS e os demais órgãos envolvidos devem adotar as seguintes medidas administrativas:</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia c.1)</label>
+                            <textarea class="form-control" name="providencia_c1" rows="2" required>observar o prescrito no Art 55 da Portaria 46-DGP, de 27 MAR 12 (deve ser alterada para Portaria - DGP/C Ex No 407, DE 25 DE JULHO DE 2022:</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia c.2)</label>
+                            <textarea class="form-control" name="providencia_c2" rows="3" required>publicar em BI a Incorporação dos Oficiais MFDV Temporários convocados e cadastrar na BDCP (Base de Dados Corporativa de Pessoal) via SiCAPEx, conforme os incisos I e II do Art 5º da Port 147-DGP, de 23 SET 11 (IR 30-87) combinado com as letras c) e f) do inciso I do Art 199 da Port 46-DGP, de 27 MAR 12. Especial atenção deve ser conferida aos dados individuais, que devem ser extraídos à luz da Certidão de Nascimento/Casamento (nome, filiação, data e local de nascimento), as especialidades e aos cursos e estágios que possuem: e</textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Providencia c.3)</label>
+                            <textarea class="form-control" name="providencia_c3" rows="2" required>As OM de 1ª Fase, na data da Incorporação, deverão providenciar a identificação dos MFDV (Art 205 e 206 da Port 251-DGP, de 11 NOV 09 - NT 13-DSM).</textarea>
+                        </div>
+                    </div>
+
+                    <input name="crip" type="hidden" value="<?php echo hash('sha256', $_SESSION['chave'] . "criptografia"); ?>">
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-file-pdf me-2"></i>Gerar Aditamento BAR
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 <?php
 include_once 'footer.php';
 ?>

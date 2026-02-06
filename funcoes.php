@@ -338,18 +338,31 @@ function erro($BASE_URL, $nivel, $codigo, $arquivo, $descricao, $retorno_usuario
 {
     require $BASE_URL . '/dao/conecta_banco.php';
     include_once $BASE_URL . '/dao/LogDAO.php';
-    
+
     $id_usuario_erro = null;
     if(isset($_SESSION['id_usuario_smo']))
         $id_usuario_erro = $_SESSION['id_usuario_smo'];
-    
+
     $logDAO = new logDAO($conexao);
-    
+
     $_SESSION['erro_retorno_usuario'] = $retorno_usuario;
     $_SESSION['erro_codigo'] = $codigo;
-    
+
+    // Armazena página de retorno baseado no estado de login
+    if(isset($_SESSION['id_usuario_smo']) && (int)$_SESSION['id_usuario_smo'] > 0) {
+        // Usuário logado: volta para página inicial do perfil
+        if(isset($_SESSION['perfil_smo']) && $_SESSION['perfil_smo'] == 'operador') {
+            $_SESSION['erro_pagina_retorno'] = '/smo/distribuidos_om_1_fase.php';
+        } else {
+            $_SESSION['erro_pagina_retorno'] = '/smo/obrigatorios.php';
+        }
+    } else {
+        // Usuário não logado: volta para login
+        $_SESSION['erro_pagina_retorno'] = '/smo/login.php';
+    }
+
     $resultado = $logDAO->insertErro($nivel, $codigo, $arquivo, $descricao, $retorno_usuario);
-  
+
     echo '<meta http-equiv="refresh" content="0; URL=/smo/erro.php">';
     exit();
 }

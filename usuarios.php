@@ -58,7 +58,7 @@ if (isset($_GET['crip']) && (isset($_GET['id']))) {
 </main>
 
 <?php if ($_SESSION['mensagem']): ?>
-    <div class="container">
+    <div class="container mt-4">
         <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
             <i class="fas fa-check-circle me-2"></i>
             <div><?php echo $_SESSION['mensagem']; $_SESSION['mensagem'] = null; ?></div>

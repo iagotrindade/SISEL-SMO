@@ -62,26 +62,25 @@ if (!$oficio)  $oficio = new Oficio();
         <div class="container">
             <div class="section-title" data-aos="fade-up">
 
-                <h1><b><?php echo $obrigatorio->getNomecompleto() ?></b></h1>
-                <br>
+                <h1><?php echo $obrigatorio->getNomecompleto() ?></h1>
 
-                <a href="mpdf/ficha_obrigatorio.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank">
-                    <label for="ficha" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>Ficha</label>
-                    <img src="imagens/pdf.png" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?> height="50px"></a>
+                <a href="mpdf/ficha_obrigatorio.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank" class="text-decoration-none" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>
+                    <span class="me-1">Ficha</span>
+                    <img src="imagens/pdf.png" height="50px" alt="PDF Ficha"></a>
 
                 <?php
                 if ($obrigatorio->getDataComparecimentoSelecaoGeral() != null || $obrigatorio->getJise() != null || $obrigatorio->getCidJise() != null) {
                 ?>
-                    <a href="mpdf/relatorio_jise.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank">
-                        <label for="relatorio" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>JISE</label>
-                        <img src="imagens/pdf.png" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?> height="50px"></a>
+                    <a href="mpdf/relatorio_jise.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank" class="text-decoration-none" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>
+                        <span class="me-1">JISE</span>
+                        <img src="imagens/pdf.png" height="50px" alt="PDF JISE"></a>
                 <?php
                 }
                 if ($obrigatorio->getDataJisr() != null || $obrigatorio->getJisr() != null || $obrigatorio->getCidJisr() != null) {
                 ?>
-                    <a href="mpdf/relatorio_jisr.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank">
-                        <label for="relatorio" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>JISR</label>
-                        <img src="imagens/pdf.png" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?> height="50px"></a>
+                    <a href="mpdf/relatorio_jisr.php?crip=<?php echo $crip_url ?>&id_obrigatorio=<?php echo $id_obrigatorio ?>" target="_blank" class="text-decoration-none" <?php if ($usuario->getPerfil() != 'admin') echo 'hidden' ?>>
+                        <span class="me-1">JISR</span>
+                        <img src="imagens/pdf.png" height="50px" alt="PDF JISR"></a>
                 <?php } ?>
 
             </div>
@@ -90,10 +89,13 @@ if (!$oficio)  $oficio = new Oficio();
 </main>
 
 <?php if (isset($_SESSION['mensagem']) && $_SESSION['mensagem'] != null) : ?>
-    <center>
-        <font size="4" color="green" size="4px"><?php echo $_SESSION['mensagem'];
-                                                $_SESSION['mensagem'] = null; ?></font>
-    </center>
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <?php echo $_SESSION['mensagem'];
+            $_SESSION['mensagem'] = null; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+    </div>
 <?php endif; ?>
 
 <section id="contact" class="contact">
@@ -107,18 +109,16 @@ if (!$oficio)  $oficio = new Oficio();
         <div class="row  justify-content-center">
             <form action="controller/obrigatorio_edita_revisao_medica.php" method="post" role="form">
                 <div class="row form">
-                    <center> <b>
-                            <font size="5" color="green">REVISÃO MÉDICA - OM 1ª FASE</font>
-                        </b></center>
-                    <br>
-                    <br>
+                    <div class="text-center text-success">
+                        <h3>REVISÃO MÉDICA - OM 1ª FASE</h3>
+                    </div>
                     <div class="col-md-4 form-group">
-                        <b>*Data Revisão Médica (novo)</b>
+                        <label class="form-label fw-semibold">Data Revisão Médica (novo) <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="data_revisao_medica" value="<?php echo $obrigatorio->imprimeData_revisao_medica() ?>" placeholder="Data Revisão Médica">
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <b>Resultado Revisão Médica </b>
+                        <label class="form-label fw-semibold">Resultado Revisão Médica</label>
                         <select name="resultado_revisao_medica_complementar" class="form-control">
                             <option value="">Selecione a Opção</option>
                             <option <?php if ($obrigatorio->getResultadoRevisaoMedicaComplementar() == "APTO") echo " selected " ?> value="APTO">APTO</option>
@@ -128,12 +128,12 @@ if (!$oficio)  $oficio = new Oficio();
 
                     </div>
                     <div class="col-md-4 form-group">
-                        <b>*CID Revisão Médica (novo)</b>
+                        <label class="form-label fw-semibold">CID Revisão Médica (novo) <span class="text-danger">*</span></label>
                         <textarea placeholder="CID Revisão Médica" name="cid_revisao_medica" class="form-control"><?php echo $obrigatorio->getCid_revisao_medica() ?></textarea>
                     </div>
 
                     <div class="col-md-12 form-group">
-                        <b>*Observação Revisão Médica (novo)</b>
+                        <label class="form-label fw-semibold">Observação Revisão Médica (novo) <span class="text-danger">*</span></label>
                         <textarea placeholder="OBS Revisão Médica" name="observacao_revisao_medica" class="form-control"><?php echo $obrigatorio->getObs_revisao_medica() ?></textarea>
                     </div>
                     <input hidden type="text" value="<?= $id_obrigatorio ?>" name="id_obrigatorio">
@@ -142,7 +142,7 @@ if (!$oficio)  $oficio = new Oficio();
 
                 <div class="text-center">
                     <br>
-                    <button type="submit" style="width: 100%;" class="btn btn-primary btn-block">SALVAR - Revisão Médica</button>
+                    <button type="submit" class="btn btn-primary w-100">SALVAR - Revisão Médica</button>
                 </div>
 
             </form>
@@ -155,13 +155,11 @@ if (!$oficio)  $oficio = new Oficio();
         <div class="row  justify-content-center">
             <form action="controller/obrigatorio_edita_isgr.php" method="post" role="form">
                 <div class="row form">
-                    <center> <b>
-                            <font size="5" color="green">ISGRev</font>
-                        </b></center>
-                    <br>
-                    <br>
+                    <div class="text-center text-success">
+                        <h3>ISGRev</h3>
+                    </div>
                     <div class="col-md-4 form-group">
-                        <b>ISGRev</b>
+                        <label class="form-label fw-semibold">ISGRev</label>
                         <select name="resultado_isgr" class="form-control">
                             <option value="">Selecione a Opção</option>
                             <option <?php if ($obrigatorio->getResultadoIsgr() == "NÃO é o caso") echo " selected " ?> value="NÃO é o caso">NÃO é o caso</option>
@@ -173,17 +171,17 @@ if (!$oficio)  $oficio = new Oficio();
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <b>*Data ISGRev</b>
+                        <label class="form-label fw-semibold">Data ISGRev <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="data_isgr" value="<?php echo $obrigatorio->imprimeData_isgr() ?>" placeholder="Data ISGR">
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <b>*CID ISGRev</b>
+                        <label class="form-label fw-semibold">CID ISGRev <span class="text-danger">*</span></label>
                         <textarea placeholder="CID Revisão Médica" name="cid_isgr" class="form-control"><?php echo $obrigatorio->getCid_isgr() ?></textarea>
                     </div>
 
                     <div class="col-md-12 form-group">
-                        <b>*Observação ISGRev</b>
+                        <label class="form-label fw-semibold">Observação ISGRev <span class="text-danger">*</span></label>
                         <textarea placeholder="OBS ISGRev" name="observacao_isgr" class="form-control"><?php echo $obrigatorio->getObservacao_isgr() ?></textarea>
                     </div>
                     <input hidden type="text" value="<?= $id_obrigatorio ?>" name="id_obrigatorio">
@@ -192,9 +190,8 @@ if (!$oficio)  $oficio = new Oficio();
 
                 <div class="text-center">
                     <br>
-                    <button type="submit" style="width: 100%;" class="btn btn-primary btn-block">SALVAR - ISGRev </button>
+                    <button type="submit" class="btn btn-primary w-100">SALVAR - ISGRev</button>
                 </div>
-
             </form>
         </div>
     </div>
@@ -205,11 +202,11 @@ if (!$oficio)  $oficio = new Oficio();
         <div class="row  justify-content-center">
             <form action="controller/obrigatorio_edita_incorporacao_om.php" method="post" role="form">
                 <div class="row form">
-                    <center> <b>
-                            <font size="5" color="green">INCORPORAÇÃO</font>
-                        </b></center>
+                    <div class="text-center text-success">
+                        <h3>INCORPORAÇÃO</h3>
+                    </div>
                     <div class="col-md-4 form-group">
-                        <b>*Incorporação - Compareceu? (novo)</b>
+                        <label class="form-label fw-semibold">Incorporação - Compareceu? (novo) <span class="text-danger">*</span></label>
                         <select name="incorporacao" class="form-control">
                             <option value="">Selecione a Opção</option>
                             <option <?php if ($obrigatorio->getIncorporacao() == 'SIM') echo 'selected' ?> value="SIM">SIM</option>
@@ -218,12 +215,12 @@ if (!$oficio)  $oficio = new Oficio();
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <b>Data Incorporação</b>
+                        <label class="form-label fw-semibold">Data Incorporação</label>
                         <input type="text" class="form-control" value="<?php echo $obrigatorio->imprimeDataIncorporacao() ?>" name="data_incorporacao" placeholder="Data de Incorporação">
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <b>OM 1ª Fase</b>
+                        <label class="form-label fw-semibold">OM 1ª Fase</label>
                         <select name="id_om_1_fase" class="form-control">
                             <option value="">Selecione a Opção</option>
                             <?php
@@ -238,12 +235,12 @@ if (!$oficio)  $oficio = new Oficio();
                     </div>
 
                     <div class="col-md-12 form-group">
-                        <b>*BAR Incorporação - OM 1ª Fase (novo)</b>
+                        <label class="form-label fw-semibold">BAR Incorporação - OM 1ª Fase (novo) <span class="text-danger">*</span></label>
                         <textarea placeholder="BAR - OM 1ª Fase" name="bar_om_1_fase" class="form-control"><?php echo $obrigatorio->getBar_om_1_fase() ?></textarea>
                     </div>
 
                     <div class="col-md-4 form-group" id="observacoes">
-                        <b>OM 2ª Fase</b>
+                        <label class="form-label fw-semibold">OM 2ª Fase</label>
                         <select name="om_2_fase" class="form-control">
                             <option value="">OM 2ª Fase</option>
                             <?php
@@ -258,14 +255,10 @@ if (!$oficio)  $oficio = new Oficio();
                         <input hidden type="text" value="<?= $id_obrigatorio ?>" name="id_obrigatorio">
                         <input name="crip" hidden value="<?php echo  hash('sha256', $_SESSION['chave'] . "obrigatorio"); ?>">
                     </div>
-
                 </div>
                 <br>
-                <button type="submit" style="width: 100%;" class="btn btn-primary btn-block">SALVAR - Incorporação</button>
-
+                <button type="submit" class="btn btn-primary w-100">SALVAR - Incorporação</button>
             </form>
-
-
         </div>
     </div>
 </section>
@@ -274,11 +267,9 @@ if (!$oficio)  $oficio = new Oficio();
     <div class="container card">
         <div class="row  justify-content-center">
             <div class="row form">
-                <center> <b>
-                        <font size="5" color="green">ARQUIVOS</font>
-                    </b></center>
-                <br>
-                <br>
+                <div class="text-center text-success">
+                    <h3>ARQUIVOS</h3>
+                </div>
                 <div class="row">
                     <div class="col-md-12 form-group">
 
@@ -295,12 +286,12 @@ if (!$oficio)  $oficio = new Oficio();
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <input type="file" style="width: 100%;" class="btn btn-primary btn-block" name="arquivo">
+                                        <input type="file" class="form-control" name="arquivo">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <button type="submit" style="width: 100%;" class="btn btn-primary btn-block">ENVIAR ARQUIVO</button>
+                                        <button type="submit" class="btn btn-primary w-100">ENVIAR ARQUIVO</button>
                                     </div>
                                 </div>
                             </div>
@@ -348,13 +339,7 @@ if (!$oficio)  $oficio = new Oficio();
             </div>
         </div>
     </div>
-
-
 </section>
-<br>
-<br>
-
-
 <?php
 include_once 'footer.php';
 ?>

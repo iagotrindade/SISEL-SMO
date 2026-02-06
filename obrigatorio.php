@@ -11,6 +11,7 @@ include_once 'dao/ObrigatorioDAO.php';
 include_once 'dao/ArquivoDAO.php';
 include_once 'dao/AuxiliarDAO.php';
 include_once 'dao/UsuarioDAO.php';
+include_once 'dao/LogDAO.php';
 
 if ($_SESSION['perfil_smo'] != "admin") {
     erro($BASE_URL, 2, 9961356, $pagina_atual, "usuario_sem_permissao", "Usuário sem permissão!");
@@ -72,6 +73,10 @@ $aba4active = "";
 $aba5active = "";
 $aba6active = "";
 $aba7active = "";
+$aba8active = "";
+$aba9active = "";
+$aba10active = "";
+$aba11active = "";
 $aba1show = "";
 $aba2show = "";
 $aba3show = "";
@@ -79,6 +84,10 @@ $aba4show = "";
 $aba5show = "";
 $aba6show = "";
 $aba7show = "";
+$aba8show = "";
+$aba9show = "";
+$aba10show = "";
+$aba11show = "";
 if ($aba == 1) {
     $aba1active = " active ";
     $aba1show = " show active ";
@@ -119,6 +128,14 @@ if ($aba == 10) {
     $aba10active = " active ";
     $aba10show = " show active ";
 };
+if ($aba == 11) {
+    $aba11active = " active ";
+    $aba11show = " show active ";
+};
+
+// Buscar histórico de alterações para a aba de histórico
+$logDAO = new LogDAO($conexao);
+$historico_obrigatorio = $logDAO->findByIdObrigatorio($id_obrigatorio);
 ?>
 
 <main id="main">
@@ -163,6 +180,55 @@ if ($aba == 10) {
     </div>
 <?php endif; ?>
 
+<style>
+    /* Estilos das abas - Compatível com tema claro e escuro */
+    #myTabs.nav-tabs {
+        border-bottom: 2px solid #006400 !important;
+        background: var(--gray-dark, #e9ecef) !important;
+        padding: 0.5rem !important;
+        border-radius: 8px 8px 0 0 !important;
+        flex-wrap: wrap;
+    }
+    #myTabs .nav-item {
+        margin-bottom: 0 !important;
+    }
+    #myTabs .nav-link {
+        color: var(--text-primary, #333) !important;
+        background: transparent !important;
+        border: 2px solid transparent !important;
+        border-radius: 8px 8px 0 0 !important;
+        padding: 0.6rem 1rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        margin-right: 2px !important;
+        margin-bottom: 2px !important;
+        font-size: 0.9rem !important;
+    }
+    #myTabs .nav-link:hover {
+        color: #006400 !important;
+        background: rgba(0, 100, 0, 0.15) !important;
+        border-color: rgba(0, 100, 0, 0.3) !important;
+    }
+    #myTabs .nav-link.active {
+        color: #ffffff !important;
+        background: #006400 !important;
+        border-color: #006400 !important;
+    }
+    #myTabs .nav-link i {
+        color: #006400 !important;
+    }
+    #myTabs .nav-link.active i {
+        color: #ffffff !important;
+    }
+
+    /* Conteúdo das abas */
+    #contact .tab-content {
+        background: var(--gray-darker, #f8f9fa) !important;
+        border-radius: 0 0 8px 8px !important;
+        padding: 1rem !important;
+    }
+</style>
+
 <section id="contact" class="contact">
     <div class="container card">
         <div class="row  justify-content-center">
@@ -171,34 +237,37 @@ if ($aba == 10) {
 
             <ul class="nav nav-tabs" id="myTabs">
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba1active ?>" style="color: #495057;" data-toggle="tab" href="#aba1">Identificação</a>
+                    <a class="nav-link <?= $aba1active ?>" data-toggle="tab" href="#aba1"><i class="fas fa-id-card me-1"></i>Identificação</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba2active ?>" style="color: #495057;" data-toggle="tab" href="#aba2">FISEMI</a>
+                    <a class="nav-link <?= $aba2active ?>" data-toggle="tab" href="#aba2"><i class="fas fa-file-signature me-1"></i>FISEMI</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba3active ?>" style="color: #495057;" data-toggle="tab" href="#aba3">Justiça</a>
+                    <a class="nav-link <?= $aba3active ?>" data-toggle="tab" href="#aba3"><i class="fas fa-gavel me-1"></i>Justiça</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba4active ?>" style="color: #495057;" data-toggle="tab" href="#aba4">Adiamento</a>
+                    <a class="nav-link <?= $aba4active ?>" data-toggle="tab" href="#aba4"><i class="fas fa-calendar-times me-1"></i>Adiamento</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba5active ?>" style="color: #495057;" data-toggle="tab" href="#aba5">Distribuição</a>
+                    <a class="nav-link <?= $aba5active ?>" data-toggle="tab" href="#aba5"><i class="fas fa-map-marker-alt me-1"></i>Distribuição</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba10active ?>" style="color: #495057;" data-toggle="tab" href="#aba10">Incorporação</a>
+                    <a class="nav-link <?= $aba10active ?>" data-toggle="tab" href="#aba10"><i class="fas fa-user-check me-1"></i>Incorporação</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba6active ?>" style="color: #495057;" data-toggle="tab" href="#aba6">Ficha Completa</a>
+                    <a class="nav-link <?= $aba6active ?>" data-toggle="tab" href="#aba6"><i class="fas fa-file-alt me-1"></i>Ficha Completa</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba7active ?>" style="color: #495057;" data-toggle="tab" href="#aba7">Arquivos</a>
+                    <a class="nav-link <?= $aba7active ?>" data-toggle="tab" href="#aba7"><i class="fas fa-folder-open me-1"></i>Arquivos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $aba6active ?>" style="color: #495057;" data-toggle="tab" href="#aba9">Ofício</a>
+                    <a class="nav-link <?= $aba9active ?>" data-toggle="tab" href="#aba9"><i class="fas fa-envelope me-1"></i>Ofício</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" style="color: #495057;" data-toggle="tab" href="#aba8">Apagar</a>
+                    <a class="nav-link <?= $aba11active ?>" data-toggle="tab" href="#aba11"><i class="fas fa-history me-1"></i>Histórico</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $aba8active ?>" data-toggle="tab" href="#aba8"><i class="fas fa-trash-alt me-1"></i>Apagar</a>
                 </li>
             </ul>
 
@@ -234,6 +303,10 @@ if ($aba == 10) {
 
                 <div class="tab-pane fade <?= $aba9show ?>" id="aba9">
                     <?php include_once 'obrigatorio_oficio.php' ?>
+                </div>
+
+                <div class="tab-pane fade <?= $aba11show ?>" id="aba11">
+                    <?php include_once 'obrigatorio_historico.php' ?>
                 </div>
 
                 <br>

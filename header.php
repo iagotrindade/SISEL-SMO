@@ -27,8 +27,7 @@ $endereco_completo = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
 
 // VERIFICAÇÃO DE TROCA DE SENHA OBRIGATÓRIA
 if (isset($_SESSION['id_usuario_smo']) && $_SESSION['trocar_senha_smo'] == true && $pagina_acessada != "/smo/altera_senha.php") {
-    session_destroy();
-    header("Location: index.php");
+    header("Location: /smo/altera_senha.php");
     exit();
 }
 
@@ -79,30 +78,17 @@ $insere_log = $logDAO->insertAcessoPagina($pagina_acessada, $endereco_completo);
     <script src="libs/jquery.maskedinput.js"></script>
     <!-- maskMoney REMOVIDO - ROLLBACK: <script src="libs/maskMoney.js"></script> -->
 
+    <!-- Chart.js para Dashboard Analítico (local) -->
+    <script src="assets/js/chart.min.js"></script>
+
     <!-- CSS padrão -->
     <link href="assets/css/style.css" rel="stylesheet">
 
     <!-- CSS para Filtros e Forms -->
     <link href="assets/css/style-filters.css" rel="stylesheet">
 
-    <!-- Theme Stylesheet será carregado dinamicamente pelo theme-switcher.js -->
-    <script>
-        // Carrega o tema inicial antes da página renderizar
-        (function() {
-            const THEME_KEY = 'smo-theme-preference';
-            const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-            const themeFile = savedTheme === 'dark' ?
-                'assets/css/style-dark-modern.css' :
-                'assets/css/style-light-modern.css';
-
-            const link = document.createElement('link');
-            link.id = 'theme-stylesheet';
-            link.rel = 'stylesheet';
-            link.href = themeFile;
-            document.head.appendChild(link);
-
-        })();
-    </script>
+    <!-- Tema Claro -->
+    <link href="assets/css/style-light-modern.css" rel="stylesheet">
 
     <script>
         // Configurações iniciais quando o documento está pronto
@@ -198,8 +184,6 @@ $insere_log = $logDAO->insertAcessoPagina($pagina_acessada, $endereco_completo);
 <body class="d-flex flex-column min-vh-100">
     <!-- Navegação por teclado para acessibilidade -->
     <a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo principal</a>
-
-    <a name="topo" id="topo"></a>
 
     <?php
     // Inclui o menu apropriado baseado no estado de login

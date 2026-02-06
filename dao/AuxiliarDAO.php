@@ -52,6 +52,12 @@ class AuxiliarDAO
             return false;
     }
 
+    // Alias para findAllEspec
+    public function findAllEspecialidades()
+    {
+        return $this->findAllEspec() ?: [];
+    }
+
 
     public function findAllCidades()
     {

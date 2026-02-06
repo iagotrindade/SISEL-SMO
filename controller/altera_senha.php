@@ -21,7 +21,7 @@
     if($criptografia != hash('sha256', $_SESSION['chave']."nova_senha"))  erro($BASE_URL, 2, 2364534, $pagina_atual, "criptografia_invalida", "Tente fazer o login novamente!");
     
     if($senha1 == null || $senha2 == null) erro($BASE_URL, 1, 26347457, $pagina_atual, "senha_null", "Os dois campos são obrigatórios!");
-    if($senha1 != $senha2) erro($BASE_URL, 1, 32345745, $pagina_atual, "senha_null", "As duas senhas devem são iguais!");
+    if($senha1 != $senha2) erro($BASE_URL, 1, 32345745, $pagina_atual, "senha_diferente", "As duas senhas devem ser iguais!");
     
     if(strlen($senha1) < 8) erro($BASE_URL, 1, 2353467, $pagina_atual, "senha<8char", "O Campo de senha deve ter pelo menos 8 caracteres!");
     if(!preg_match('/[A-Z]/', $senha1)) erro($BASE_URL, 1, 63483268, $pagina_atual, "senha!=maiuscula", "A senha deve ter pelo menos uma letra MAIÚSCULA!");
@@ -42,16 +42,21 @@
         $insere_log = $logDAO->insertLog("3005", "log", $_SESSION['id_usuario_smo'] , "Login", $alteracao);
         $_SESSION['trocar_senha_smo'] = false;
 
-        if ($usuario->getPerfil() == 'operador') 
+        if ($usuario->getPerfil() == 'operador')
         {
             header("Location: ../distribuidos_om_1_fase.php");
+            exit();
         }
-        else {
+        else
+        {
             header("Location: ../obrigatorios.php");
+            exit();
         }
     }
     else
+    {
         erro($BASE_URL, 3, 236457856, $pagina_atual, "erro_senha_padrao", "Algo errado não deu certo!");
+    }
 ?>
 
 

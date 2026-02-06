@@ -729,7 +729,7 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
     {
         $obrigatorios = [];
         $stmt = $this->conexao->prepare("
-                                            select om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase, om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase, om.cidade cidade_om_1_fase, om.cep cep_om_1_fase , o.* 
+                                            select om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase, om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase, om.cidade cidade_om_1_fase, om.cep cep_om_1_fase , o.*
                                             from obrigatorio o
                                             left join om on om.id = o.id_om_1_fase where o.apagado = 0 and id_om = :id_om order by nome_completo asc
                                         ");
@@ -746,6 +746,35 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             return $obrigatorios;
         } else
             return false;
+    }
+
+    /**
+     * Busca todos os obrigatórios ativos (para admin - sem filtro de OM)
+     * @return array|false
+     */
+    public function findAllAtivosAdmin()
+    {
+        $obrigatorios = [];
+        $stmt = $this->conexao->prepare("
+            SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                   om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                   om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+            FROM obrigatorio o
+            LEFT JOIN om ON om.id = o.id_om_1_fase
+            WHERE o.apagado = 0
+            ORDER BY o.nome_completo ASC
+        ");
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $data = $stmt->fetchAll();
+            foreach ($data as $item) {
+                $obrigatorio = $this->buildObrigatorio($item);
+                $obrigatorios[] = $obrigatorio;
+            }
+            return $obrigatorios;
+        }
+        return [];
     }
 
     public function findAllAtivosdaOM()
@@ -824,9 +853,9 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         $anoAtual = date('Y');
 
         $stmt = $this->conexao->prepare("
-            SELECT COUNT(*) as total 
-            FROM obrigatorio 
-            WHERE apagado = 0 
+            SELECT COUNT(*) as total
+            FROM obrigatorio
+            WHERE apagado = 0
             AND YEAR(data_incorporacao) = :ano
         ");
 
@@ -839,6 +868,42 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         }
 
         return 0;
+    }
+
+    /**
+     * Conta o total de obrigatórios incorporados por ano e período
+     * @param int|null $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return int Quantidade de obrigatórios incorporados
+     */
+    public function countIncorporados($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_incorporacao) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_incorporacao) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_incorporacao IS NOT NULL
+                    $whereAno";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
     }
 
     /**
@@ -913,16 +978,34 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             'formacao' => 'o.formacao',
             'nome_instituicao_ensino' => 'o.nome_instituicao_ensino',
             'data_nascimento' => 'o.data_nascimento',
-            'situacao_militar' => 'o.situacao_militar'
+            'situacao_militar' => 'o.situacao_militar',
+            'especialidade_1' => 'o.especialidade_1',
+            'ano_residencia_espe_1' => 'o.ano_residencia_espe_1',
+            'rm_destino_fisemi' => 'o.rm_destino_fisemi',
+            'abreviatura_om_1_fase' => 'om.abreviatura',
+            'compareceu_designacao' => 'o.compareceu_designacao',
+            'distribuicao' => 'o.distribuicao',
+            'prioridade_forca' => 'o.prioridade_forca',
+            'prioridade_gu' => 'prioridade_gu_ordem'
         ];
 
         $orderCol = $allowedColumns[$orderColumn] ?? 'o.nome_completo';
         $orderDirection = strtoupper($orderDir) === 'DESC' ? 'DESC' : 'ASC';
 
+        // Subquery para ordenação por prioridade de guarnição
+        $prioridadeGuSelect = "NULL AS prioridade_gu_ordem";
+        $prioridadeGuJoin = "";
+        if ($orderColumn === 'prioridade_gu' && !empty($filters['guarnicao_filtro'])) {
+            $guIds = array_map('intval', $filters['guarnicao_filtro']);
+            $guIdsStr = implode(',', $guIds);
+            $prioridadeGuSelect = "(SELECT MIN(oxg_ord.prioridade) FROM obrigatorio_x_guarnicao oxg_ord WHERE oxg_ord.id_obrigatorio = o.id AND oxg_ord.apagado = 0 AND oxg_ord.id_guarnicao IN ($guIdsStr)) AS prioridade_gu_ordem";
+        }
+
         $sql = "
             SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
                    om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
-                   om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                   om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*,
+                   $prioridadeGuSelect
             FROM obrigatorio o
             LEFT JOIN om ON om.id = o.id_om_1_fase
             WHERE " . implode(" AND ", $where) . "
@@ -1178,6 +1261,17 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             $where[] = "o.prioridade_forca IN (" . implode(',', $placeholders) . ")";
         }
 
+        // Guarnição (prioridade de guarnição)
+        if (!empty($filters['guarnicao_filtro'])) {
+            $placeholders = [];
+            foreach ($filters['guarnicao_filtro'] as $i => $val) {
+                $key = ":gu_$i";
+                $placeholders[] = $key;
+                $params[$key] = $val;
+            }
+            $where[] = "EXISTS (SELECT 1 FROM obrigatorio_x_guarnicao oxg WHERE oxg.id_obrigatorio = o.id AND oxg.apagado = 0 AND oxg.id_guarnicao IN (" . implode(',', $placeholders) . "))";
+        }
+
         // Semestre (range de datas)
         if (!empty($filters['data_semestre'])) {
             $where[] = "o.data_selecao_geral BETWEEN :sem_inicio AND :sem_fim";
@@ -1202,6 +1296,1260 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             $where[] = "o.local_compareceu_designacao = :local_comp";
             $params[':local_comp'] = $filters['local_compareceu_designacao_filtro'];
         }
+    }
+
+    /**
+     * Busca obrigatorios para o Aditamento BAR
+     * @param string $distribuicao Tipo de distribuicao
+     * @param int $ano Ano do filtro data_comparecimento_designacao
+     * @return array Lista de objetos Obrigatorio
+     */
+    public function findParaAditamentoBAR($distribuicao, $ano)
+    {
+        $obrigatorios = [];
+
+        $sql = "SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                       om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                       om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                FROM obrigatorio o
+                LEFT JOIN om ON om.id = o.id_om_1_fase
+                WHERE o.apagado = 0
+                AND o.distribuicao = :distribuicao
+                AND o.data_comparecimento_designacao IS NOT NULL
+                AND YEAR(o.data_comparecimento_designacao) = :ano
+                ORDER BY o.nome_completo ASC";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(':distribuicao', $distribuicao);
+        $stmt->bindValue(':ano', (int)$ano, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $data = $stmt->fetchAll();
+
+            foreach ($data as $item) {
+                $obrigatorio = $this->buildObrigatorio($item);
+                $obrigatorios[] = $obrigatorio;
+            }
+            return $obrigatorios;
+        }
+
+        return [];
+    }
+
+    // ==================== MÉTODOS PARA DASHBOARD ANALÍTICO ====================
+
+    /**
+     * Estatísticas por Especialidade
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorEspecialidade($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    COALESCE(NULLIF(especialidade_1, ''), 'Não informada') as especialidade,
+                    COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0 AND YEAR(data_selecao_geral) = ? AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY COALESCE(NULLIF(especialidade_1, ''), 'Não informada')
+                ORDER BY total DESC
+                LIMIT 10";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['especialidade'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Estatísticas por Situação Militar
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorSituacaoMilitar($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    COALESCE(NULLIF(situacao_militar, ''), 'Não informada') as situacao,
+                    COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0 AND YEAR(data_selecao_geral) = ? AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY COALESCE(NULLIF(situacao_militar, ''), 'Não informada')
+                ORDER BY total DESC";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['situacao'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Estatísticas por Resultado de Revisão Médica
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorResultadoRevisao($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    CASE
+                        WHEN resultado_revisao_medica_complementar IS NULL OR resultado_revisao_medica_complementar = '' THEN 'PENDENTE'
+                        ELSE resultado_revisao_medica_complementar
+                    END as resultado,
+                    COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0 AND YEAR(data_selecao_geral) = ? AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY resultado
+                ORDER BY total DESC";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['resultado'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Estatísticas de Evolução Mensal de Incorporações
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasMensais($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $mesesFiltro = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($mesesFiltro), '?'));
+
+        $sql = "SELECT
+                    MONTH(data_incorporacao) as mes,
+                    COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0
+                AND data_incorporacao IS NOT NULL
+                AND YEAR(data_incorporacao) = ?
+                AND MONTH(data_incorporacao) IN ($mesesPlaceholders)
+                GROUP BY MONTH(data_incorporacao)
+                ORDER BY mes ASC";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $mesesFiltro);
+        $stmt->execute($params);
+
+        $nomeMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        // Filtra apenas os meses selecionados
+        $labelsExibir = [];
+        $dadosExibir = [];
+        $dadosTemp = array_fill(0, 12, 0);
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $mesIndex = (int)$row['mes'] - 1;
+                $dadosTemp[$mesIndex] = (int)$row['total'];
+            }
+        }
+
+        // Exibe apenas os meses filtrados
+        foreach ($mesesFiltro as $mes) {
+            $labelsExibir[] = $nomeMeses[$mes - 1];
+            $dadosExibir[] = $dadosTemp[$mes - 1];
+        }
+
+        return ['labels' => $labelsExibir, 'data' => $dadosExibir];
+    }
+
+    /**
+     * Estatísticas por OM 1ª Fase
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorOM($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    COALESCE(om.abreviatura, 'Não distribuído') as om_nome,
+                    COUNT(*) as total
+                FROM obrigatorio o
+                LEFT JOIN om ON om.id = o.id_om_1_fase
+                WHERE o.apagado = 0 AND YEAR(o.data_selecao_geral) = ? AND MONTH(o.data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY om.abreviatura
+                ORDER BY total DESC
+                LIMIT 10";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['om_nome'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Estatísticas por Classificação JISE
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorJISE($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    CASE
+                        WHEN jise IS NULL OR jise = '' THEN 'Não avaliado'
+                        ELSE jise
+                    END as classificacao,
+                    COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0 AND YEAR(data_selecao_geral) = ? AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY classificacao
+                ORDER BY
+                    CASE classificacao
+                        WHEN 'A' THEN 1
+                        WHEN 'B1' THEN 2
+                        WHEN 'B2' THEN 3
+                        WHEN 'C' THEN 4
+                        ELSE 5
+                    END";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['classificacao'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Conta obrigatórios pendentes de distribuição (sem OM de 1ª fase)
+     * @param int|null $ano Ano para filtrar (null = todos)
+     * @param array $meses Meses para filtrar (vazio = todos)
+     * @return int
+     */
+    public function countPendentesDistribuicao($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND (id_om_1_fase IS NULL OR id_om_1_fase = 0 OR id_om_1_fase = '')
+                    AND (distribuicao IS NULL OR distribuicao = '')
+                    AND (resultado_revisao_medica_complementar IS NULL OR resultado_revisao_medica_complementar NOT IN ('INAPTO', 'NÃO COMPARECEU'))";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta obrigatórios pendentes de revisão médica (já distribuídos mas sem resultado)
+     * @param int|null $ano Ano para filtrar (null = todos)
+     * @param array $meses Meses para filtrar (vazio = todos)
+     * @return int
+     */
+    public function countPendentesRevisaoMedica($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente com countPendentesRevisaoOM - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND id_om_1_fase IS NOT NULL
+                    AND id_om_1_fase > 0
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')
+                    AND (resultado_revisao_medica_complementar IS NULL OR resultado_revisao_medica_complementar = '')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta obrigatórios com adiamento ativo (solicitou adiamento e ainda está vigente)
+     * @return int
+     */
+    public function countAdiamentosAtivos()
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND situacao_militar = 'Em Dia - ADIADO CURSANDO RESIDÊNCIA'";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta obrigatórios inaptos na revisão médica
+     * @param int|null $ano Ano para filtrar (null = todos)
+     * @param array $meses Meses para filtrar (vazio = todos)
+     * @return int
+     */
+    public function countInaptos($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente com countInaptosOM - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND resultado_revisao_medica_complementar = 'INAPTO'
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta total de obrigatórios designados para OM (já têm OM atribuída)
+     * @param int|null $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return int
+     */
+    public function countDesignados($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente com countDesignadosOM - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND id_om_1_fase IS NOT NULL
+                    AND id_om_1_fase > 0
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta total de obrigatórios APTOS na revisão médica
+     * @param int|null $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return int
+     */
+    public function countAptos($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente com countAptosOM - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND resultado_revisao_medica_complementar = 'APTO'
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta incorporados por ano de SELEÇÃO (não por ano de incorporação)
+     * Mantém consistência com os outros indicadores
+     * @param int|null $ano Ano para filtrar (da seleção)
+     * @param array $meses Meses para filtrar
+     * @return int
+     */
+    public function countIncorporadosPorAnoSelecao($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND data_incorporacao IS NOT NULL
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta APTOS aguardando incorporação (aprovados mas não incorporados)
+     * @param int|null $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return int
+     */
+    public function countAguardandoIncorporacao($ano = null, $meses = [])
+    {
+        try {
+            $params = [];
+            $whereAno = "";
+
+            if ($ano !== null) {
+                $whereAno = " AND YEAR(data_selecao_geral) = ?";
+                $params[] = $ano;
+
+                if (!empty($meses)) {
+                    $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+                    $whereAno .= " AND MONTH(data_selecao_geral) IN ($mesesPlaceholders)";
+                    $params = array_merge($params, $meses);
+                }
+            }
+
+            // Filtro consistente - exclui distribuições de outras forças
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    $whereAno
+                    AND resultado_revisao_medica_complementar = 'APTO'
+                    AND (data_incorporacao IS NULL)
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute($params);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS ESPECÍFICOS PARA OPERADORES DE OM
+    // ==========================================
+
+    /**
+     * Conta total de designados para uma OM específica
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return int
+     */
+    public function countDesignadosOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta total de aptos para uma OM específica
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return int
+     */
+    public function countAptosOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND resultado_revisao_medica_complementar = 'APTO'
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta total de inaptos para uma OM específica
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return int
+     */
+    public function countInaptosOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND resultado_revisao_medica_complementar = 'INAPTO'
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Conta pendentes de revisão médica para uma OM específica
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return int
+     */
+    public function countPendentesRevisaoOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT COUNT(*) as total FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND (resultado_revisao_medica_complementar IS NULL OR resultado_revisao_medica_complementar = '')
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+            $result = $stmt->fetch();
+            return $result ? (int)$result['total'] : 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Estatísticas de Resultado de Revisão Médica para uma OM
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasResultadoRevisaoOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT
+                        CASE
+                            WHEN resultado_revisao_medica_complementar IS NULL OR resultado_revisao_medica_complementar = '' THEN 'PENDENTE'
+                            ELSE resultado_revisao_medica_complementar
+                        END as resultado,
+                        COUNT(*) as total
+                    FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')
+                    GROUP BY resultado
+                    ORDER BY total DESC";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+
+            $labels = [];
+            $data = [];
+
+            if ($stmt->rowCount() > 0) {
+                $results = $stmt->fetchAll();
+                foreach ($results as $row) {
+                    $labels[] = $row['resultado'];
+                    $data[] = (int)$row['total'];
+                }
+            }
+
+            return ['labels' => $labels, 'data' => $data];
+        } catch (Exception $e) {
+            return ['labels' => [], 'data' => []];
+        }
+    }
+
+    /**
+     * Estatísticas por Especialidade para uma OM
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasEspecialidadeOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT
+                        COALESCE(NULLIF(especialidade_1, ''), 'Não informada') as especialidade,
+                        COUNT(*) as total
+                    FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')
+                    GROUP BY especialidade
+                    ORDER BY total DESC
+                    LIMIT 10";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+
+            $labels = [];
+            $data = [];
+
+            if ($stmt->rowCount() > 0) {
+                $results = $stmt->fetchAll();
+                foreach ($results as $row) {
+                    $labels[] = $row['especialidade'];
+                    $data[] = (int)$row['total'];
+                }
+            }
+
+            return ['labels' => $labels, 'data' => $data];
+        } catch (Exception $e) {
+            return ['labels' => [], 'data' => []];
+        }
+    }
+
+    /**
+     * Estatísticas por Tipo de Distribuição para uma OM
+     * @param int $id_om ID da OM
+     * @param int $ano Ano para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasDistribuicaoOM($id_om, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $sql = "SELECT
+                        COALESCE(NULLIF(distribuicao, ''), 'Não definido') as tipo_distribuicao,
+                        COUNT(*) as total
+                    FROM obrigatorio
+                    WHERE apagado = 0
+                    AND id_om_1_fase = ?
+                    AND YEAR(data_selecao_geral) = ?
+                    AND distribuicao IS NOT NULL
+                    AND distribuicao != ''
+                    AND distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')
+                    GROUP BY tipo_distribuicao
+                    ORDER BY total DESC";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute([$id_om, $ano]);
+
+            $labels = [];
+            $data = [];
+
+            if ($stmt->rowCount() > 0) {
+                $results = $stmt->fetchAll();
+                foreach ($results as $row) {
+                    $labels[] = $row['tipo_distribuicao'];
+                    $data[] = (int)$row['total'];
+                }
+            }
+
+            return ['labels' => $labels, 'data' => $data];
+        } catch (Exception $e) {
+            return ['labels' => [], 'data' => []];
+        }
+    }
+
+    /**
+     * Busca todos os obrigatórios ativos por ano e período
+     * @param int $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return array Lista de obrigatórios
+     */
+    public function findAllAtivosPorAno($ano = null, $meses = [])
+    {
+        try {
+            $ano = $ano ?? date('Y');
+            $meses = !empty($meses) ? $meses : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+            $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+            $sql = "SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                           om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                           om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                    FROM obrigatorio o
+                    LEFT JOIN om ON om.id = o.id_om_1_fase
+                    WHERE o.apagado = 0
+                    AND YEAR(o.data_selecao_geral) = ?
+                    AND MONTH(o.data_selecao_geral) IN ($mesesPlaceholders)
+                    ORDER BY o.nome_completo ASC";
+
+            $stmt = $this->conexao->prepare($sql);
+            $params = array_merge([(int)$ano], $meses);
+            $stmt->execute($params);
+
+            $obrigatorios = [];
+            while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $obrigatorios[] = $this->buildObrigatorio($data);
+            }
+
+            return $obrigatorios;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Busca obrigatórios por OM e ano
+     * @param int|array $oms ID da OM ou array de IDs
+     * @param int $ano Ano para filtrar
+     * @return array Lista de obrigatórios
+     */
+    public function findByOMsAno($oms, $ano = null)
+    {
+        try {
+            $ano = $ano ?? date('Y');
+
+            if (!is_array($oms)) {
+                $oms = [$oms];
+            }
+
+            $omsPlaceholders = implode(',', array_fill(0, count($oms), '?'));
+
+            // Filtro consistente com count*OM - exclui distribuições de outras forças
+            $sql = "SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                           om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                           om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                    FROM obrigatorio o
+                    LEFT JOIN om ON om.id = o.id_om_1_fase
+                    WHERE o.apagado = 0
+                    AND YEAR(o.data_selecao_geral) = ?
+                    AND o.id_om_1_fase IN ($omsPlaceholders)
+                    AND o.distribuicao IS NOT NULL
+                    AND o.distribuicao != ''
+                    AND o.distribuicao NOT IN ('EXCESSO CONTINGENTE', 'MARINHA', 'FORÇA AÉREA')
+                    ORDER BY om.abreviatura ASC, o.nome_completo ASC";
+
+            $stmt = $this->conexao->prepare($sql);
+            $params = array_merge([(int)$ano], $oms);
+            $stmt->execute($params);
+
+            $obrigatorios = [];
+            while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $obrigatorios[] = $this->buildObrigatorio($data);
+            }
+
+            return $obrigatorios;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Estatísticas comparativas entre dois períodos
+     * @param int $ano1 Primeiro ano
+     * @param array $meses1 Meses do primeiro período
+     * @param int $ano2 Segundo ano
+     * @param array $meses2 Meses do segundo período
+     * @return array Dados comparativos
+     */
+    public function getEstatisticasComparativas($ano1, $meses1, $ano2, $meses2)
+    {
+        try {
+            $dados = [
+                'periodo1' => [
+                    'total' => 0,
+                    'incorporados' => 0,
+                    'aptos' => 0,
+                    'inaptos' => 0,
+                    'pendentes' => 0
+                ],
+                'periodo2' => [
+                    'total' => 0,
+                    'incorporados' => 0,
+                    'aptos' => 0,
+                    'inaptos' => 0,
+                    'pendentes' => 0
+                ]
+            ];
+
+            // Período 1 - Usando data_selecao_geral para consistência
+            $estatSituacao1 = $this->getEstatisticasPorSituacaoMilitar($ano1, $meses1);
+            $dados['periodo1']['total'] = array_sum($estatSituacao1['data']);
+            $dados['periodo1']['incorporados'] = $this->countIncorporadosPorAnoSelecao($ano1, $meses1);
+            $dados['periodo1']['aptos'] = $this->countAptos($ano1, $meses1);
+            $dados['periodo1']['inaptos'] = $this->countInaptos($ano1, $meses1);
+            $dados['periodo1']['pendentes'] = $this->countPendentesRevisaoMedica($ano1, $meses1);
+
+            // Período 2 - Usando data_selecao_geral para consistência
+            $estatSituacao2 = $this->getEstatisticasPorSituacaoMilitar($ano2, $meses2);
+            $dados['periodo2']['total'] = array_sum($estatSituacao2['data']);
+            $dados['periodo2']['incorporados'] = $this->countIncorporadosPorAnoSelecao($ano2, $meses2);
+            $dados['periodo2']['aptos'] = $this->countAptos($ano2, $meses2);
+            $dados['periodo2']['inaptos'] = $this->countInaptos($ano2, $meses2);
+            $dados['periodo2']['pendentes'] = $this->countPendentesRevisaoMedica($ano2, $meses2);
+
+            return $dados;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Estatísticas de distribuição por Cidade (Local Comparecimento)
+     * @param int $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return array ['labels' => [...], 'data' => [...]]
+     */
+    public function getEstatisticasPorCidade($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+
+        $sql = "SELECT
+                    COALESCE(NULLIF(TRIM(o.local_compareceu_designacao), ''), 'Não definido') as cidade,
+                    COUNT(*) as total
+                FROM obrigatorio o
+                WHERE o.apagado = 0
+                    AND YEAR(o.data_selecao_geral) = ?
+                    AND MONTH(o.data_selecao_geral) IN ($mesesPlaceholders)
+                GROUP BY COALESCE(NULLIF(TRIM(o.local_compareceu_designacao), ''), 'Não definido')
+                ORDER BY total DESC
+                LIMIT 15";
+
+        $stmt = $this->conexao->prepare($sql);
+        $params = array_merge([(int)$ano], $meses);
+        $stmt->execute($params);
+
+        $labels = [];
+        $data = [];
+
+        if ($stmt->rowCount() > 0) {
+            $results = $stmt->fetchAll();
+            foreach ($results as $row) {
+                $labels[] = $row['cidade'];
+                $data[] = (int)$row['total'];
+            }
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Busca próximos eventos/datas importantes do sistema
+     * @param int $dias Número de dias para buscar (padrão 30)
+     * @return array Lista de eventos ordenados por data
+     */
+    public function getProximosEventos($dias = 30)
+    {
+        $eventos = [];
+        $hoje = date('Y-m-d');
+        $dataLimite = date('Y-m-d', strtotime("+{$dias} days"));
+
+        // 1. Próximas incorporações programadas
+        $sql = "SELECT id, nome_completo, data_incorporacao, om_2_fase
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_incorporacao IS NOT NULL
+                    AND data_incorporacao >= ?
+                    AND data_incorporacao <= ?
+                ORDER BY data_incorporacao ASC
+                LIMIT 10";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$hoje, $dataLimite]);
+        $incorporacoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($incorporacoes as $row) {
+            $eventos[] = [
+                'tipo' => 'incorporacao',
+                'icone' => 'fa-user-plus',
+                'cor' => 'success',
+                'titulo' => 'Incorporação',
+                'descricao' => $row['nome_completo'] . ($row['om_2_fase'] ? ' - ' . $row['om_2_fase'] : ''),
+                'data' => $row['data_incorporacao'],
+                'id_obrigatorio' => $row['id']
+            ];
+        }
+
+        // 2. Próximas seleções gerais
+        $sql = "SELECT id, nome_completo, data_selecao_geral
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_selecao_geral IS NOT NULL
+                    AND data_selecao_geral >= ?
+                    AND data_selecao_geral <= ?
+                ORDER BY data_selecao_geral ASC
+                LIMIT 10";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$hoje, $dataLimite]);
+        $selecoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($selecoes as $row) {
+            $eventos[] = [
+                'tipo' => 'selecao',
+                'icone' => 'fa-clipboard-check',
+                'cor' => 'primary',
+                'titulo' => 'Seleção Geral',
+                'descricao' => $row['nome_completo'],
+                'data' => $row['data_selecao_geral'],
+                'id_obrigatorio' => $row['id']
+            ];
+        }
+
+        // 3. Próximas seleções complementares
+        $sql = "SELECT id, nome_completo, data_selecao_complementar
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_selecao_complementar IS NOT NULL
+                    AND data_selecao_complementar >= ?
+                    AND data_selecao_complementar <= ?
+                ORDER BY data_selecao_complementar ASC
+                LIMIT 10";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$hoje, $dataLimite]);
+        $selecoesComp = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($selecoesComp as $row) {
+            $eventos[] = [
+                'tipo' => 'selecao_complementar',
+                'icone' => 'fa-clipboard-list',
+                'cor' => 'info',
+                'titulo' => 'Seleção Complementar',
+                'descricao' => $row['nome_completo'],
+                'data' => $row['data_selecao_complementar'],
+                'id_obrigatorio' => $row['id']
+            ];
+        }
+
+        // 4. Fim de adiamentos (vencimentos próximos)
+        $sql = "SELECT id, nome_completo, fim_adiamento, especialidade_adiamento
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND fim_adiamento IS NOT NULL
+                    AND fim_adiamento >= ?
+                    AND fim_adiamento <= ?
+                ORDER BY fim_adiamento ASC
+                LIMIT 10";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$hoje, $dataLimite]);
+        $adiamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($adiamentos as $row) {
+            $eventos[] = [
+                'tipo' => 'adiamento',
+                'icone' => 'fa-calendar-times',
+                'cor' => 'warning',
+                'titulo' => 'Fim de Adiamento',
+                'descricao' => $row['nome_completo'] . ($row['especialidade_adiamento'] ? ' (' . $row['especialidade_adiamento'] . ')' : ''),
+                'data' => $row['fim_adiamento'],
+                'id_obrigatorio' => $row['id']
+            ];
+        }
+
+        // 5. Próximas revisões médicas
+        $sql = "SELECT id, nome_completo, data_revisao_medica
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_revisao_medica IS NOT NULL
+                    AND data_revisao_medica >= ?
+                    AND data_revisao_medica <= ?
+                ORDER BY data_revisao_medica ASC
+                LIMIT 10";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$hoje, $dataLimite]);
+        $revisoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($revisoes as $row) {
+            $eventos[] = [
+                'tipo' => 'revisao_medica',
+                'icone' => 'fa-stethoscope',
+                'cor' => 'danger',
+                'titulo' => 'Revisão Médica',
+                'descricao' => $row['nome_completo'],
+                'data' => $row['data_revisao_medica'],
+                'id_obrigatorio' => $row['id']
+            ];
+        }
+
+        // Ordena todos os eventos por data
+        usort($eventos, function($a, $b) {
+            return strtotime($a['data']) - strtotime($b['data']);
+        });
+
+        // Limita a 15 eventos
+        return array_slice($eventos, 0, 15);
+    }
+
+    /**
+     * Busca eventos agrupados por data para visualização em calendário
+     * @param int $mes Mês (1-12)
+     * @param int $ano Ano
+     * @return array Eventos agrupados por dia
+     */
+    public function getEventosPorMes($mes, $ano)
+    {
+        $eventos = [];
+        $primeiroDia = sprintf('%04d-%02d-01', $ano, $mes);
+        $ultimoDia = date('Y-m-t', strtotime($primeiroDia));
+
+        // Busca incorporações do mês
+        $sql = "SELECT DATE(data_incorporacao) as data, COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_incorporacao BETWEEN ? AND ?
+                GROUP BY DATE(data_incorporacao)";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$primeiroDia, $ultimoDia]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($results as $row) {
+            $dia = (int)date('j', strtotime($row['data']));
+            if (!isset($eventos[$dia])) {
+                $eventos[$dia] = [];
+            }
+            $eventos[$dia][] = [
+                'tipo' => 'incorporacao',
+                'cor' => 'success',
+                'total' => (int)$row['total']
+            ];
+        }
+
+        // Busca fim de adiamentos do mês
+        $sql = "SELECT DATE(fim_adiamento) as data, COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND fim_adiamento BETWEEN ? AND ?
+                GROUP BY DATE(fim_adiamento)";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$primeiroDia, $ultimoDia]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($results as $row) {
+            $dia = (int)date('j', strtotime($row['data']));
+            if (!isset($eventos[$dia])) {
+                $eventos[$dia] = [];
+            }
+            $eventos[$dia][] = [
+                'tipo' => 'adiamento',
+                'cor' => 'warning',
+                'total' => (int)$row['total']
+            ];
+        }
+
+        // Busca revisões médicas do mês
+        $sql = "SELECT DATE(data_revisao_medica) as data, COUNT(*) as total
+                FROM obrigatorio
+                WHERE apagado = 0
+                    AND data_revisao_medica BETWEEN ? AND ?
+                GROUP BY DATE(data_revisao_medica)";
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([$primeiroDia, $ultimoDia]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($results as $row) {
+            $dia = (int)date('j', strtotime($row['data']));
+            if (!isset($eventos[$dia])) {
+                $eventos[$dia] = [];
+            }
+            $eventos[$dia][] = [
+                'tipo' => 'revisao',
+                'cor' => 'danger',
+                'total' => (int)$row['total']
+            ];
+        }
+
+        return $eventos;
     }
 }
 

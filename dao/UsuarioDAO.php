@@ -88,13 +88,13 @@ class UsuarioDAO implements UsuarioDAOInterface
         }
         else
         {
-           print_r($stmt->errorInfo()); 
-            exit();
             $this->conexao->rollBack();
+            // Log do erro para debug (não exibir em produção)
+            error_log("Erro ao inserir usuário: " . print_r($stmt->errorInfo(), true));
             return false;
         }
     }
-    
+
     public function update_pass(Usuario $usuario)
     {
         $sql = "UPDATE usuario set senha = :senha, _usuario_ultima_atualizacao =:_usuario_ultima_atualizacao where id = :id"; 
@@ -191,13 +191,12 @@ class UsuarioDAO implements UsuarioDAOInterface
         }
         else
         {
-            print_r($stmt->errorInfo()); 
-            exit();
             $this->conexao->rollBack();
+            error_log("Erro ao atualizar usuário: " . print_r($stmt->errorInfo(), true));
             return false;
         }
     }
-    
+
     public function tentativa_login($mail)
     {
         $navegador = getBrowser();

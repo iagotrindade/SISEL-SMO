@@ -51,7 +51,8 @@ try {
     $orderDir = 'ASC';
     if (isset($_GET['order'][0])) {
         $columnIndex = intval($_GET['order'][0]['column']);
-        $columns = ['nome_completo', 'cpf', 'formacao', 'nome_instituicao_ensino', '', '', 'data_nascimento', 'situacao_militar', ''];
+        // Colunas: nome, cpf, formacao, instituicao, ano_residencia, especialidade, nascimento, situacao_militar, transferencia
+        $columns = ['nome_completo', 'cpf', 'formacao', 'nome_instituicao_ensino', 'ano_residencia_espe_1', 'especialidade_1', 'data_nascimento', 'situacao_militar', 'rm_destino_fisemi'];
         if (isset($columns[$columnIndex]) && !empty($columns[$columnIndex])) {
             $orderColumn = $columns[$columnIndex];
         }
