@@ -16,9 +16,6 @@ include("mpdf60/mpdf.php");
 if($_SESSION['perfil_smo'] != "admin") erro($BASE_URL, 2, 6549874951, $pagina_atual, "usuario!admin", "Não foi possível acessar a página!");
     
 
-$ObrigatorioDAO = new ObrigatorioDAO($conexao);
-$todos_obrigatorios = $ObrigatorioDAO->findAllAtivos();
-
 $data = filtra_campo_post('data_lista_presenca');
 if(!valida_data($data))  erro($BASE_URL, 1, 34755866, $pagina_atual, "data_invalida", "Data Inválida!");
 $situacao_militar1 = filtra_campo_post('situacao_militar1');
@@ -31,12 +28,13 @@ $nome_instituicao_ensino = filtra_campo_post('nome_instituicao_ensino');
 
 if(empty($nome_instituicao_ensino)) erro($BASE_URL, 1, 325346478, $pagina_atual, "IE_Graduacao_NULL", "O campo IE Graduação é obrigatório!");
 
+// Busca apenas os obrigatórios necessários com filtro SQL
+$ObrigatorioDAO = new ObrigatorioDAO($conexao);
+$situacoesMilitares = array_filter([$situacao_militar1, $situacao_militar2, $situacao_militar3,
+                                     $situacao_militar4, $situacao_militar5, $situacao_militar6]);
+$todos_obrigatorios = $ObrigatorioDAO->findParaListaPresenca($nome_instituicao_ensino, $situacoesMilitares);
+
 $logDAO = new LogDAO($conexao);
-$conexao = new AuxiliarDAO($conexao);
-
-$lista_presenca_obrigatorios = $conexao->findObrigatoriosParaListaPresenca(); 
-
-//$html = ob_get_clean();
 
 $html = "
 <style>
@@ -77,20 +75,9 @@ $html = "
                 <th width='25%'>ASSINATURA</th>
             </tr>";
 
-//if ($todos_obrigatorios)
-foreach ($todos_obrigatorios as $obrigatorio) 
-{ 
-    if($obrigatorio->getSituacaoMilitar() == null) continue;
-    if($obrigatorio->getNomeInstitutoEnsino() != $nome_instituicao_ensino) continue;
-
-    if ($obrigatorio->getSituacaoMilitar() == $situacao_militar1 ||
-    $obrigatorio->getSituacaoMilitar() == $situacao_militar2 ||
-    $obrigatorio->getSituacaoMilitar() == $situacao_militar3 ||
-    $obrigatorio->getSituacaoMilitar() == $situacao_militar4 ||
-    $obrigatorio->getSituacaoMilitar() == $situacao_militar5 ||
-    $obrigatorio->getSituacaoMilitar() == $situacao_militar6)
-    
-
+// Dados já vêm filtrados do banco
+foreach ($todos_obrigatorios as $obrigatorio)
+{
     $html = $html . "
         <tr>
             <td style='vertical-align: middle;'>".$obrigatorio->getCPF()."</td>

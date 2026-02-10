@@ -17,29 +17,24 @@ $mpdf = new mPDF('C', 'A4-P');
 
 if ($_SESSION['perfil_smo'] != "admin") erro($BASE_URL, 2, 6549874951, $pagina_atual, "usuario!admin", "Não foi possível acessar a página!");
 
-
-$ObrigatorioDAO = new ObrigatorioDAO($conexao);
-$todos_obrigatorios = $ObrigatorioDAO->findAllAtivos();
-
-$paragrafo_um = $_POST['paragrafo_um'];
-$paragrafo_dois = $_POST['paragrafo_dois'];
-
-$data_inicial = $_POST['date_inicial'];
-$data_final = $_POST['date_final'];
-
-$data = $_POST['documento_dia'];
-
-$logDAO = new LogDAO($conexao);
-$conexao = new AuxiliarDAO($conexao);
-
 // Dados vindos do formulário
 $titulo        = $_POST['titulo'] ?? '';
 $subtitulo     = $_POST['subtitulo'] ?? '';
 $paragrafo_um  = $_POST['paragrafo_um'] ?? '';
 $paragrafo_dois = $_POST['paragrafo_dois'] ?? '';
-$data_inicial  = $_POST['date_inicial'] ?? '';
-$data_final    = $_POST['date_final'] ?? '';
 $data          = $_POST['documento_dia'] ?? '';
+
+// Converte strings vazias em null para evitar erro SQL
+$data_inicial  = !empty(trim($_POST['date_inicial'] ?? '')) ? trim($_POST['date_inicial']) : null;
+$data_final    = !empty(trim($_POST['date_final'] ?? '')) ? trim($_POST['date_final']) : null;
+
+// Inicializa DAOs
+$logDAO = new LogDAO($conexao);
+$auxiliarDAO = new AuxiliarDAO($conexao);
+
+// Busca apenas os obrigatórios necessários com filtro SQL
+$ObrigatorioDAO = new ObrigatorioDAO($conexao);
+$todos_obrigatorios = $ObrigatorioDAO->findParaInspecaoSaude($data_inicial, $data_final);
 
 // Cabeçalho
 $html = "
@@ -80,21 +75,27 @@ $mpdf->WriteHTML($html);
 $aptos = [];
 $inaptos = [];
 
-// Montagem das listas
+// Montagem das listas (dados já filtrados pelo SQL)
 foreach ($todos_obrigatorios as $candidato) {
+    $jise = $candidato->getJise();
     $dataSelecao = $candidato->getDataSelecaoGeral();
-    if (empty($dataSelecao)) continue;
 
-    if (!empty($data_inicial) && !empty($data_final)) {
-        $dataInspecao = new DateTime($dataSelecao);
-        if ($dataInspecao < new DateTime($data_inicial) || $dataInspecao > new DateTime($data_final)) continue;
+    // Ignora registros inválidos
+    if (empty($jise) || !in_array($jise, ['A', 'B1', 'B2', 'C'])) {
+        continue;
     }
 
-    $cpf = strlen($candidato->getCpf()) > 5
-        ? substr($candidato->getCpf(), 0, -5) . "******"
+    // Valida se a data está no período (proteção adicional)
+    if ($data_inicial && $data_final) {
+        if (empty($dataSelecao) || $dataSelecao < $data_inicial || $dataSelecao > $data_final) {
+            continue;
+        }
+    }
+
+    $cpf = strlen($candidato->getCPF()) > 5
+        ? substr($candidato->getCPF(), 0, -5) . "******"
         : "******";
     $nome = mb_strtoupper($candidato->getNomeCompleto());
-    $jise = $candidato->getJise();
 
     $statusMap = [
         'A' => 'APTO',
@@ -117,6 +118,19 @@ foreach ($todos_obrigatorios as $candidato) {
     } else {
         $inaptos[] = $linha;
     }
+}
+
+// Verifica se há dados para exibir
+if (empty($aptos) && empty($inaptos)) {
+    $html_sem_dados = "
+    <div style='text-align: center; padding: 40px; border: 2px solid #CCCCCC; border-radius: 8px; margin: 20px 0;'>
+        <p style='font-size: 14px; color: #666; margin: 0;'>
+            <strong>Nenhum registro encontrado</strong><br><br>
+            Não há candidatos com resultado de inspeção de saúde (JISE) no período selecionado.<br>
+            Período: " . ($data_inicial && $data_final ? date('d/m/Y', strtotime($data_inicial)) . " a " . date('d/m/Y', strtotime($data_final)) : "Todos os registros") . "
+        </p>
+    </div>";
+    $mpdf->WriteHTML($html_sem_dados);
 }
 
 // Geração da tabela de APTOS

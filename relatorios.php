@@ -219,13 +219,13 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Data Inicial da Inspeção</label>
-                            <input type="date" class="form-control" name="date_inicial">
+                            <label class="form-label fw-semibold">Data Inicial da Inspeção <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="date_inicial" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Data Final da Inspeção</label>
-                            <input type="date" class="form-control" name="date_final">
+                            <label class="form-label fw-semibold">Data Final da Inspeção <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="date_final" required>
                         </div>
                     </div>
 

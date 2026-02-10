@@ -955,8 +955,14 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
      * @param string $orderDir Direção da ordenação (ASC/DESC)
      * @return array
      */
-    public function findAtivosComFiltrosPaginado($filters, $start, $length, $search = '', $orderColumn = 'nome_completo', $orderDir = 'ASC')
+    public function findAtivosComFiltrosPaginado($filters, $start, $length, $search = '', $orderColumns = null, $orderDir = 'ASC')
     {
+        // Retrocompatibilidade: se orderColumns for string, converter para formato array
+        if (!is_array($orderColumns)) {
+            $orderColumn = $orderColumns ?? 'nome_completo';
+            $orderColumns = [['column' => $orderColumn, 'dir' => $orderDir]];
+        }
+
         $params = [];
         $where = ["o.apagado = 0", "o.id_om = :id_om"];
         $params[':id_om'] = $_SESSION['id_om_smo'];
@@ -989,17 +995,42 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             'prioridade_gu' => 'prioridade_gu_ordem'
         ];
 
-        $orderCol = $allowedColumns[$orderColumn] ?? 'o.nome_completo';
-        $orderDirection = strtoupper($orderDir) === 'DESC' ? 'DESC' : 'ASC';
-
-        // Subquery para ordenação por prioridade de guarnição
+        // Construir múltiplas cláusulas ORDER BY
+        $orderClauses = [];
         $prioridadeGuSelect = "NULL AS prioridade_gu_ordem";
-        $prioridadeGuJoin = "";
-        if ($orderColumn === 'prioridade_gu' && !empty($filters['guarnicao_filtro'])) {
-            $guIds = array_map('intval', $filters['guarnicao_filtro']);
-            $guIdsStr = implode(',', $guIds);
-            $prioridadeGuSelect = "(SELECT MIN(oxg_ord.prioridade) FROM obrigatorio_x_guarnicao oxg_ord WHERE oxg_ord.id_obrigatorio = o.id AND oxg_ord.apagado = 0 AND oxg_ord.id_guarnicao IN ($guIdsStr)) AS prioridade_gu_ordem";
+
+        foreach ($orderColumns as $order) {
+            $orderColumn = $order['column'];
+            $orderDirection = strtoupper($order['dir']) === 'DESC' ? 'DESC' : 'ASC';
+
+            if (isset($allowedColumns[$orderColumn])) {
+                $orderCol = $allowedColumns[$orderColumn];
+
+                // FORMAÇÃO / ANO: ordena por formacao E ano_formacao juntos
+                if ($orderColumn === 'formacao') {
+                    $orderClauses[] = "o.formacao $orderDirection, o.ano_formacao $orderDirection";
+                } else {
+                    $orderClauses[] = "$orderCol $orderDirection";
+                }
+
+                // Subquery para ordenação por prioridade de guarnição
+                if ($orderColumn === 'prioridade_gu' && !empty($filters['guarnicao_filtro'])) {
+                    $guIds = array_map('intval', $filters['guarnicao_filtro']);
+                    $guIdsStr = implode(',', $guIds);
+                    $prioridadeGuSelect = "(SELECT MIN(oxg_ord.prioridade) FROM obrigatorio_x_guarnicao oxg_ord WHERE oxg_ord.id_obrigatorio = o.id AND oxg_ord.apagado = 0 AND oxg_ord.id_guarnicao IN ($guIdsStr)) AS prioridade_gu_ordem";
+                }
+            }
         }
+
+        // Se nenhuma ordenação válida foi definida, usar padrão
+        if (empty($orderClauses)) {
+            $orderClauses[] = "o.nome_completo ASC";
+        }
+
+        $orderByClause = implode(', ', $orderClauses);
+
+        // LOG: Verificar cláusula ORDER BY gerada
+        error_log("DAO - ORDER BY: $orderByClause");
 
         $sql = "
             SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
@@ -1009,7 +1040,7 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
             FROM obrigatorio o
             LEFT JOIN om ON om.id = o.id_om_1_fase
             WHERE " . implode(" AND ", $where) . "
-            ORDER BY $orderCol $orderDirection
+            ORDER BY $orderByClause
             LIMIT :limit OFFSET :offset
         ";
 
@@ -2550,6 +2581,101 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         }
 
         return $eventos;
+    }
+
+    /**
+     * Busca obrigatórios filtrados para lista de presença
+     * @param string $instituicaoEnsino Nome da instituição de ensino
+     * @param array $situacoesMilitares Array com as situações militares permitidas
+     * @return array|false
+     */
+    public function findParaListaPresenca($instituicaoEnsino, $situacoesMilitares = [])
+    {
+        $obrigatorios = [];
+
+        // Remove valores vazios do array
+        $situacoesMilitares = array_filter($situacoesMilitares, function($valor) {
+            return !empty($valor);
+        });
+
+        if (empty($instituicaoEnsino) || empty($situacoesMilitares)) {
+            return [];
+        }
+
+        // Cria placeholders para o IN clause
+        $placeholders = implode(',', array_fill(0, count($situacoesMilitares), '?'));
+
+        $sql = "SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
+                       om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
+                       om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                FROM obrigatorio o
+                LEFT JOIN om ON om.id = o.id_om_1_fase
+                WHERE o.apagado = 0
+                  AND o.nome_instituicao_ensino = ?
+                  AND o.situacao_militar IN ($placeholders)
+                  AND o.situacao_militar IS NOT NULL
+                ORDER BY o.nome_completo ASC";
+
+        $stmt = $this->conexao->prepare($sql);
+
+        // Bind dos parâmetros
+        $params = array_merge([$instituicaoEnsino], $situacoesMilitares);
+        $stmt->execute($params);
+
+        if ($stmt->rowCount() > 0) {
+            $data = $stmt->fetchAll();
+            foreach ($data as $item) {
+                $obrigatorio = $this->buildObrigatorio($item);
+                $obrigatorios[] = $obrigatorio;
+            }
+            return $obrigatorios;
+        }
+
+        return [];
+    }
+
+    /**
+     * Busca obrigatórios filtrados para inspeção de saúde
+     * @param string|null $dataInicial Data inicial (formato Y-m-d)
+     * @param string|null $dataFinal Data final (formato Y-m-d)
+     * @return array|false
+     */
+    public function findParaInspecaoSaude($dataInicial = null, $dataFinal = null)
+    {
+        $obrigatorios = [];
+
+        // Limpa strings vazias
+        $dataInicial = !empty(trim($dataInicial)) ? trim($dataInicial) : null;
+        $dataFinal = !empty(trim($dataFinal)) ? trim($dataFinal) : null;
+
+        $sql = "SELECT o.*
+                FROM obrigatorio o
+                WHERE o.apagado = 0";
+
+        $params = [];
+
+        // Adiciona filtro de data se fornecido
+        if ($dataInicial !== null && $dataFinal !== null) {
+            $sql .= " AND o.data_selecao_geral >= ? AND o.data_selecao_geral <= ?";
+            $params[] = $dataInicial;
+            $params[] = $dataFinal;
+        }
+
+        $sql .= " ORDER BY o.data_selecao_geral ASC, o.nome_completo ASC";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute($params);
+
+        if ($stmt->rowCount() > 0) {
+            $data = $stmt->fetchAll();
+            foreach ($data as $item) {
+                $obrigatorio = $this->buildObrigatorio($item);
+                $obrigatorios[] = $obrigatorio;
+            }
+            return $obrigatorios;
+        }
+
+        return [];
     }
 }
 

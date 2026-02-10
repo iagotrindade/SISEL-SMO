@@ -45,18 +45,35 @@ try {
         $search_term = trim($_GET['search']['value']);
     }
 
-    // Ordenação
-    $orderColumn = 'nome_completo';
-    $orderDir = 'ASC';
-    if (isset($_GET['order'][0])) {
-        $columnIndex = intval($_GET['order'][0]['column']);
+    // Ordenação (suporta múltiplas colunas)
+    $orderColumns = [];
+
+    // LOG: Ver TUDO que foi recebido
+    error_log("PRE_DIST - TODOS os parâmetros GET: " . print_r(array_keys($_GET), true));
+    error_log("PRE_DIST - Valor de 'order': " . print_r($_GET['order'] ?? 'NÃO EXISTE', true));
+
+    if (isset($_GET['order']) && is_array($_GET['order'])) {
         // Colunas: checkbox, nome, formacao, om_1_fase, instituicao, especialidade, ano_residencia, dias_vida, situacao_militar, compareceu_desig, distribuicao, prioridade_gu, transferencia
         $columns = ['', 'nome_completo', 'formacao', 'abreviatura_om_1_fase', 'nome_instituicao_ensino', 'especialidade_1', 'ano_residencia_espe_1', 'data_nascimento', 'situacao_militar', 'compareceu_designacao', 'distribuicao', 'prioridade_gu', 'rm_destino_fisemi'];
-        if (isset($columns[$columnIndex]) && !empty($columns[$columnIndex])) {
-            $orderColumn = $columns[$columnIndex];
+
+        foreach ($_GET['order'] as $order) {
+            $columnIndex = intval($order['column']);
+            if (isset($columns[$columnIndex]) && !empty($columns[$columnIndex])) {
+                $orderColumns[] = [
+                    'column' => $columns[$columnIndex],
+                    'dir' => ($order['dir'] === 'desc') ? 'DESC' : 'ASC'
+                ];
+            }
         }
-        $orderDir = ($_GET['order'][0]['dir'] === 'desc') ? 'DESC' : 'ASC';
     }
+
+    // Se não houver ordenação definida, usar padrão
+    if (empty($orderColumns)) {
+        $orderColumns = [['column' => 'nome_completo', 'dir' => 'ASC']];
+    }
+
+    // LOG: Verificar ordenações recebidas
+    error_log("PRE_DIST - Ordenações processadas: " . print_r($orderColumns, true));
 
     // ==================== PREPARAR FILTROS ====================
     $filters = [];
@@ -216,7 +233,7 @@ try {
     // ==================== BUSCAR DADOS ====================
     $recordsTotal = $ObrigatorioDAO->countAtivos();
     $recordsFiltered = $ObrigatorioDAO->countAtivosComFiltros($filters, $search_term);
-    $results = $ObrigatorioDAO->findAtivosComFiltrosPaginado($filters, $start, $length, $search_term, $orderColumn, $orderDir);
+    $results = $ObrigatorioDAO->findAtivosComFiltrosPaginado($filters, $start, $length, $search_term, $orderColumns);
 
     // ==================== MONTAR RESPOSTA ====================
     $data = [];

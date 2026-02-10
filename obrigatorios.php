@@ -306,6 +306,9 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     <button type="button" id="btn-exportar-excel" class="btn btn-primary ms-2">
                         <i class="fas fa-file-excel me-2"></i>Exportar Excel
                     </button>
+                    <small class="text-muted ms-3">
+                        <i class="fas fa-info-circle me-1"></i>Dica: Clique nas colunas para adicionar ordenação. Clique novamente para inverter (ASC/DESC) ou remover
+                    </small>
                 </div>
             </div>
         </div>
@@ -334,16 +337,26 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
 
 <script type="text/javascript">
     var tabela;
+    // Array global para ordenações ativas (inicia vazio - usuário define ordenação clicando nas colunas)
+    var activeOrders = [];
 
     $(document).ready(function() {
         // Inicializa DataTables com Server-Side Processing
         tabela = $('#tabela_dinamica').DataTable({
             processing: true,
             serverSide: true,
+            ordering: false, // DESABILITA ordenação do DataTables completamente
+            order: [], // Remove qualquer ordenação inicial
+            orderFixed: false, // Remove ordenação fixa
+            orderClasses: false, // Remove classes de ordenação
             ajax: {
                 url: 'controller/obrigatorios_ajax.php',
                 type: 'GET',
+                cache: false, // Desabilita cache do navegador
                 data: function(d) {
+                    // Cache busting - força requisição nova a cada chamada
+                    d._cache_bust = new Date().getTime();
+
                     // Adiciona filtros customizados à requisição
                     d.voluntario_filtro = $('#voluntario_filtro').val();
                     d.dependentes_filtro = $('#dependentes_filtro').val();
@@ -363,7 +376,35 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     d.especialidade_filtro = $('#especialidade_filtro').val();
                     d.prioridade_forca_filtro = $('#prioridade_forca_filtro').val();
                     d.data_selecao_geral_semestre_filtro = $('#data_selecao_geral_semestre_filtro').val();
+
+                    // ORDENAÇÃO CUMULATIVA: Envia as ordenações acumuladas
+                    d.order = activeOrders.map(function(ord) {
+                        return {column: ord[0], dir: ord[1]};
+                    });
+                    console.log('✓ Enviando ordenações:', activeOrders);
+                    console.log('✓ Dados enviados (order):', d.order);
+                },
+                dataSrc: function(json) {
+                    console.log('✓ Dados recebidos do servidor:', json);
+                    console.log('✓ Primeiros 3 registros:', json.data.slice(0, 3));
+
+                    // Log dos nomes para verificar ordem
+                    const nomesRecebidos = json.data.slice(0, 5).map(function(row) {
+                        return $(row.nome).text();
+                    });
+                    console.log('✓ Primeiros 5 nomes recebidos:', nomesRecebidos);
+
+                    return json.data;
                 }
+            },
+            drawCallback: function(settings) {
+                // Log dos nomes renderizados na tabela
+                const nomesRenderizados = [];
+                $('#tabela_dinamica tbody tr').slice(0, 5).each(function() {
+                    const nome = $(this).find('td:eq(0)').text().trim();
+                    nomesRenderizados.push(nome);
+                });
+                console.log('✓ Primeiros 5 nomes RENDERIZADOS na tabela:', nomesRenderizados);
             },
             columns: [{
                     data: 'nome'
@@ -393,9 +434,6 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     data: 'transferencia'
                 }
             ],
-            order: [
-                [0, 'asc']
-            ],
             pageLength: 50,
             lengthMenu: [50, 100, 200, 500],
             language: {
@@ -416,6 +454,107 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                 }
             }
         });
+
+        // ==================== ORDENAÇÃO CUMULATIVA MANUAL ====================
+        // Intercepta cliques nos headers das colunas
+        $('#tabela_dinamica thead th').on('click', function() {
+            var columnIndex = $(this).index();
+            var columnName = $(this).text().trim().split('(')[0].trim();
+
+            console.log('=================================');
+            console.log('🖱️ Clique detectado na coluna:', columnName, '(índice:', columnIndex + ')');
+            console.log('📊 activeOrders ANTES:', JSON.parse(JSON.stringify(activeOrders)));
+
+            // Verifica se a coluna já está nas ordenações ativas
+            var existingIndex = -1;
+            for (var i = 0; i < activeOrders.length; i++) {
+                if (activeOrders[i][0] === columnIndex) {
+                    existingIndex = i;
+                    break;
+                }
+            }
+
+            if (existingIndex !== -1) {
+                // Se já existe, verifica a direção atual
+                var currentDir = activeOrders[existingIndex][1];
+
+                if (currentDir === 'asc') {
+                    // ASC → DESC
+                    activeOrders[existingIndex][1] = 'desc';
+                    console.log('🔄 Alternando: ASC → DESC');
+                } else {
+                    // DESC → REMOVE
+                    activeOrders.splice(existingIndex, 1);
+                    console.log('🗑️ Removendo coluna da ordenação (DESC → REMOVE)');
+                }
+            } else {
+                // Se não existe, adiciona à lista com direção 'asc'
+                activeOrders.push([columnIndex, 'asc']);
+                console.log('➕ Nova coluna adicionada à ordenação (prioridade ' + activeOrders.length + ')');
+            }
+
+            console.log('📊 activeOrders DEPOIS:', JSON.parse(JSON.stringify(activeOrders)));
+
+            // Atualiza indicadores visuais
+            updateOrderIndicators();
+
+            // Recarrega a tabela com as novas ordenações
+            console.log('🔃 Recarregando tabela...');
+            tabela.ajax.reload(function() {
+                console.log('✅ Tabela recarregada com sucesso');
+            });
+            console.log('=================================');
+        });
+
+        // Função para atualizar os indicadores visuais de ordenação
+        function updateOrderIndicators() {
+            console.log('🔄 Atualizando indicadores visuais. activeOrders:', activeOrders);
+
+            // Remove todos os indicadores existentes
+            $('#tabela_dinamica thead th').removeClass('sorting_asc sorting_desc').addClass('sorting');
+            $('#tabela_dinamica thead th .order-number').remove();
+
+            // Se não há ordenações, não mostra indicadores
+            if (activeOrders.length === 0) {
+                console.log('⚠️ Nenhuma ordenação ativa - sem indicadores visuais');
+                return;
+            }
+
+            // Adiciona indicadores para cada ordenação ativa
+            activeOrders.forEach(function(order, index) {
+                var columnIndex = order[0];
+                var direction = order[1];
+                var $th = $('#tabela_dinamica thead th').eq(columnIndex);
+                var columnName = $th.text().trim().split('(')[0].trim(); // Remove números antigos
+
+                console.log('➕ Adicionando indicador:', {
+                    coluna: columnName,
+                    index: columnIndex,
+                    ordem: index + 1,
+                    direcao: direction
+                });
+
+                $th.removeClass('sorting').addClass('sorting_' + direction);
+
+                // SEMPRE adiciona número da ordem (mesmo se for apenas 1 ordenação)
+                var orderBadge = '<span class="order-number" style="display: inline-block; background: #007bff; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 0.75em; font-weight: bold; margin-left: 5px;">(' + (index + 1) + ')</span>';
+                $th.append(orderBadge);
+            });
+
+            console.log('✅ Indicadores atualizados com sucesso');
+        }
+
+        // Botão para limpar todas as ordenações
+        $('<button class="btn btn-sm btn-secondary ms-2" id="btn-limpar-ordenacao" title="Limpar todas as ordenações"><i class="fas fa-sort-amount-up-alt"></i> Limpar Ordenação</button>')
+            .insertAfter('#btn-limpar')
+            .on('click', function() {
+                activeOrders = []; // Limpa todas as ordenações
+                updateOrderIndicators();
+                tabela.ajax.reload();
+            });
+
+        // Inicializa os indicadores visuais
+        updateOrderIndicators();
 
         // Aplica filtros automaticamente ao alterar qualquer select
         $('#filtros-container select').on('change', function() {
