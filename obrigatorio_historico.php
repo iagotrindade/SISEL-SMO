@@ -215,11 +215,56 @@ if ($historico_obrigatorio) {
                                 </span>
                             </div>
 
-                            <?php if (!empty($log['alteracao_detalhada'])): ?>
-                            <div class="mt-2 pt-2 border-top small text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                <?php echo nl2br(htmlspecialchars($log['alteracao_detalhada'])); ?>
-                            </div>
+                            <?php if (!empty($log['alteracao_detalhada'])):
+                                $diffData = json_decode($log['alteracao_detalhada'], true);
+                                if ($diffData && isset($diffData['changes']) && count($diffData['changes']) > 0):
+                            ?>
+                                <!-- Diff visual campo a campo -->
+                                <div class="mt-2 pt-2 border-top">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-exchange-alt me-2 text-primary small"></i>
+                                        <strong class="small"><?php echo count($diffData['changes']); ?> campo(s) alterado(s)</strong>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered mb-0" style="font-size: 0.85em;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width:30%">Campo</th>
+                                                    <th style="width:35%">Antes</th>
+                                                    <th style="width:35%">Depois</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($diffData['changes'] as $change): ?>
+                                                <tr>
+                                                    <td class="fw-semibold"><?php echo htmlspecialchars($change['label']); ?></td>
+                                                    <td style="background-color: rgba(220,53,69,0.08);">
+                                                        <?php if (!empty($change['old'])): ?>
+                                                            <span class="text-danger"><?php echo htmlspecialchars($change['old']); ?></span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted fst-italic">(vazio)</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td style="background-color: rgba(25,135,84,0.08);">
+                                                        <?php if (!empty($change['new'])): ?>
+                                                            <span class="text-success"><?php echo htmlspecialchars($change['new']); ?></span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted fst-italic">(vazio)</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- Formato legado (print_r) -->
+                                <div class="mt-2 pt-2 border-top small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <?php echo nl2br(htmlspecialchars($log['alteracao_detalhada'])); ?>
+                                </div>
+                            <?php endif; ?>
                             <?php endif; ?>
 
                             <?php if (!empty($log['sistema'])): ?>

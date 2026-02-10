@@ -32,7 +32,7 @@ $data_isgr = trata_data($data_isgr);
 if($crip != hash('sha256', $_SESSION['chave']. "obrigatorio")) erro($BASE_URL, 2, 3463463464, $pagina_atual, "criptografia_invalida", "Não foi possível editar o usuário!");
 
 $obrigatorio_editar = $obrigatorioDAO->findById($id_obrigatorio_edita);
-
+$estadoAntes = $obrigatorio_editar->toArray();
 
 try
 {
@@ -46,13 +46,14 @@ catch(Exception $e)
     erro($BASE_URL, 3, 235778, $pagina_atual, "catch", $e->getMessage());
 }
 
+$estadoDepois = $obrigatorio_editar->toArray();
 $data = $obrigatorioDAO->update_isgr($obrigatorio_editar);
 
 if($data)
 {
     $alteracao = "Atualizou o ISGR do obrigatório " . $obrigatorio_editar;
-    $alteracao_detalahada = print_r($data, true);
-    $logDAO->insertLog(3011, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalahada);
+    $alteracao_detalhada = gerarDiffObrigatorio($estadoAntes, $estadoDepois);
+    $logDAO->insertLog(3015, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalhada);
 }
 else 
 {   

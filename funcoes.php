@@ -368,4 +368,127 @@ function erro($BASE_URL, $nivel, $codigo, $arquivo, $descricao, $retorno_usuario
 }
 
 
+/////////////////////////////////////////////////////////////////
+// HISTÓRICO DETALHADO - Diff campo a campo
+/////////////////////////////////////////////////////////////////
+
+/**
+ * Retorna mapeamento de nomes de campos do Obrigatório para rótulos em português
+ */
+function getLabelsObrigatorio()
+{
+    return [
+        'nome_completo' => 'Nome Completo',
+        'cpf' => 'CPF',
+        'telefone' => 'Telefone',
+        'mail' => 'E-mail',
+        'estado_civil' => 'Estado Civil',
+        'data_nascimento' => 'Data de Nascimento',
+        'nome_pai' => 'Nome do Pai',
+        'nome_mae' => 'Nome da Mãe',
+        'nacionalidade' => 'Nacionalidade',
+        'naturalidade' => 'Naturalidade',
+        'identidade' => 'Identidade',
+        'dependentes' => 'Dependentes',
+        'endereco' => 'Endereço',
+        'prioridade_forca' => 'Prioridade Força',
+        'voluntario' => 'Voluntário',
+        'documento_militar' => 'Documento Militar',
+        'numero_documento_militar' => 'Nº Documento Militar',
+        'data_expedicao' => 'Data Expedição',
+        'forca' => 'Força',
+        'nome_instituicao_ensino' => 'Instituição de Ensino',
+        'ano_formacao' => 'Ano de Formação',
+        'formacao' => 'Formação',
+        'ano_residencia_espe_1' => 'Ano Residência Esp. 1',
+        'ano_residencia_espe_2' => 'Ano Residência Esp. 2',
+        'ano_residencia_espe_3' => 'Ano Residência Esp. 3',
+        'cidade_instituicao_ensino' => 'Cidade Instituição',
+        'jise' => 'JISE',
+        'cid_jise' => 'CID JISE',
+        'data_exame_medico' => 'Data Exame Médico',
+        'observacao_jise' => 'Observação JISE',
+        'jisr' => 'JISR',
+        'cid_jisr' => 'CID JISR',
+        'data_jisr' => 'Data JISR',
+        'jise_a_1' => 'JISE A1',
+        'cid_jise_a_1' => 'CID JISE A1',
+        'data_jise_a_1' => 'Data JISE A1',
+        'observacao_jise_a_1' => 'Observação JISE A1',
+        'data_selecao_geral' => 'Data Seleção Geral',
+        'data_comparecimento_selecao_geral' => 'Data Comparecimento Sel. Geral',
+        'data_comparecimento_designacao' => 'Data Comparecimento Designação',
+        'data_proxima_apresentacao' => 'Data Próxima Apresentação',
+        'situacao_militar' => 'Situação Militar',
+        'solicitou_adiamento' => 'Solicitou Adiamento',
+        'inicio_adiamento' => 'Início Adiamento',
+        'fim_adiamento' => 'Fim Adiamento',
+        'especialidade_adiamento' => 'Especialidade Adiamento',
+        'transferencia_fisemi' => 'Transferência FISEMI',
+        'rm_origem_fisemi' => 'RM Origem FISEMI',
+        'rm_destino_fisemi' => 'RM Destino FISEMI',
+        'numero_acao' => 'Número da Ação',
+        'transitou_julgado' => 'Transitou em Julgado',
+        'data_liminar' => 'Data Liminar',
+        'favoravel' => 'Favorável',
+        'convocado' => 'Convocado',
+        'distribuicao' => 'Distribuição',
+        'om_1_fase' => 'OM 1ª Fase',
+        'compareceu_designacao' => 'Compareceu Designação',
+        'local_compareceu_designacao' => 'Local Compareceu Designação',
+        'data_selecao_complementar' => 'Data Seleção Complementar',
+        'resultado_revisao_medica_complementar' => 'Resultado Revisão Médica Compl.',
+        'resultado_isgr' => 'Resultado ISGR',
+        'data_incorporacao' => 'Data Incorporação',
+        'om_2_fase' => 'OM 2ª Fase',
+        'observacao' => 'Observação',
+        'especialidade_1' => 'Especialidade 1',
+        'especialidade_2' => 'Especialidade 2',
+        'especialidade_3' => 'Especialidade 3',
+        'data_revisao_medica' => 'Data Revisão Médica',
+        'cid_revisao_medica' => 'CID Revisão Médica',
+        'obs_revisao_medica' => 'Obs. Revisão Médica',
+        'incorporacao' => 'Incorporação',
+        'bar_om_1_fase' => 'BAR OM 1ª Fase',
+        'data_isgr' => 'Data ISGR',
+        'cid_isgr' => 'CID ISGR',
+        'observacao_isgr' => 'Observação ISGR',
+    ];
+}
+
+/**
+ * Compara estado antes/depois de um Obrigatório e retorna JSON com as mudanças
+ * @param array $antes Estado antes da edição (via toArray())
+ * @param array $depois Estado depois da edição (via toArray())
+ * @return string|null JSON com as mudanças ou null se não houve alteração
+ */
+function gerarDiffObrigatorio($antes, $depois)
+{
+    $labels = getLabelsObrigatorio();
+    $changes = [];
+
+    foreach ($depois as $field => $newValue) {
+        $oldValue = $antes[$field] ?? null;
+
+        // Normaliza valores para comparação (null e string vazia são iguais)
+        $oldNorm = ($oldValue === null || $oldValue === '') ? '' : (string)$oldValue;
+        $newNorm = ($newValue === null || $newValue === '') ? '' : (string)$newValue;
+
+        if ($oldNorm !== $newNorm) {
+            $changes[] = [
+                'field' => $field,
+                'label' => $labels[$field] ?? $field,
+                'old' => $oldNorm,
+                'new' => $newNorm
+            ];
+        }
+    }
+
+    if (empty($changes)) {
+        return null;
+    }
+
+    return json_encode(['changes' => $changes], JSON_UNESCAPED_UNICODE);
+}
+
 ?>

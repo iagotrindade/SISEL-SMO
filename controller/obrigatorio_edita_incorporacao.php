@@ -40,32 +40,34 @@ if($crip != hash('sha256', $_SESSION['chave']. "obrigatorio"))
 
 
 $obrigatorio_editar = $obrigatorioDAO->findById($id_obrigatorio_edita);
+$estadoAntes = $obrigatorio_editar->toArray();
 
 try
 {
     $om_1_fase = new OM();
-    $om_1_fase->setId($id_om_1_fase);   
+    $om_1_fase->setId($id_om_1_fase);
     $obrigatorio_editar->setDataIncorporacao($data_incorporacao);
     $obrigatorio_editar->setOm1Fase($om_1_fase);
     $obrigatorio_editar->setOm2Fase($om_2_fase);
     $obrigatorio_editar->setIncorporacao($incorporacao);
     $obrigatorio_editar->setBar_om_1_fase($bar_om_1_fase);
 }
-catch(Exception $e) 
+catch(Exception $e)
 {
     erro($BASE_URL, 3, 235778, $pagina_atual, "catch", $e->getMessage());
 }
 
+$estadoDepois = $obrigatorio_editar->toArray();
 $data = $obrigatorioDAO->update($obrigatorio_editar);
 
 if($data)
 {
-    $alteracao = "Atualizou a Distribuição do obrigatório " . $obrigatorio_editar;
-    $alteracao_detalahada = print_r($data, true);
-    $logDAO->insertLog(3011, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalahada);
+    $alteracao = "Atualizou a Incorporação do obrigatório " . $obrigatorio_editar;
+    $alteracao_detalhada = gerarDiffObrigatorio($estadoAntes, $estadoDepois);
+    $logDAO->insertLog(3013, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalhada);
 }
-else 
-{   
+else
+{
     erro($BASE_URL, 3, 858975757, $pagina_atual, "distribuicao_nao_atualizada", "Não foi possível atualizar a Distribuição!");
 }
 

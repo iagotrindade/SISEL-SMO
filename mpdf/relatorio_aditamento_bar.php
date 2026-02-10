@@ -179,8 +179,7 @@ foreach ($obrigatorios as $obrigatorio) {
         $abreviatura_om = $om_1_fase->getAbreviatura();
     }
 
-    $local_compareceu = $obrigatorio->getLocalCompareceuDesignacao();
-    $localidade_completa = $local_compareceu ? strtoupper($local_compareceu) : $cidade_om;
+    $localidade_completa = $cidade_om;
     if ($abreviatura_om) {
         $localidade_completa .= " - " . $abreviatura_om;
     }
@@ -253,13 +252,10 @@ $html .= "
     <span class='assinatura-cargo'>Chefe da Secao do Servico Militar da 3ª Regiao Militar</span>
 </div>
 
-<div class='rodape-bar'>
-    <i>(Adt $nr_aditamento SSMR/SSMT ao Boletim de Acesso Restrito Regional Nr $nr_bar, de $quando_bar...............$total_obrigatorios de $total_obrigatorios)</i>
-</div>
 ";
 
 // mPDF com margens para cabecalho e rodape (mode, format, font-size, font, margin_left, margin_right, margin_top, margin_bottom, margin_header, margin_footer)
-$mpdf = new mPDF('C', 'A4', 0, '', 10, 10, 18, 18, 5, 5);
+$mpdf = new mPDF('C', 'A4', 0, '', 10, 10, 25, 28, 5, 5);
 
 // Definir cabecalho e rodape com aviso de acesso restrito
 $header = "
@@ -273,6 +269,9 @@ $footer = "
 <div style='font-size: 8pt; text-align: center; border: 1px solid #CC0000; padding: 3px; color: #CC0000;'>
     MATERIAL DE ACESSO RESTRITO<br>
     Art 44 e 45 do Dec 7.845, de 14 NOV 12
+</div>
+<div style='font-size: 8pt; text-align: left; margin-top: 2px; font-style: italic;'>
+    (Adt $nr_aditamento SSMR/SSMT ao Boletim de Acesso Restrito Regional Nr $nr_bar, de $quando_bar...............{PAGENO} de {nbpg})
 </div>
 ";
 

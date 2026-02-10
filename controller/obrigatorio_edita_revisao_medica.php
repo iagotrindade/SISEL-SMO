@@ -32,7 +32,7 @@ if($crip != hash('sha256', $_SESSION['chave']. "obrigatorio")) erro($BASE_URL, 2
 
 
 $obrigatorio_editar = $obrigatorioDAO->findById($id_obrigatorio_edita);
-
+$estadoAntes = $obrigatorio_editar->toArray();
 
 try
 {
@@ -48,13 +48,14 @@ catch(Exception $e)
     erro($BASE_URL, 3, 235778, $pagina_atual, "catch", $e->getMessage());
 }
 
+$estadoDepois = $obrigatorio_editar->toArray();
 $data = $obrigatorioDAO->update_revisao_medica($obrigatorio_editar);
 
 if($data)
 {
     $alteracao = "Atualizou a Revisão Médica do obrigatório " . $obrigatorio_editar;
-    $alteracao_detalahada = print_r($data, true);
-    $logDAO->insertLog(3011, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalahada);
+    $alteracao_detalhada = gerarDiffObrigatorio($estadoAntes, $estadoDepois);
+    $logDAO->insertLog(3014, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalhada);
 }
 else 
 {   

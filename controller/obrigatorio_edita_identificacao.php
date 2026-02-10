@@ -132,6 +132,7 @@ if(!empty($cpf))
 }
 
 $obrigatorio_editar = $obrigatorioDAO->findById($id_obrigatorio_edita);
+$estadoAntes = $obrigatorio_editar->toArray();
 
 try
 {
@@ -196,13 +197,14 @@ catch(Exception $e)
 }
 
 
+$estadoDepois = $obrigatorio_editar->toArray();
 $data = $obrigatorioDAO->update($obrigatorio_editar);
 
 if($data)
 {
     $alteracao = "Atualizou a aba $aba do obrigatório " . $obrigatorio_editar;
-    $alteracao_detalahada = print_r($data, true);
-    $logDAO->insertLog(3003, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalahada);
+    $alteracao_detalhada = gerarDiffObrigatorio($estadoAntes, $estadoDepois);
+    $logDAO->insertLog(3003, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalhada);
 }
 else 
 {   

@@ -49,7 +49,7 @@ if(!empty($cpf))
 }
 
 $obrigatorio_editar = $obrigatorioDAO->findById($id_obrigatorio_edita);
-
+$estadoAntes = $obrigatorio_editar->toArray();
 
 try
 {
@@ -66,13 +66,14 @@ catch(Exception $e)
     erro($BASE_URL, 3, 35868458, $pagina_atual, "catch", $e->getMessage());
 }
 
+$estadoDepois = $obrigatorio_editar->toArray();
 $data = $obrigatorioDAO->update($obrigatorio_editar);
 
 if($data)
 {
     $alteracao = "Atualizou o FISEMI do obrigatório " . $obrigatorio_editar;
-    $alteracao_detalahada = print_r($data, true);
-    $logDAO->insertLog(3008, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalahada);
+    $alteracao_detalhada = gerarDiffObrigatorio($estadoAntes, $estadoDepois);
+    $logDAO->insertLog(3008, "obrigatorio", $id_obrigatorio_edita, $alteracao, $alteracao_detalhada);
 }
 else 
 {   
