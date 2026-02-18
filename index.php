@@ -301,6 +301,24 @@ $ultimasAtividades = $logDAO->getUltimasAtividades(5, $filtroUsuario);
                             </div>
                         </div>
 
+                        <!-- Mapa de Distribuição Geográfica -->
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0" style="color: var(--text-primary); font-weight: 600;">
+                                        <i class="fas fa-map-marked-alt me-2" style="color: var(--accent-green);"></i>Distribuição Geográfica
+                                    </h5>
+                                    <div class="d-flex align-items-center gap-3" style="font-size: 0.85rem;">
+                                        <span><i class="fas fa-circle me-1" style="color: #2196F3;"></i> Origem dos Obrigatórios</span>
+                                        <span><i class="fas fa-circle me-1" style="color: #4CAF50;"></i> OMs de Destino</span>
+                                    </div>
+                                </div>
+                                <div class="p-3" style="background: var(--gray-dark); border-radius: var(--border-radius);">
+                                    <div id="mapa-distribuicao" style="height: 500px; border-radius: var(--border-radius); z-index: 1;"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Calendário de Eventos -->
                         <div class="row mt-4">
                             <div class="col-md-6 mb-4">
@@ -709,11 +727,160 @@ $ultimasAtividades = $logDAO->getUltimasAtividades(5, $filtroUsuario);
                     $('#indicador-adiamentos').text(response.indicadores.adiamentos_ativos);
                     $('#indicador-inaptos').text(response.indicadores.total_inaptos);
                 }
+
+                // Atualiza mapa geográfico
+                if (response.mapa) {
+                    renderizarMapa(response.mapa);
+                }
             },
             error: function(xhr, status, error) {
                 console.error('Erro ao carregar dados dos gráficos:', error);
             }
         });
+    }
+
+    // ==================== MAPA DE DISTRIBUIÇÃO GEOGRÁFICA ====================
+    var mapaLeaflet = null;
+    var layerOrigens = null;
+    var layerDestinos = null;
+    var layerControl = null;
+
+    function renderizarMapa(dados) {
+        // Inicializa o mapa na primeira chamada
+        if (!mapaLeaflet) {
+            mapaLeaflet = L.map('mapa-distribuicao', {
+                zoomControl: true,
+                scrollWheelZoom: true
+            }).setView([-29.50, -53.50], 6);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 18
+            }).addTo(mapaLeaflet);
+        }
+
+        // Remove layers anteriores
+        if (layerOrigens) mapaLeaflet.removeLayer(layerOrigens);
+        if (layerDestinos) mapaLeaflet.removeLayer(layerDestinos);
+        if (layerControl) mapaLeaflet.removeControl(layerControl);
+
+        layerOrigens = L.layerGroup();
+        layerDestinos = L.layerGroup();
+
+        // Encontra o máximo para escalar os raios
+        var maxOrigem = 1, maxDestino = 1;
+        if (dados.origens && dados.origens.length > 0) {
+            maxOrigem = Math.max.apply(null, dados.origens.map(function(o) { return o.total; }));
+        }
+        if (dados.destinos && dados.destinos.length > 0) {
+            maxDestino = Math.max.apply(null, dados.destinos.map(function(d) { return d.total; }));
+        }
+
+        // Cache de nomes de cidades ordenados por tamanho (maior primeiro)
+        var cidadesOrdenadas = null;
+        function getCidadesOrdenadas() {
+            if (cidadesOrdenadas) return cidadesOrdenadas;
+            cidadesOrdenadas = Object.keys(CIDADES_COORDENADAS).sort(function(a, b) {
+                return b.length - a.length;
+            });
+            return cidadesOrdenadas;
+        }
+
+        // Função para buscar coordenadas (case-insensitive, com limpeza de sufixos)
+        function buscarCoordenadas(texto) {
+            if (!texto || typeof CIDADES_COORDENADAS === 'undefined') return null;
+
+            // Limpa sufixos como "-RS", "-SC", "/RS" etc
+            var cidade = texto.trim().replace(/[\-\/]\s*[A-Z]{2}\s*$/, '').trim();
+
+            // Tenta o nome exato
+            if (CIDADES_COORDENADAS[cidade]) return CIDADES_COORDENADAS[cidade];
+
+            // Busca case-insensitive exata
+            var cidadeLower = cidade.toLowerCase();
+            for (var key in CIDADES_COORDENADAS) {
+                if (key.toLowerCase() === cidadeLower) {
+                    return CIDADES_COORDENADAS[key];
+                }
+            }
+
+            // Busca cidade contida no texto (para nomes de OM como "HOSPITAL DE GUARNIÇÃO DE SANTIAGO")
+            var textoLower = texto.toLowerCase();
+            var cidades = getCidadesOrdenadas();
+            for (var i = 0; i < cidades.length; i++) {
+                if (textoLower.indexOf(cidades[i].toLowerCase()) !== -1) {
+                    return CIDADES_COORDENADAS[cidades[i]];
+                }
+            }
+
+            return null;
+        }
+
+        // Plota origens (azul)
+        if (dados.origens) {
+            dados.origens.forEach(function(item) {
+                var coords = buscarCoordenadas(item.cidade);
+                if (coords) {
+                    var raio = Math.max(6, Math.sqrt(item.total / maxOrigem) * 25);
+                    L.circleMarker(coords, {
+                        radius: raio,
+                        fillColor: '#2196F3',
+                        color: '#1565C0',
+                        weight: 2,
+                        opacity: 0.9,
+                        fillOpacity: 0.5
+                    }).bindPopup(
+                        '<div style="text-align:center;">' +
+                        '<strong style="font-size:14px;">' + item.cidade + '</strong><br>' +
+                        '<span style="color:#2196F3;font-size:20px;font-weight:bold;">' + item.total + '</span><br>' +
+                        '<small>obrigatório(s) - Origem</small>' +
+                        '</div>'
+                    ).addTo(layerOrigens);
+                }
+            });
+        }
+
+        // Plota destinos (verde)
+        if (dados.destinos) {
+            dados.destinos.forEach(function(item) {
+                var coords = buscarCoordenadas(item.cidade);
+                if (coords) {
+                    var raio = Math.max(6, Math.sqrt(item.total / maxDestino) * 25);
+                    L.circleMarker(coords, {
+                        radius: raio,
+                        fillColor: '#4CAF50',
+                        color: '#2E7D32',
+                        weight: 2,
+                        opacity: 0.9,
+                        fillOpacity: 0.5
+                    }).bindPopup(
+                        '<div style="text-align:center;">' +
+                        '<strong style="font-size:14px;">' + item.cidade + '</strong><br>' +
+                        '<span style="color:#2E7D32;font-size:12px;">' + (item.om || '') + '</span><br>' +
+                        '<span style="color:#4CAF50;font-size:20px;font-weight:bold;">' + item.total + '</span><br>' +
+                        '<small>obrigatório(s) - Destino OM</small>' +
+                        '</div>'
+                    ).addTo(layerDestinos);
+                }
+            });
+        }
+
+        layerOrigens.addTo(mapaLeaflet);
+        layerDestinos.addTo(mapaLeaflet);
+
+        // Controle de layers
+        layerControl = L.control.layers(null, {
+            '<i class="fas fa-circle" style="color:#2196F3;"></i> Origem': layerOrigens,
+            '<i class="fas fa-circle" style="color:#4CAF50;"></i> Destino (OMs)': layerDestinos
+        }, { collapsed: false }).addTo(mapaLeaflet);
+
+        // Ajusta o zoom para incluir todos os marcadores
+        var allMarkers = [];
+        layerOrigens.eachLayer(function(l) { allMarkers.push(l.getLatLng()); });
+        layerDestinos.eachLayer(function(l) { allMarkers.push(l.getLatLng()); });
+        if (allMarkers.length > 0) {
+            mapaLeaflet.fitBounds(L.latLngBounds(allMarkers).pad(0.1));
+        }
     }
 
     // Função para exportar gráfico como imagem PNG

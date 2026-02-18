@@ -1341,14 +1341,16 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
 
         $sql = "SELECT om.id id_om_1_fase, om.nome nome_om_1_fase, om.abreviatura abreviatura_om_1_fase,
                        om.telefone telefone_om_1_fase, om.endereco endereco_om_1_fase,
-                       om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*
+                       om.cidade cidade_om_1_fase, om.cep cep_om_1_fase, o.*,
+                       COALESCE(ofi.data_cabecalho, o.data_incorporacao) as data_incorporacao
                 FROM obrigatorio o
                 LEFT JOIN om ON om.id = o.id_om_1_fase
+                LEFT JOIN oficio ofi ON ofi.id_obrigatorio = o.id
                 WHERE o.apagado = 0
                 AND o.distribuicao = :distribuicao
                 AND o.data_comparecimento_designacao IS NOT NULL
                 AND YEAR(o.data_comparecimento_designacao) = :ano
-                ORDER BY o.nome_completo ASC";
+                ORDER BY om.cidade ASC, o.nome_completo ASC";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':distribuicao', $distribuicao);
@@ -2313,6 +2315,75 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         } catch (Exception $e) {
             return [];
         }
+    }
+
+    /**
+     * Distribuição geográfica para o mapa do dashboard
+     * Retorna origens (cidades dos obrigatórios) e destinos (cidades das OMs)
+     * @param int $ano Ano para filtrar
+     * @param array $meses Meses para filtrar
+     * @return array ['origens' => [...], 'destinos' => [...]]
+     */
+    public function getDistribuicaoGeografica($ano = null, $meses = [])
+    {
+        $ano = $ano ?? date('Y');
+        $meses = !empty($meses) ? $meses : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        $mesesPlaceholders = implode(',', array_fill(0, count($meses), '?'));
+        $params = array_merge([(int)$ano], $meses);
+
+        // Origens: cidades de naturalidade dos obrigatórios distribuídos
+        $sqlOrigens = "SELECT
+                    TRIM(o.naturalidade) as cidade,
+                    COUNT(*) as total
+                FROM obrigatorio o
+                WHERE o.apagado = 0
+                    AND o.id_om_1_fase IS NOT NULL
+                    AND o.distribuicao IS NOT NULL
+                    AND TRIM(o.naturalidade) IS NOT NULL
+                    AND TRIM(o.naturalidade) != ''
+                    AND o.data_comparecimento_designacao IS NOT NULL
+                    AND YEAR(o.data_comparecimento_designacao) = ?
+                    AND MONTH(o.data_comparecimento_designacao) IN ($mesesPlaceholders)
+                GROUP BY TRIM(o.naturalidade)
+                ORDER BY total DESC";
+
+        $stmt = $this->conexao->prepare($sqlOrigens);
+        $stmt->execute($params);
+
+        $origens = [];
+        if ($stmt->rowCount() > 0) {
+            foreach ($stmt->fetchAll() as $row) {
+                $origens[] = ['cidade' => $row['cidade'], 'total' => (int)$row['total']];
+            }
+        }
+
+        // Destinos: cidades das OMs onde são distribuídos
+        $sqlDestinos = "SELECT
+                    COALESCE(NULLIF(TRIM(om.cidade), ''), om.nome) as cidade,
+                    om.abreviatura as om,
+                    COUNT(*) as total
+                FROM obrigatorio o
+                INNER JOIN om ON om.id = o.id_om_1_fase
+                WHERE o.apagado = 0
+                    AND o.distribuicao IS NOT NULL
+                    AND o.data_comparecimento_designacao IS NOT NULL
+                    AND YEAR(o.data_comparecimento_designacao) = ?
+                    AND MONTH(o.data_comparecimento_designacao) IN ($mesesPlaceholders)
+                GROUP BY COALESCE(NULLIF(TRIM(om.cidade), ''), om.nome), om.abreviatura
+                ORDER BY total DESC";
+
+        $stmt2 = $this->conexao->prepare($sqlDestinos);
+        $stmt2->execute($params);
+
+        $destinos = [];
+        if ($stmt2->rowCount() > 0) {
+            foreach ($stmt2->fetchAll() as $row) {
+                $destinos[] = ['cidade' => $row['cidade'], 'om' => $row['om'], 'total' => (int)$row['total']];
+            }
+        }
+
+        return ['origens' => $origens, 'destinos' => $destinos];
     }
 
     /**

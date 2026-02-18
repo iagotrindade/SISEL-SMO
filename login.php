@@ -127,24 +127,6 @@ include_once 'header.php';
                         </form>
                     </div>
                 </div>
-
-                <!-- Card de informações -->
-                <div class="card" style="margin-top: 2rem; padding: 1.5rem; text-align: center;" data-aos="fade-up" data-aos-delay="200">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="bi bi-check-circle-fill" style="color: var(--success); font-size: 1.2rem;"></i>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Ambiente Seguro</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="bi bi-lightning-fill" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Acesso Rápido</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="bi bi-shield-fill-check" style="color: var(--info); font-size: 1.2rem;"></i>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Dados Protegidos</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

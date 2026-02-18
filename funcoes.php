@@ -491,4 +491,397 @@ function gerarDiffObrigatorio($antes, $depois)
     return json_encode(['changes' => $changes], JSON_UNESCAPED_UNICODE);
 }
 
+/////////////////////////////////////////////////////////////////
+// EXPORTAÇÃO MULTI-FORMATO (PDF, Word)
+/////////////////////////////////////////////////////////////////
+
+/**
+ * Converte caminhos relativos de imagens (../imagens/*) para base64 data URIs.
+ * Necessário porque os arquivos .doc/.odt baixados não têm acesso ao servidor.
+ */
+function converterImagensParaBase64($html)
+{
+    return preg_replace_callback(
+        '/(<img[^>]*?)src=[\'"]\.\.\/imagens\/([^"\']+)[\'"]/i',
+        function ($matches) {
+            $imagePath = __DIR__ . DIRECTORY_SEPARATOR . 'imagens' . DIRECTORY_SEPARATOR . $matches[2];
+            if (file_exists($imagePath)) {
+                $imageData = base64_encode(file_get_contents($imagePath));
+                $ext = strtolower(pathinfo($matches[2], PATHINFO_EXTENSION));
+                $mimeTypes = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif'];
+                $mime = $mimeTypes[$ext] ?? 'image/png';
+                return $matches[1] . 'src="data:' . $mime . ';base64,' . $imageData . '"';
+            }
+            return $matches[0];
+        },
+        $html
+    );
+}
+
+/**
+ * Exporta HTML como documento Word (.doc)
+ */
+function outputComoDocumento($html, $formato, $nomeArquivo, $config = [])
+{
+    if ($formato === 'doc' || $formato === 'docx') {
+        outputComoWord($html, $nomeArquivo, $config);
+    }
+}
+
+/**
+ * Converte HTML simples de header/footer (divs com texto, <br>, bordas) para OOXML WordprocessingML.
+ * Suporta {PAGENO} e {nbpg} convertidos em campos PAGE/NUMPAGES do Word.
+ */
+function gerarOoxmlDeHtml($html, $comPaginacao = false)
+{
+    $ooxml = '';
+
+    // Extrair cada <div> como um parágrafo separado
+    preg_match_all('/<div\b([^>]*)>(.*?)<\/div>/si', $html, $divs, PREG_SET_ORDER);
+
+    if (empty($divs)) {
+        $texto = htmlspecialchars(trim(strip_tags($html)), ENT_XML1, 'UTF-8');
+        if (!empty($texto)) {
+            $ooxml .= '<w:p><w:r><w:t xml:space="preserve">' . $texto . '</w:t></w:r></w:p>';
+        }
+        return $ooxml;
+    }
+
+    foreach ($divs as $div) {
+        $attrs = $div[1];
+        $conteudo = $div[2];
+
+        // Extrair style do atributo
+        $style = '';
+        if (preg_match('/style=[\'"]([^\'"]*)[\'"]/', $attrs, $m)) $style = $m[1];
+
+        // Propriedades CSS
+        $align = 'left';
+        if (preg_match('/text-align:\s*center/i', $style)) $align = 'center';
+        elseif (preg_match('/text-align:\s*right/i', $style)) $align = 'right';
+
+        $hasBorder = (bool)preg_match('/border/i', $style);
+
+        $color = '000000';
+        if (preg_match('/(?:^|;|\s)color:\s*#([0-9A-Fa-f]{6})/i', $style, $m)) $color = $m[1];
+
+        $fontSize = 16; // 8pt = 16 half-points
+        if (preg_match('/font-size:\s*(\d+)\s*pt/i', $style, $m)) $fontSize = intval($m[1]) * 2;
+
+        $isItalic = (bool)preg_match('/font-style:\s*italic/i', $style);
+
+        // Run properties comuns (Times New Roman explícito para não usar Calibri padrão)
+        $rPr = '<w:rPr>';
+        $rPr .= '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>';
+        $rPr .= '<w:sz w:val="' . $fontSize . '"/><w:szCs w:val="' . $fontSize . '"/>';
+        if ($color !== '000000') $rPr .= '<w:color w:val="' . $color . '"/>';
+        if ($isItalic) $rPr .= '<w:i/>';
+        $rPr .= '</w:rPr>';
+
+        // Paragraph properties
+        $pPr = '<w:pPr><w:jc w:val="' . $align . '"/>';
+        if ($hasBorder) {
+            $pPr .= '<w:pBdr>';
+            $pPr .= '<w:top w:val="single" w:sz="4" w:space="1" w:color="' . $color . '"/>';
+            $pPr .= '<w:left w:val="single" w:sz="4" w:space="4" w:color="' . $color . '"/>';
+            $pPr .= '<w:bottom w:val="single" w:sz="4" w:space="1" w:color="' . $color . '"/>';
+            $pPr .= '<w:right w:val="single" w:sz="4" w:space="4" w:color="' . $color . '"/>';
+            $pPr .= '</w:pBdr>';
+        }
+        $pPr .= '</w:pPr>';
+
+        $temPaginacao = $comPaginacao && (strpos($conteudo, '{PAGENO}') !== false || strpos($conteudo, '{nbpg}') !== false);
+
+        $ooxml .= '<w:p>' . $pPr;
+
+        if ($temPaginacao) {
+            // Texto com campos de paginação
+            $texto = trim(strip_tags(preg_replace('/<br\s*\/?>/i', ' ', $conteudo)));
+            $partes = preg_split('/(\{PAGENO\}|\{nbpg\})/', $texto, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+            foreach ($partes as $parte) {
+                if ($parte === '{PAGENO}' || $parte === '{nbpg}') {
+                    $campo = $parte === '{PAGENO}' ? ' PAGE ' : ' NUMPAGES ';
+                    $ooxml .= '<w:r>' . $rPr . '<w:fldChar w:fldCharType="begin"/></w:r>';
+                    $ooxml .= '<w:r>' . $rPr . '<w:instrText xml:space="preserve">' . $campo . '</w:instrText></w:r>';
+                    $ooxml .= '<w:r>' . $rPr . '<w:fldChar w:fldCharType="separate"/></w:r>';
+                    $ooxml .= '<w:r>' . $rPr . '<w:t>1</w:t></w:r>';
+                    $ooxml .= '<w:r>' . $rPr . '<w:fldChar w:fldCharType="end"/></w:r>';
+                } elseif (!empty(trim($parte))) {
+                    $ooxml .= '<w:r>' . $rPr . '<w:t xml:space="preserve">' . htmlspecialchars(trim($parte), ENT_XML1, 'UTF-8') . '</w:t></w:r>';
+                }
+            }
+        } else {
+            // Texto normal, dividido por <br>
+            $linhas = preg_split('/<br\s*\/?>/i', $conteudo);
+            foreach ($linhas as $i => $linha) {
+                $texto = htmlspecialchars(trim(strip_tags($linha)), ENT_XML1, 'UTF-8');
+                if (!empty($texto)) {
+                    if ($i > 0) $ooxml .= '<w:r><w:br/></w:r>';
+                    $ooxml .= '<w:r>' . $rPr . '<w:t xml:space="preserve">' . $texto . '</w:t></w:r>';
+                }
+            }
+        }
+
+        $ooxml .= '</w:p>';
+    }
+
+    return $ooxml;
+}
+
+/**
+ * Adiciona propriedades CSS inline a uma tag HTML.
+ * Estilos da classe vão ANTES dos inline existentes, para que inline tenha precedência.
+ */
+function adicionarStyleInline($tagHtml, $novoEstilo)
+{
+    if (preg_match('/style=[\'"]([^\'"]*)[\'"]/', $tagHtml, $m)) {
+        // Class styles primeiro, inline existente depois (inline vence em caso de conflito)
+        $combinado = $novoEstilo . ' ' . rtrim($m[1], '; ') . ';';
+        return preg_replace('/style=[\'"][^\'"]*[\'"]/', 'style="' . $combinado . '"', $tagHtml);
+    }
+    return preg_replace('/>$/', ' style="' . $novoEstilo . '">', $tagHtml);
+}
+
+/**
+ * Converte CSS de <style> blocks para inline styles nos elementos HTML.
+ * Necessário porque o Word (altChunk) não processa <style> blocks.
+ *
+ * Suporta:
+ * - Seletores de elemento: body { ... }
+ * - Seletores de classe simples: .classname { ... }
+ * - Seletores compostos: .parent child { ... } (ex: .tabela-principal th)
+ */
+function inlineCssParaWord($html)
+{
+    // 1. Extrair regras CSS dos blocos <style>
+    $cssRules = [];
+    $htmlLimpo = preg_replace_callback(
+        '/<style[^>]*>(.*?)<\/style>/si',
+        function ($matches) use (&$cssRules) {
+            preg_match_all('/([^{]+)\{([^}]+)\}/s', $matches[1], $rules, PREG_SET_ORDER);
+            foreach ($rules as $rule) {
+                $cssRules[] = [
+                    'seletor' => trim($rule[1]),
+                    'props' => trim(preg_replace('/\s+/', ' ', $rule[2]))
+                ];
+            }
+            return '';
+        },
+        $html
+    );
+
+    if (empty($cssRules)) return $html;
+
+    $bodyStyle = '';
+
+    foreach ($cssRules as $rule) {
+        $sel = $rule['seletor'];
+        $props = rtrim($rule['props'], '; ') . ';';
+
+        // Seletor body → será aplicado como div wrapper
+        if ($sel === 'body') {
+            $bodyStyle = $props;
+            continue;
+        }
+
+        // Seletor de classe simples: .classname
+        if (preg_match('/^\.([a-zA-Z0-9_-]+)$/', $sel, $m)) {
+            $cls = preg_quote($m[1], '/');
+            $htmlLimpo = preg_replace_callback(
+                '/(<\w+\b[^>]*?\bclass=[\'"]' . $cls . '[\'"][^>]*?)>/si',
+                function ($matches) use ($props) {
+                    return adicionarStyleInline($matches[0], $props);
+                },
+                $htmlLimpo
+            );
+            continue;
+        }
+
+        // Seletor composto: .parent child (ex: .tabela-principal th)
+        if (preg_match('/^\.([a-zA-Z0-9_-]+)\s+(\w+)$/', $sel, $m)) {
+            $parentCls = preg_quote($m[1], '/');
+            $childTag = $m[2];
+
+            // Encontrar blocos do elemento pai e aplicar estilos nos filhos
+            $htmlLimpo = preg_replace_callback(
+                '/<(\w+)\b([^>]*?\bclass=[\'"]' . $parentCls . '[\'"][^>]*)>(.*?)<\/\1>/si',
+                function ($matches) use ($childTag, $props) {
+                    $parentOpen = '<' . $matches[1] . $matches[2] . '>';
+                    $content = $matches[3];
+                    $parentClose = '</' . $matches[1] . '>';
+
+                    // Aplicar estilo em todas as tags filhas do tipo especificado
+                    $ct = preg_quote($childTag, '/');
+                    $content = preg_replace_callback(
+                        '/(<' . $ct . '\b[^>]*?)>/si',
+                        function ($cm) use ($props) {
+                            return adicionarStyleInline($cm[0], $props);
+                        },
+                        $content
+                    );
+
+                    return $parentOpen . $content . $parentClose;
+                },
+                $htmlLimpo
+            );
+            continue;
+        }
+    }
+
+    // Envolver com estilos do body
+    if ($bodyStyle) {
+        $htmlLimpo = '<div style="' . $bodyStyle . '">' . $htmlLimpo . '</div>';
+    }
+
+    return $htmlLimpo;
+}
+
+/**
+ * Gera arquivo DOCX real (Office Open XML) com headers/footers nativos e paginação dinâmica.
+ * Usa altChunk para embutir o conteúdo HTML dentro do DOCX.
+ */
+function outputComoWord($html, $nomeArquivo, $config = [])
+{
+    $orientacao = $config['orientacao'] ?? 'portrait';
+    $mt = $config['margin_top'] ?? '25mm';
+    $mb = $config['margin_bottom'] ?? '28mm';
+    $ml = $config['margin_left'] ?? '10mm';
+    $mr = $config['margin_right'] ?? '10mm';
+    $headerHtml = $config['header_html'] ?? '';
+    $footerHtml = $config['footer_html'] ?? '';
+
+    $timestamp = time();
+    $nomeCompleto = $nomeArquivo . '_' . $timestamp . '.doc';
+
+    // Converter mm para twips (1 inch = 1440 twips, 1 inch = 25.4mm)
+    $fator = 1440 / 25.4;
+    $mtTwips = round(floatval(str_replace('mm', '', $mt)) * $fator);
+    $mbTwips = round(floatval(str_replace('mm', '', $mb)) * $fator);
+    $mlTwips = round(floatval(str_replace('mm', '', $ml)) * $fator);
+    $mrTwips = round(floatval(str_replace('mm', '', $mr)) * $fator);
+    $hdrMargin = round(5 * $fator);  // 5mm para header
+    $ftrMargin = round(8 * $fator);  // 8mm para footer
+
+    // Tamanho A4 em twips
+    $pgW = $orientacao === 'landscape' ? 16838 : 11906;
+    $pgH = $orientacao === 'landscape' ? 11906 : 16838;
+    $orientAttr = $orientacao === 'landscape' ? ' w:orient="landscape"' : '';
+
+    // Preparar HTML: converter imagens para base64, width nas tabelas
+    $html = converterImagensParaBase64($html);
+    $html = preg_replace('/<table\b((?![^>]*\bwidth=)[^>]*)>/i', '<table width="100%"$1>', $html);
+
+    // Converter CSS de <style> para inline (Word altChunk não processa <style> blocks)
+    $htmlInline = inlineCssParaWord($html);
+
+    // Propagar font-family para todos os elementos com style inline
+    // Word não herda font-family de elementos pai no altChunk, precisa ser explícito
+    $htmlInline = preg_replace_callback(
+        '/style=[\'"]([^\'"]*)[\'"]/',
+        function ($m) {
+            if (stripos($m[1], 'font-family') === false) {
+                return 'style="font-family: \'Times New Roman\', Times, serif; ' . $m[1] . '"';
+            }
+            return 'style="' . $m[1] . '"';
+        },
+        $htmlInline
+    );
+
+    // Montar HTML completo para altChunk
+    $altHtml = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n";
+    $altHtml .= "</head>\n<body>\n" . $htmlInline . "\n</body>\n</html>";
+
+    // Criar arquivo DOCX (ZIP com XML)
+    $tempFile = tempnam(sys_get_temp_dir(), 'docx_');
+    $zip = new ZipArchive();
+    if ($zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        echo '<h3>Erro: não foi possível criar o arquivo DOCX.</h3>';
+        exit();
+    }
+
+    // IDs de relacionamentos
+    $relId = 1;
+    $chunkId = 'rId' . $relId++;
+    $hdrId = $headerHtml ? 'rId' . $relId++ : '';
+    $ftrId = $footerHtml ? 'rId' . $relId++ : '';
+
+    // === [Content_Types].xml ===
+    $ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    $ct .= '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">';
+    $ct .= '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>';
+    $ct .= '<Default Extension="xml" ContentType="application/xml"/>';
+    $ct .= '<Default Extension="html" ContentType="text/html"/>';
+    $ct .= '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>';
+    if ($hdrId) $ct .= '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>';
+    if ($ftrId) $ct .= '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>';
+    $ct .= '</Types>';
+    $zip->addFromString('[Content_Types].xml', $ct);
+
+    // === _rels/.rels ===
+    $rr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    $rr .= '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+    $rr .= '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>';
+    $rr .= '</Relationships>';
+    $zip->addFromString('_rels/.rels', $rr);
+
+    // === word/_rels/document.xml.rels ===
+    $dr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    $dr .= '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+    $dr .= '<Relationship Id="' . $chunkId . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk" Target="afchunk.html"/>';
+    if ($hdrId) $dr .= '<Relationship Id="' . $hdrId . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>';
+    if ($ftrId) $dr .= '<Relationship Id="' . $ftrId . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>';
+    $dr .= '</Relationships>';
+    $zip->addFromString('word/_rels/document.xml.rels', $dr);
+
+    // === word/document.xml ===
+    $doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    $doc .= '<w:document xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+    $doc .= ' xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+    $doc .= '<w:body>';
+    $doc .= '<w:altChunk r:id="' . $chunkId . '"/>';
+    $doc .= '<w:sectPr>';
+    if ($hdrId) $doc .= '<w:headerReference w:type="default" r:id="' . $hdrId . '"/>';
+    if ($ftrId) $doc .= '<w:footerReference w:type="default" r:id="' . $ftrId . '"/>';
+    $doc .= '<w:pgSz w:w="' . $pgW . '" w:h="' . $pgH . '"' . $orientAttr . '/>';
+    $doc .= '<w:pgMar w:top="' . $mtTwips . '" w:right="' . $mrTwips . '" w:bottom="' . $mbTwips . '" w:left="' . $mlTwips . '"';
+    $doc .= ' w:header="' . $hdrMargin . '" w:footer="' . $ftrMargin . '"/>';
+    $doc .= '</w:sectPr>';
+    $doc .= '</w:body></w:document>';
+    $zip->addFromString('word/document.xml', $doc);
+
+    // === word/afchunk.html (conteúdo HTML embutido) ===
+    $zip->addFromString('word/afchunk.html', "\xEF\xBB\xBF" . $altHtml);
+
+    // === word/header1.xml (OOXML nativo - repete em todas as páginas) ===
+    if ($hdrId) {
+        $hdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+        $hdr .= '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        $hdr .= gerarOoxmlDeHtml($headerHtml, false);
+        $hdr .= '</w:hdr>';
+        $zip->addFromString('word/header1.xml', $hdr);
+    }
+
+    // === word/footer1.xml (OOXML nativo - repete em todas as páginas com paginação) ===
+    if ($ftrId) {
+        $ftr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+        $ftr .= '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        $ftr .= gerarOoxmlDeHtml($footerHtml, true);
+        $ftr .= '</w:ftr>';
+        $zip->addFromString('word/footer1.xml', $ftr);
+    }
+
+    $zip->close();
+
+    // Enviar arquivo Word (.doc é DOCX internamente, Word detecta o formato automaticamente)
+    header("Content-Type: application/msword");
+    header("Content-Disposition: attachment; filename=\"{$nomeCompleto}\"");
+    header("Content-Length: " . filesize($tempFile));
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    readfile($tempFile);
+    unlink($tempFile);
+}
+
 ?>

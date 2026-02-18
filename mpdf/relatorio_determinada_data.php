@@ -138,20 +138,28 @@ $html = $html . "
   </tr>
 </table>";
 
-$mpdf = new mPDF('C', 'A4-L'); 
-$mpdf->WriteHTML($html);
-
-$timestamp = time();
-$nome_arquivo = 'relatorio_inspecao_saude_' . $timestamp . '.pdf';
-$arquivo = $destino . $nome_arquivo;
-
+$formato_saida = filtra_campo_post('formato_saida') ?: 'pdf';
 
 $alteracao = "Gerou um Relatório de comparecimento JISE/JISER na data de $data_sel_geral";
 $alteracao_detalahada = "CPF dos Obrigatórios ". print_r($lista_cpf_obrigatorios, true);
-$insere_log = $logDAO->insertLog(4005, "PDF", null, $alteracao, $alteracao_detalahada, null);
+$insere_log = $logDAO->insertLog(4005, strtoupper($formato_saida), null, $alteracao, $alteracao_detalahada, null);
+
+if ($formato_saida !== 'pdf') {
+    ob_end_clean();
+    outputComoDocumento($html, $formato_saida, 'relatorio_jise_jisr', [
+        'orientacao' => 'landscape',
+        'margin_top' => '15mm',
+        'margin_bottom' => '15mm',
+        'margin_left' => '15mm',
+        'margin_right' => '15mm',
+    ]);
+    exit();
+}
+
+$mpdf = new mPDF('C', 'A4-L');
+$mpdf->WriteHTML($html);
 
 ob_get_clean();
 $mpdf->Output();
-//$mpdf->Output($arquivo, 'F');
 
 ?>

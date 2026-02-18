@@ -76,7 +76,9 @@ $response = [
         'pendentes_revisao' => $obrigatorioDAO->countPendentesRevisaoMedica($ano, $mesesFiltro),
         'adiamentos_ativos' => $obrigatorioDAO->countAdiamentosAtivos($ano, $mesesFiltro),
         'total_inaptos' => $obrigatorioDAO->countInaptos($ano, $mesesFiltro)
-    ] : null
+    ] : null,
+    // Dados geográficos para o mapa (apenas para admin)
+    'mapa' => ($_SESSION['perfil_smo'] == 'admin') ? $obrigatorioDAO->getDistribuicaoGeografica($ano, $mesesFiltro) : null
 ];
 
 // Retorna JSON

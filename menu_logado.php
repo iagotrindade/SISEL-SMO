@@ -75,6 +75,7 @@ $ultimasNotificacoes = $notificacaoDAO->findAtivas($perfilMenu, $idOmMenu, ['lim
                         </a>
                         <ul>
                             <li><a href="obrigatorio_cadastra.php">Obrigatório</a></li>
+                            <li><a href="fisemi_upload.php">Importar FISEMI (OCR)</a></li>
                             <li><a href="usuarios.php">Usuário</a></li>
                             <li><a href="especialidades.php">Especialidade</a></li>
                             <li><a href="graduacoes.php">Graduação</a></li>

@@ -88,6 +88,8 @@ $aba8show = "";
 $aba9show = "";
 $aba10show = "";
 $aba11show = "";
+$aba12active = "";
+$aba12show = "";
 if ($aba == 1) {
     $aba1active = " active ";
     $aba1show = " show active ";
@@ -131,6 +133,10 @@ if ($aba == 10) {
 if ($aba == 11) {
     $aba11active = " active ";
     $aba11show = " show active ";
+};
+if ($aba == 12) {
+    $aba12active = " active ";
+    $aba12show = " show active ";
 };
 
 // Buscar histórico de alterações para a aba de histórico
@@ -267,6 +273,9 @@ $historico_obrigatorio = $logDAO->findByIdObrigatorio($id_obrigatorio);
                     <a class="nav-link <?= $aba11active ?>" data-toggle="tab" href="#aba11"><i class="fas fa-history me-1"></i>Histórico</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link <?= $aba12active ?>" data-toggle="tab" href="#aba12"><i class="fas fa-stream me-1"></i>Timeline</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link <?= $aba8active ?>" data-toggle="tab" href="#aba8"><i class="fas fa-trash-alt me-1"></i>Apagar</a>
                 </li>
             </ul>
@@ -307,6 +316,10 @@ $historico_obrigatorio = $logDAO->findByIdObrigatorio($id_obrigatorio);
 
                 <div class="tab-pane fade <?= $aba11show ?>" id="aba11">
                     <?php include_once 'obrigatorio_historico.php' ?>
+                </div>
+
+                <div class="tab-pane fade <?= $aba12show ?>" id="aba12">
+                    <?php include_once 'obrigatorio_timeline.php' ?>
                 </div>
 
                 <br>

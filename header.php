@@ -49,7 +49,7 @@ $insere_log = $logDAO->insertAcessoPagina($pagina_acessada, $endereco_completo);
     <meta name="author" content="SMO">
 
     <!-- Segurança -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' https://cdnjs.cloudflare.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' https://*.tile.openstreetmap.org data: blob:; worker-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net https://tessdata.projectnaptha.com;">
 
     <title>SiS MFDV - SMO</title>
 
@@ -80,6 +80,15 @@ $insere_log = $logDAO->insertAcessoPagina($pagina_acessada, $endereco_completo);
 
     <!-- Chart.js para Dashboard Analítico (local) -->
     <script src="assets/js/chart.min.js"></script>
+
+    <!-- Leaflet.js para Mapa Geográfico (local) -->
+    <link href="libs/leaflet/leaflet.min.css" rel="stylesheet">
+    <script src="libs/leaflet/leaflet.min.js"></script>
+    <script src="assets/js/cidades-coordenadas.js"></script>
+
+    <!-- PDF.js e Tesseract.js para OCR de FISEMI (local) -->
+    <script src="libs/pdfjs/pdf.min.js"></script>
+    <script src="libs/tesseract/tesseract.min.js"></script>
 
     <!-- CSS padrão -->
     <link href="assets/css/style.css" rel="stylesheet">

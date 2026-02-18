@@ -173,6 +173,16 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
 
                     <input name="crip" type="hidden" value="<?php echo hash('sha256', $_SESSION['chave'] . "criptografia"); ?>">
 
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Formato de Saída</label>
+                            <select name="formato_saida" class="form-select formato-saida-select">
+                                <option value="pdf">PDF</option>
+                                <option value="doc">Word (.doc)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-file-pdf me-2"></i>Gerar Relatório
@@ -231,6 +241,16 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
 
                     <input name="crip" type="hidden" value="<?php echo hash('sha256', $_SESSION['chave'] . "criptografia"); ?>">
 
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Formato de Saída</label>
+                            <select name="formato_saida" class="form-select formato-saida-select">
+                                <option value="pdf">PDF</option>
+                                <option value="doc">Word (.doc)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-file-pdf me-2"></i>Gerar Relatório
@@ -258,6 +278,16 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
                     </div>
 
                     <input name="crip" type="hidden" value="<?php echo hash('sha256', $_SESSION['chave'] . "criptografia"); ?>">
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Formato de Saída</label>
+                            <select name="formato_saida" class="form-select formato-saida-select">
+                                <option value="pdf">PDF</option>
+                                <option value="doc">Word (.doc)</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -321,12 +351,12 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Nome do General</label>
-                            <input type="text" class="form-control" name="nome_general" value="ANYSIO LUIZ CRESPO ALVES NEGRÃO" required>
+                            <input type="text" class="form-control" name="nome_general" value="Gen Div RODRIGO FERRAZ SILVA" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Nome do Coronel</label>
-                            <input type="text" class="form-control" name="nome_coronel" value="CARLOS REGIS CARNEIRO BORGES" required>
+                            <input type="text" class="form-control" name="nome_coronel" value="MARCIO RODRIGO RIBAS - CEL" required>
                         </div>
 
                         <div class="col-md-12">
@@ -341,7 +371,7 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
 
                         <div class="col-md-12">
                             <label class="form-label fw-semibold">Providencia a.</label>
-                            <textarea class="form-control" name="providencia_a" rows="2" required>As OM deverão Cadastrar/Atualizar as Fichas Cadastro (F Cdtr) do SiCAPEx dos Oficiais Temporários, conforme a Portaria 147-DGP, de 23 DEZ 11 (IR 30-87):</textarea>
+                            <textarea class="form-control" name="providencia_a" rows="2" required>As OM deverão Cadastrar as Fichas Cadastro (F Cdtr) do SiCAPEx dos Oficiais Temporários, conforme a Portaria 147-DGP, de 23 DEZ 11 (IR 30-87):</textarea>
                         </div>
 
                         <div class="col-md-12">
@@ -356,21 +386,31 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
 
                         <div class="col-md-12">
                             <label class="form-label fw-semibold">Providencia c.1)</label>
-                            <textarea class="form-control" name="providencia_c1" rows="2" required>observar o prescrito no Art 55 da Portaria 46-DGP, de 27 MAR 12 (deve ser alterada para Portaria - DGP/C Ex No 407, DE 25 DE JULHO DE 2022:</textarea>
+                            <textarea class="form-control" name="providencia_c1" rows="2" required>observar o prescrito no Art 143 da Portaria-DGP/C Ex nº 407, de 25 JUL 22;</textarea>
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label fw-semibold">Providencia c.2)</label>
-                            <textarea class="form-control" name="providencia_c2" rows="3" required>publicar em BI a Incorporação dos Oficiais MFDV Temporários convocados e cadastrar na BDCP (Base de Dados Corporativa de Pessoal) via SiCAPEx, conforme os incisos I e II do Art 5º da Port 147-DGP, de 23 SET 11 (IR 30-87) combinado com as letras c) e f) do inciso I do Art 199 da Port 46-DGP, de 27 MAR 12. Especial atenção deve ser conferida aos dados individuais, que devem ser extraídos à luz da Certidão de Nascimento/Casamento (nome, filiação, data e local de nascimento), as especialidades e aos cursos e estágios que possuem: e</textarea>
+                            <textarea class="form-control" name="providencia_c2" rows="3" required>publicar em BI a incorporação dos Oficiais MFDV Temporários convocados e cadastrar na BDCP (Base de Dados Corporativa de Pessoal) via SiCAPEx, conforme os incisos I e II do Art 5º da Port 147-DGP, de 23 SET 11 (IR 30-87) combinado com as letras c) e f) do inciso I do Art 208 da Portaria- DGP/C Ex nº 407, de 25 JUL 22. Especial atenção deve ser conferida aos dados individuais, que devem ser extraídos à luz da Certidão de Nascimento/Casamento (nome, filiação, data e local de nascimento), às especialidades e aos cursos e estágios que possuem; e</textarea>
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label fw-semibold">Providencia c.3)</label>
-                            <textarea class="form-control" name="providencia_c3" rows="2" required>As OM de 1ª Fase, na data da Incorporação, deverão providenciar a identificação dos MFDV (Art 205 e 206 da Port 251-DGP, de 11 NOV 09 - NT 13-DSM).</textarea>
+                            <textarea class="form-control" name="providencia_c3" rows="2" required>As OM de 1ª Fase, na data da incorporação, deverão providenciar a identificação do MFDV (Art 205 e 206 da Port 251-DGP, de 11 NOV 09 - NT 13-DSM).</textarea>
                         </div>
                     </div>
 
                     <input name="crip" type="hidden" value="<?php echo hash('sha256', $_SESSION['chave'] . "criptografia"); ?>">
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Formato de Saída</label>
+                            <select name="formato_saida" class="form-select formato-saida-select">
+                                <option value="pdf">PDF</option>
+                                <option value="doc">Word (.doc)</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -382,6 +422,16 @@ $lista_ie_graduacao = $auxiliar->findAllCidInst();
         </div>
     </div>
 </section>
+
+<script>
+document.querySelectorAll('.formato-saida-select').forEach(function(select) {
+    select.addEventListener('change', function() {
+        var btn = this.closest('form').querySelector('button[type="submit"] i');
+        var icones = { pdf: 'fa-file-pdf', doc: 'fa-file-word' };
+        btn.className = 'fas ' + (icones[this.value] || 'fa-file-pdf') + ' me-2';
+    });
+});
+</script>
 
 <?php
 include_once 'footer.php';

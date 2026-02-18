@@ -13,8 +13,6 @@ include_once '../dao/LogDAO.php';
 include_once '../dao/AuxiliarDAO.php';
 include("mpdf60/mpdf.php");
 
-$mpdf = new mPDF('C', 'A4-P');
-
 if ($_SESSION['perfil_smo'] != "admin") erro($BASE_URL, 2, 6549874951, $pagina_atual, "usuario!admin", "Não foi possível acessar a página!");
 
 // Dados vindos do formulário
@@ -68,8 +66,6 @@ $html = "
 <p class='texto-corpo'>$paragrafo_um</p>
 <p class='texto-corpo'>$paragrafo_dois</p>
 <p class='texto-data'>$data</p>";
-
-$mpdf->WriteHTML($html);
 
 // Inicialização das listas
 $aptos = [];
@@ -130,7 +126,7 @@ if (empty($aptos) && empty($inaptos)) {
             Período: " . ($data_inicial && $data_final ? date('d/m/Y', strtotime($data_inicial)) . " a " . date('d/m/Y', strtotime($data_final)) : "Todos os registros") . "
         </p>
     </div>";
-    $mpdf->WriteHTML($html_sem_dados);
+    $html .= $html_sem_dados;
 }
 
 // Geração da tabela de APTOS
@@ -158,7 +154,7 @@ if (!empty($aptos)) {
     }
 
     $html_aptos .= "</table>";
-    $mpdf->WriteHTML($html_aptos);
+    $html .= $html_aptos;
 }
 
 // Geração da tabela de INAPTOS
@@ -186,14 +182,32 @@ if (!empty($inaptos)) {
     }
 
     $html_inaptos .= "</table>";
-    $mpdf->WriteHTML($html_inaptos);
+    $html .= $html_inaptos;
 }
 
+$formato_saida = filtra_campo_post('formato_saida') ?: 'pdf';
+
 // Registro de log
+$alteracao = "Gerou um Relatório de inspeção de saúde na data de $data.";
+$logDAO->insertLog(4006, strtoupper($formato_saida), null, $alteracao, "Relatório gerado com sucesso.", null);
+
+if ($formato_saida !== 'pdf') {
+    ob_end_clean();
+    outputComoDocumento($html, $formato_saida, 'inspecao_saude', [
+        'orientacao' => 'portrait',
+        'margin_top' => '15mm',
+        'margin_bottom' => '15mm',
+        'margin_left' => '15mm',
+        'margin_right' => '15mm',
+    ]);
+    exit();
+}
+
+$mpdf = new mPDF('C', 'A4-P');
+$mpdf->WriteHTML($html);
+
 $timestamp = time();
-$nome_arquivo = 'relatorio_inspeção_saúde_' . $timestamp . '.pdf';
-$alteracao = "Gerou um Relatório de lista de presença na data de $data.";
-$logDAO->insertLog(4006, "PDF", null, $alteracao, "Relatório gerado com sucesso.", null);
+$nome_arquivo = 'relatorio_inspecao_saude_' . $timestamp . '.pdf';
 
 ob_end_clean();
-$mpdf->Output($nome_arquivo, 'I'); // 'I' = abre no navegador
+$mpdf->Output($nome_arquivo, 'I');

@@ -90,22 +90,29 @@ foreach ($todos_obrigatorios as $obrigatorio)
 
 $html = $html . "</table>";
 
-
-$mpdf = new mPDF('C', 'A4-L'); 
-$mpdf->WriteHTML($html);
-
-$timestamp = time();
-$nome_arquivo = 'relatorio_lista_presenca' . $timestamp . '.pdf';
-$arquivo = $destino . $nome_arquivo;
-
+$formato_saida = filtra_campo_post('formato_saida') ?: 'pdf';
 
 $alteracao = "Gerou um Relatório de lista de presença na data de $data para a IE $nome_instituicao_ensino";
-$alteracao_detalahada = "Todas as situações militares do relatório ". $situacao_militar1 . " - " . $situacao_militar2 . " - " . 
+$alteracao_detalahada = "Todas as situações militares do relatório ". $situacao_militar1 . " - " . $situacao_militar2 . " - " .
 $situacao_militar3 . " - " . $situacao_militar4 . " - " . $situacao_militar5 . " - " . $situacao_militar6;
-$insere_log = $logDAO->insertLog(4006, "PDF", null, $alteracao, $alteracao_detalahada, null);
+$insere_log = $logDAO->insertLog(4006, strtoupper($formato_saida), null, $alteracao, $alteracao_detalahada, null);
+
+if ($formato_saida !== 'pdf') {
+    ob_end_clean();
+    outputComoDocumento($html, $formato_saida, 'lista_presenca', [
+        'orientacao' => 'landscape',
+        'margin_top' => '15mm',
+        'margin_bottom' => '15mm',
+        'margin_left' => '15mm',
+        'margin_right' => '15mm',
+    ]);
+    exit();
+}
+
+$mpdf = new mPDF('C', 'A4-L');
+$mpdf->WriteHTML($html);
 
 ob_get_clean();
 $mpdf->Output();
-//$mpdf->Output($arquivo, 'F');
 
 ?>

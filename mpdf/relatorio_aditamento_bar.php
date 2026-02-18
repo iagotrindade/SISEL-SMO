@@ -73,61 +73,61 @@ function formatarDataBR($data) {
     return date('d/m/Y', $timestamp);
 }
 
-// Observacao fixa
-$obs_tipo = "1ª Designacao - Servico Militar Obrigatorio.";
+// Observação fixa
+$obs_tipo = "1ª Designação - Serviço Militar Obrigatório.";
 
 $html = "
 <style>
-    body { font-family: 'Times New Roman', Times, serif; font-size: 10pt; }
+    body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
     .material-restrito { font-size: 8pt; text-align: center; border: 1px solid #CC0000; padding: 3px; margin-bottom: 10px; color: #CC0000; }
     .cabecalho { font-size: 10pt; text-align: center; line-height: 1.3; margin-bottom: 8px; }
-    .data-documento { font-size: 10pt; text-align: center; margin: 10px 0; font-style: italic; }
-    .titulo-aditamento { font-size: 10pt; text-align: center; font-weight: bold; margin: 10px 0; }
-    .subtitulo { font-size: 10pt; text-align: center; margin: 5px 0; }
-    .parte-titulo { font-size: 10pt; text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 5px 0; }
-    .parte-subtitulo { font-size: 10pt; text-align: center; text-decoration: underline; margin: 5px 0; }
-    .sem-alteracao { font-size: 10pt; text-align: center; margin: 5px 0; }
-    .item-titulo { font-size: 10pt; font-weight: bold; margin: 15px 0 10px 0; text-align: left; text-indent: 40px; }
-    .paragrafo { font-size: 10pt; text-align: justify; text-indent: 40px; margin: 8px 0; line-height: 1.4; }
-    .por-meses { font-size: 10pt; font-weight: bold; margin: 15px 0 10px 0; text-align: left; }
-    .tabela-principal { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 0; padding: 0; border-spacing: 0; }
-    .tabela-principal th { padding: 3px 2px; border: 1px solid #000000; background-color: #EEEEEE; font-weight: bold; text-align: center; font-size: 8pt; }
-    .tabela-principal td { padding: 2px; border: 1px solid #000000; vertical-align: middle; font-size: 8pt; }
-    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 8pt; margin: 0; padding: 0; border-spacing: 0; }
+    .data-documento { font-size: 12pt; text-align: center; margin: 10px 0; }
+    .titulo-aditamento { font-size: 12pt; text-align: center; font-weight: bold; margin: 10px 0; }
+    .subtitulo { font-size: 12pt; text-align: center; margin: 5px 0; }
+    .parte-titulo { font-size: 12pt; text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 5px 0; }
+    .parte-subtitulo { font-size: 12pt; text-align: center; font-weight: bold; text-decoration: underline; margin: 5px 0; }
+    .sem-alteracao { font-size: 12pt; text-align: center; margin: 5px 0; }
+    .item-titulo { font-size: 12pt; font-weight: bold; margin: 15px 0 10px 0; text-align: left; text-indent: 40px; }
+    .paragrafo { font-size: 12pt; text-align: justify; text-indent: 40px; margin: 8px 0; line-height: 1.4; }
+    .por-meses { font-size: 12pt; font-weight: bold; margin: 15px 0 10px 0; text-align: left; }
+    .tabela-principal { width: 100%; border-collapse: collapse; font-size: 12pt; margin: 0; padding: 0; border-spacing: 0; }
+    .tabela-principal th { padding: 3px 2px; border: 1px solid #000000; background-color: #EEEEEE; font-weight: bold; text-align: center; font-size: 11pt; }
+    .tabela-principal td { padding: 2px; border: 1px solid #000000; vertical-align: middle; font-size: 12pt; }
+    .tabela-dados { width: 100%; border-collapse: collapse; font-size: 12pt; margin: 0; padding: 0; border-spacing: 0; }
     .tabela-dados td { padding: 2px 5px; border: 1px solid #000000; border-top: none; }
     .rodape-bar { font-size: 8pt; font-style: italic; margin: 15px 0; }
     .assinatura { text-align: center; margin-top: 30px; }
-    .assinatura-nome { font-weight: bold; font-size: 10pt; }
-    .assinatura-cargo { font-size: 9pt; }
-    .delegacao { margin-top: 20px; font-size: 9pt; }
+    .assinatura-nome { font-weight: bold; font-size: 12pt; }
+    .assinatura-cargo { font-size: 12pt; }
+    .delegacao { margin-top: 20px; font-size: 12pt; }
     .providencias { margin-top: 20px; }
-    .providencias-item { margin-left: 20px; text-align: justify; font-size: 10pt; line-height: 1.4; }
+    .providencias-item { margin-left: 20px; text-align: justify; text-indent: 40px; font-size: 12pt; line-height: 1.4; }
 </style>
 
 <div class='cabecalho'>
     <img src='../imagens/brasao.png' width='60'><br>
-    MINISTERIO DA DEFESA<br>
-    EXERCITO BRASILEIRO<br>
-    COMANDO DA 3ª REGIAO MILITAR<br>
+    MINISTÉRIO DA DEFESA<br>
+    EXÉRCITO BRASILEIRO<br>
+    COMANDO DA 3ª REGIÃO MILITAR<br>
     (Gov das Armas Prov do RS/1821)<br>
-    REGIAO DOM DIOGO DE SOUZA
+    REGIÃO DOM DIOGO DE SOUZA
 </div>
 
 <div class='data-documento'>$texto_cabecalho</div>
 
 <div class='titulo-aditamento'>
-    ADITAMENTO $nr_aditamento DA SECAO DE SERVICO MILITAR REGIONAL/SUBSECAO DE<br>
-    SELECAO DE MILITARES TEMPORARIOS AO BOLETIM DE ACESSO RESTRITO<br>
+    ADITAMENTO $nr_aditamento DA SEÇÃO DE SERVIÇO MILITAR REGIONAL/SUBSEÇÃO DE<br>
+    SELEÇÃO DE MILITARES TEMPORÁRIOS AO BOLETIM DE ACESSO RESTRITO<br>
     REGIONAL Nr $nr_bar
 </div>
 
 <div class='subtitulo'>
-    PARA CONHECIMENTO DESTE COMANDO E DEVIDA EXECUCAO, PUBLICO O<br>
+    PARA CONHECIMENTO DESTE COMANDO E DEVIDA EXECUÇÃO, PUBLICO O<br>
     SEGUINTE:
 </div>
 
 <div class='parte-titulo'>1ª PARTE</div>
-<div class='parte-subtitulo'>SERVICOS DIARIOS</div>
+<div class='parte-subtitulo'>SERVIÇOS DIÁRIOS</div>
 <div class='sem-alteracao'>Sem alteração</div>
 
 <div class='parte-titulo'>2ª PARTE</div>
@@ -191,29 +191,29 @@ foreach ($obrigatorios as $obrigatorio) {
     <table class='tabela-principal'>
         <tr>
             <th width='4%'>Nr</th>
-            <th width='6%'>Posto</th>
-            <th width='20%'>Especialidade</th>
-            <th width='22%'>Nome</th>
-            <th width='14%'>Identidade e<br>CPF</th>
-            <th width='12%'>Data de<br>Incorporacao</th>
-            <th width='22%'>Localidade<br>Convocacao e<br>OM 1ª Fase</th>
+            <th width='7%'>Posto</th>
+            <th width='17%'>Especialidade</th>
+            <th width='17%'>Nome</th>
+            <th width='15%'>Identidade e<br>CPF</th>
+            <th width='17%'>Data de<br>Incorporação</th>
+            <th width='23%'>Localidade<br>Convocação e<br>OM 1ª Fase</th>
         </tr>
         <tr>
             <td style='text-align: center;'>$nr</td>
             <td style='text-align: center;'>$posto</td>
-            <td style='font-size: 7pt; text-align: center;'>$especialidade_completa</td>
+            <td style='font-size: 10pt; text-align: center;'>$especialidade_completa</td>
             <td style='font-weight: bold; text-align: center;'>$nome</td>
-            <td style='text-align: center; font-size: 7pt;'>$identidade<br>$cpf</td>
+            <td style='text-align: center; font-size: 10pt;'>$identidade<br>$cpf</td>
             <td style='text-align: center;'>$data_incorporacao</td>
-            <td style='text-align: center; font-size: 7pt;'>$localidade_completa</td>
+            <td style='text-align: center; font-size: 10pt;'>$localidade_completa</td>
         </tr>
     </table>
     <table class='tabela-dados'>
         <tr><td><b>Data de Nascimento:</b> $data_nascimento</td></tr>
-        <tr><td><b>Local de conclusao de curso superior:</b> $local_curso</td></tr>
-        <tr><td><b>Tempo de Servico Militar:</b> 0A 0M 0D</td></tr>
-        <tr><td><b>Endereco:</b> $endereco</td></tr>
-        <tr><td><b>Observacao:</b> $observacao</td></tr>
+        <tr><td><b>Local de conclusão de curso superior:</b> $local_curso</td></tr>
+        <tr><td><b>Tempo de Serviço Militar:</b> 0A 0M 0D</td></tr>
+        <tr><td><b>Endereço:</b> $endereco</td></tr>
+        <tr><td><b>Observação:</b> $observacao</td></tr>
     </table>
     ";
 
@@ -222,7 +222,7 @@ foreach ($obrigatorios as $obrigatorio) {
 
 $html .= "
 <div class='providencias'>
-    <div class='item-titulo'>2. PROVIDENCIAS DECORRENTES:</div>
+    <div class='item-titulo'>2. PROVIDÊNCIAS DECORRENTES:</div>
 
     <p class='providencias-item'><b>a.</b> $providencia_a</p>
 
@@ -237,25 +237,22 @@ $html .= "
     <p class='providencias-item' style='margin-left: 40px;'><b>3)</b> $providencia_c3</p>
 </div>
 
-<div class='parte-titulo'>4ª PARTE - JUSTICA E DISCIPLINA</div>
+<div class='parte-titulo'>4ª PARTE - JUSTIÇA E DISCIPLINA</div>
 <div class='sem-alteracao'>Sem alteração</div>
 
 <div class='assinatura'>
     <br><br>
-    <span class='assinatura-nome'>Gen Div $nome_general</span><br>
-    <span class='assinatura-cargo'>Comandante da 3ª Regiao Militar</span>
+    <span class='assinatura-nome'>$nome_general</span><br>
+    <span class='assinatura-cargo'>Comandante da 3ª Região Militar</span>
 </div>
 
 <div class='delegacao'>
-    <i>Por delegacao:</i><br><br><br>
-    <span class='assinatura-nome'>$nome_coronel - Cel</span><br>
-    <span class='assinatura-cargo'>Chefe da Secao do Servico Militar da 3ª Regiao Militar</span>
+    <i>Por delegação:</i><br><br><br>
+    <span class='assinatura-nome'>$nome_coronel</span><br>
+    <span class='assinatura-cargo'>Chefe da Seção do Serviço Militar da 3ª Região Militar</span>
 </div>
 
 ";
-
-// mPDF com margens para cabecalho e rodape (mode, format, font-size, font, margin_left, margin_right, margin_top, margin_bottom, margin_header, margin_footer)
-$mpdf = new mPDF('C', 'A4', 0, '', 10, 10, 25, 28, 5, 5);
 
 // Definir cabecalho e rodape com aviso de acesso restrito
 $header = "
@@ -266,26 +263,40 @@ $header = "
 ";
 
 $footer = "
+<div style='font-size: 8pt; text-align: left; margin-bottom: 2px; font-style: italic;'>
+    (Adt $nr_aditamento SSMR/SSMT ao Boletim de Acesso Restrito Regional Nr $nr_bar, de $quando_bar...............{PAGENO} de {nbpg})
+</div>
 <div style='font-size: 8pt; text-align: center; border: 1px solid #CC0000; padding: 3px; color: #CC0000;'>
     MATERIAL DE ACESSO RESTRITO<br>
     Art 44 e 45 do Dec 7.845, de 14 NOV 12
 </div>
-<div style='font-size: 8pt; text-align: left; margin-top: 2px; font-style: italic;'>
-    (Adt $nr_aditamento SSMR/SSMT ao Boletim de Acesso Restrito Regional Nr $nr_bar, de $quando_bar...............{PAGENO} de {nbpg})
-</div>
 ";
 
-$mpdf->SetHTMLHeader($header);
-$mpdf->SetHTMLFooter($footer);
-
-$mpdf->WriteHTML($html);
-
-$timestamp = time();
-$nome_arquivo = 'relatorio_aditamento_bar_' . $timestamp . '.pdf';
+$formato_saida = filtra_campo_post('formato_saida') ?: 'pdf';
 
 $alteracao = "Gerou um Aditamento ao BAR Nr $nr_bar para distribuicao $tipo_distribuicao";
 $alteracao_detalhada = "Total de obrigatorios: $total_obrigatorios - Ano filtro: $ano_filtro";
-$insere_log = $logDAO->insertLog(4007, "PDF", null, $alteracao, $alteracao_detalhada, null);
+$insere_log = $logDAO->insertLog(4007, strtoupper($formato_saida), null, $alteracao, $alteracao_detalhada, null);
+
+if ($formato_saida !== 'pdf') {
+    ob_end_clean();
+    outputComoDocumento($html, $formato_saida, 'aditamento_bar', [
+        'orientacao' => 'portrait',
+        'margin_top' => '25mm',
+        'margin_bottom' => '28mm',
+        'margin_left' => '10mm',
+        'margin_right' => '10mm',
+        'header_html' => $header,
+        'footer_html' => $footer,
+    ]);
+    exit();
+}
+
+// mPDF com margens para cabecalho e rodape (mode, format, font-size, font, margin_left, margin_right, margin_top, margin_bottom, margin_header, margin_footer)
+$mpdf = new mPDF('C', 'A4', 0, '', 10, 10, 25, 28, 5, 5);
+$mpdf->SetHTMLHeader($header);
+$mpdf->SetHTMLFooter($footer);
+$mpdf->WriteHTML($html);
 
 ob_end_clean();
 $mpdf->Output();
