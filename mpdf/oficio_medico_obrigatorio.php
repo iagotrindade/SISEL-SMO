@@ -79,6 +79,31 @@ $eb =               "10/" . $obrigatorio->getId() . "-"
 
 set_time_limit(300);
 
+// Determina a formação a exibir no ofício:
+// Para médicos com especialidade, usa a especialidade de ano mais recente.
+$formacao_oficio = $obrigatorio->getFormacao();
+
+if (stripos($formacao_oficio, 'MÉDICO') !== false) {
+    $candidatas = [];
+    if ($obrigatorio->getEspecialidade()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade(), 'ano' => (int)($obrigatorio->getAnoResEspe1() ?: 0)];
+    }
+    if ($obrigatorio->getEspecialidade2()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade2(), 'ano' => (int)($obrigatorio->getAnoResEspe2() ?: 0)];
+    }
+    if ($obrigatorio->getEspecialidade3()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade3(), 'ano' => (int)($obrigatorio->getAnoResEspe3() ?: 0)];
+    }
+    if (!empty($candidatas)) {
+        usort($candidatas, fn($a, $b) => $b['ano'] - $a['ano']);
+        $nome_espec = mb_strtoupper($candidatas[0]['nome']);
+        if (mb_substr($nome_espec, 0, 8) === 'MÉDICO -') {
+            $nome_espec = trim(mb_substr($nome_espec, 8));
+        }
+        $formacao_oficio = 'MÉDICO - ' . $nome_espec;
+    }
+}
+
 $html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
@@ -141,13 +166,13 @@ $html = $html . "
 
         
 <p class='texto-oficio'>
-1. Apresento a esse Comando o Sr " . $obrigatorio->getNomeCompleto() . ", " . $obrigatorio->getFormacao() . ", que após Seleção Especial de Médicos, Farmacêuticos, Dentistas e Veterinários (MFDV), está convocado à Incorporação para a prestação do Serviço Militar Obrigatório sob a forma da 1ª Fase do Estágio de Adaptação e Serviço (1ª Fase/EAS)
+1. Apresento a esse Comando o Sr " . $obrigatorio->getNomeCompleto() . ", " . $formacao_oficio . ", que após Seleção Especial de Médicos, Farmacêuticos, Dentistas e Veterinários (MFDV), está convocado à Incorporação para a prestação do Serviço Militar Obrigatório sob a forma da 1ª Fase do Estágio de Adaptação e Serviço (1ª Fase/EAS)
 </p>
 <p class='texto-oficio'>
 2. Comunico que as atividades de Seleção Complementar, Convocação à Incorporação, Incorporação e outras medidas administrativas estão reguladas em Ordem de Serviço específica.
 </p>
 <p class='texto-oficio'>
-3. Informo, também, que o " . $obrigatorio->getFormacao() . " convocado tem conhecimento de que, conforme previsto no Art
+3. Informo, também, que o " . $formacao_oficio . " convocado tem conhecimento de que, conforme previsto no Art
 183 do Decreto-Lei Nr 1.001, de 21 de outubro de 1969 (Código Penal Militar), incorrerá no crime de “insubmissão”, caso
 deixe de apresentar-se à incorporação, dentro do prazo marcado, ou que, apresentando-se, ausente-se antes do ato oficial
 de incorporação. Adicionalmente, comunico que, conforme a Súmula 7 do Superior Tribunal Militar, incorrerá no mesmo
@@ -157,7 +182,7 @@ crime citado (Insubmissão), caso não compareça à Seleção Complementar.
 <p style='font-size: 12px; font-family: Times New Roman; text-align: justify;'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    4. A OM de 1ª Fase, após a realização da Seleção Complementar, deverá expedir Ofício convocando o " . $obrigatorio->getFormacao() . " para a sua Incorporação, informando a data, horário e local de apresentação para a referida Incorporação.
+    4. A OM de 1ª Fase, após a realização da Seleção Complementar, deverá expedir Ofício convocando o " . $formacao_oficio . " para a sua Incorporação, informando a data, horário e local de apresentação para a referida Incorporação.
     <br>
     <br>
 

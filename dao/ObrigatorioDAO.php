@@ -51,6 +51,7 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         $obrigatorio->setPrioridadeForca($data['prioridade_forca']);
         $obrigatorio->setApagado($data['apagado']);
         $obrigatorio->setVoluntario($data['voluntario']);
+        $obrigatorio->setJaFoiRefratorio($data['ja_foi_refratorio'] ?? '');
         $obrigatorio->setDocumentoMilitar($data['documento_militar']);
         $obrigatorio->setNumeroDocumentoMilitar($data['numero_documento_militar']);
         $obrigatorio->setDataExpedicao($data['data_expedicao']);
@@ -204,6 +205,7 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         data_nascimento = :data_nascimento, nome_pai = UPPER(:nome_pai), nome_mae = UPPER(:nome_mae), 
         nacionalidade = UPPER(:nacionalidade), naturalidade = :naturalidade, 
         identidade = :identidade, dependentes = :dependentes, endereco = UPPER(:endereco), prioridade_forca = :prioridade_forca, voluntario = :voluntario,
+        ja_foi_refratorio = :ja_foi_refratorio,
         documento_militar = :documento_militar, numero_documento_militar = :numero_documento_militar,
         data_expedicao = :data_expedicao,
         forca = :forca,
@@ -287,6 +289,7 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
         $stmt->bindValue(":endereco", $obrigatorio->getEndereco());
         $stmt->bindValue(":prioridade_forca", $obrigatorio->getPrioridadeForca());
         $stmt->bindValue(":voluntario", $obrigatorio->getVoluntario());
+        $stmt->bindValue(":ja_foi_refratorio", $obrigatorio->getJaFoiRefratorio());
         $stmt->bindValue(":documento_militar", $obrigatorio->getDocumentoMilitar());
         $stmt->bindValue(":numero_documento_militar", $obrigatorio->getNumeroDocumentoMilitar());
         $stmt->bindValue(":data_expedicao", $obrigatorio->getDataExpedicao());
@@ -1112,6 +1115,12 @@ class ObrigatorioDAO implements ObrigatorioDAOInterface
                 $params[$key] = $val;
             }
             $where[] = "o.voluntario IN (" . implode(',', $placeholders) . ")";
+        }
+
+        // Já foi refratário
+        if (!empty($filters['ja_foi_refratorio_filtro'])) {
+            $where[] = "o.ja_foi_refratorio = :ja_foi_refratorio_filtro";
+            $params[':ja_foi_refratorio_filtro'] = $filters['ja_foi_refratorio_filtro'];
         }
 
         // Dependentes

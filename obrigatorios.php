@@ -60,7 +60,43 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
         </div>
         <div class="card-body">
             <div class="row g-3">
+                <!-- Linha 1: Situação Militar + Distribuição (6+6=12) -->
                 <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Situação Militar</label>
+                    <select id="situacao_militar" name="situacao_militar[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">Situação Militar</option>
+                        <option value="Em Débito - REFRATÁRIO">Em Débito - REFRATÁRIO</option>
+                        <option value="Em Débito - INSUBMISSO">Em Débito - INSUBMISSO</option>
+                        <option value="Em Dia - JUDICIAL">Em Dia - JUDICIAL</option>
+                        <option value="Em Dia - JUDICIAL LIMINAR">Em Dia - JUDICIAL LIMINAR</option>
+                        <option value="Em Dia - TRANSFERÊNCIA FISEMI">Em Dia - TRANSFERÊNCIA FISEMI</option>
+                        <option value="Em Dia - ALISTADO MFDV (FISEMI)">Em Dia - ALISTADO MFDV (FISEMI)</option>
+                        <option value="Em Dia - ADIADO CURSANDO RESIDÊNCIA">Em Dia - ADIADO CURSANDO RESIDÊNCIA</option>
+                        <option value="Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO">Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO</option>
+                        <option value="Quite SMO - EXCESSO - CONTINGENTE">Quite SMO - EXCESSO - CONTINGENTE</option>
+                        <option value="Quite SMO - EXCESSO - INCAPAZ SAÚDE">Quite SMO - EXCESSO - INCAPAZ SAÚDE</option>
+                        <option value="Quite SMO - DESOBRIGADO - MAIOR 38 ANOS">Quite SMO - DESOBRIGADO - MAIOR 38 ANOS</option>
+                        <option value="Quite SMO - DESOBRIGADO - JÁ RESERVISTA">Quite SMO - DESOBRIGADO - JÁ RESERVISTA</option>
+                        <option value="Quite SMO - DESOBRIGADO - NATURALIZADO">Quite SMO - DESOBRIGADO - NATURALIZADO</option>
+                        <option value="Quite SMO - CONVOCADO">Quite SMO - CONVOCADO</option>
+                    </select>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Distribuição</label>
+                    <select id="distribuicao_filtro" name="distribuicao_filtro[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">Distribuição</option>
+                        <option value="DESIGNADO - 1ª Distribuição">DESIGNADO - 1ª Distribuição</option>
+                        <option value="DESIGNADO - 2ª Distribuição">DESIGNADO - 2ª Distribuição</option>
+                        <option value="MAJORADO - 1ª Distribuição">MAJORADO - 1ª Distribuição</option>
+                        <option value="MAJORADO - 2ª Distribuição">MAJORADO - 2ª Distribuição</option>
+                        <option value="EXCESSO CONTINGENTE">EXCESSO CONTINGENTE</option>
+                        <option value="MARINHA">MARINHA</option>
+                        <option value="FORÇA AÉREA">FORÇA AÉREA</option>
+                    </select>
+                </div>
+
+                <!-- Linha 2: Datas de seleção (4+4+4=12) -->
+                <div class="col-lg-4">
                     <label class="form-label fw-semibold">Data Seleção Geral</label>
                     <select id="sel_geral_filtro" name="sel_geral_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value=""></option>
@@ -72,7 +108,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         ?>
                     </select>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <label class="form-label fw-semibold">Data Seleção Geral SEMESTRE</label>
                     <select id="data_selecao_geral_semestre_filtro" name="data_selecao_geral_semestre_filtro" style="width: 100%" class="chosen-select">
                         <option value="">Selecione o Semestre</option>
@@ -86,7 +122,20 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="dois_semestre_vinteseis">2º Semestre de 2026</option>
                     </select>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Dt Seleção Complementar</label>
+                    <select id="sel_complementar_filtro" name="sel_complementar_filtro[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">Dt Seleção Complementar</option>
+                        <?php
+                        foreach ($todas_dt_sel_complementar as $value) {
+                            echo "<option value='" . htmlspecialchars($value['data']) . "'>" . trata_data($value['data']) . "</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <!-- Linha 3: Especialidade + IE Graduação (8+4=12) -->
+                <div class="col-lg-8">
                     <label class="form-label fw-semibold">Especialidade</label>
                     <select id="especialidade_filtro" name="especialidade_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Especialidade</option>
@@ -98,7 +147,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         ?>
                     </select>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <label class="form-label fw-semibold">IE Graduação</label>
                     <select id="faculdade_filtro" name="faculdade_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">IE Graduação</option>
@@ -125,24 +174,28 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="GRADUADO EM FACULDADE FORA RS">GRADUADO EM FACULDADE FORA RS</option>
                     </select>
                 </div>
-                <div class="col-lg-6">
-                    <label class="form-label fw-semibold">Situação Militar</label>
-                    <select id="situacao_militar" name="situacao_militar[]" style="width: 100%" class="chosen-select" multiple>
-                        <option value="">Situação Militar</option>
-                        <option value="Em Débito - REFRATÁRIO">Em Débito - REFRATÁRIO</option>
-                        <option value="Em Débito - INSUBMISSO">Em Débito - INSUBMISSO</option>
-                        <option value="Em Dia - JUDICIAL">Em Dia - JUDICIAL</option>
-                        <option value="Em Dia - JUDICIAL LIMINAR">Em Dia - JUDICIAL LIMINAR</option>
-                        <option value="Em Dia - TRANSFERÊNCIA FISEMI">Em Dia - TRANSFERÊNCIA FISEMI</option>
-                        <option value="Em Dia - ALISTADO MFDV (FISEMI)">Em Dia - ALISTADO MFDV (FISEMI)</option>
-                        <option value="Em Dia - ADIADO CURSANDO RESIDÊNCIA">Em Dia - ADIADO CURSANDO RESIDÊNCIA</option>
-                        <option value="Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO">Em Dia - B1 - INSP SAU - RETORNAR PRÓXIMA SELEÇÃO</option>
-                        <option value="Quite SMO - EXCESSO - CONTINGENTE">Quite SMO - EXCESSO - CONTINGENTE</option>
-                        <option value="Quite SMO - EXCESSO - INCAPAZ SAÚDE">Quite SMO - EXCESSO - INCAPAZ SAÚDE</option>
-                        <option value="Quite SMO - DESOBRIGADO - MAIOR 38 ANOS">Quite SMO - DESOBRIGADO - MAIOR 38 ANOS</option>
-                        <option value="Quite SMO - DESOBRIGADO - JÁ RESERVISTA">Quite SMO - DESOBRIGADO - JÁ RESERVISTA</option>
-                        <option value="Quite SMO - DESOBRIGADO - NATURALIZADO">Quite SMO - DESOBRIGADO - NATURALIZADO</option>
-                        <option value="Quite SMO - CONVOCADO">Quite SMO - CONVOCADO</option>
+
+                <!-- Linha 4: OMs + Dt Comp Designação (4+4+4=12) -->
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">OM 1ª Fase</label>
+                    <select id="om_1_fase_filtro" name="om_1_fase_filtro[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">OM - 1ª Fase</option>
+                        <?php
+                        foreach ($todas_oms_1_fase as $value) {
+                            echo "<option value='" . htmlspecialchars($value['abreviatura']) . "'>" . htmlspecialchars($value['abreviatura']) . "</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">OM 2ª Fase</label>
+                    <select id="om_2_fase_filtro" name="om_2_fase_filtro[]" style="width: 100%" class="chosen-select" multiple>
+                        <option value="">OM 2ª Fase</option>
+                        <?php
+                        foreach ($todas_oms_2_fase as $value) {
+                            echo "<option value='" . htmlspecialchars($value['abreviatura']) . "'>" . htmlspecialchars($value['abreviatura']) . "</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="col-lg-4">
@@ -157,6 +210,8 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         ?>
                     </select>
                 </div>
+
+                <!-- Linha 5: Filtros pequenos (6 × col-2 = 12) -->
                 <div class="col-lg-2">
                     <label class="form-label fw-semibold">Voluntário</label>
                     <select id="voluntario_filtro" name="voluntario_filtro[]" style="width: 100%" class="chosen-select" multiple>
@@ -164,28 +219,12 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="NÃO">Não</option>
                     </select>
                 </div>
-                <div class="col-lg-6">
-                    <label class="form-label fw-semibold">Distribuição</label>
-                    <select id="distribuicao_filtro" name="distribuicao_filtro[]" style="width: 100%" class="chosen-select" multiple>
-                        <option value="">Distribuição</option>
-                        <option value="DESIGNADO - 1ª Distribuição">DESIGNADO - 1ª Distribuição</option>
-                        <option value="DESIGNADO - 2ª Distribuição">DESIGNADO - 2ª Distribuição</option>
-                        <option value="MAJORADO - 1ª Distribuição">MAJORADO - 1ª Distribuição</option>
-                        <option value="MAJORADO - 2ª Distribuição">MAJORADO - 2ª Distribuição</option>
-                        <option value="EXCESSO CONTINGENTE">EXCESSO CONTINGENTE</option>
-                        <option value="MARINHA">MARINHA</option>
-                        <option value="FORÇA AÉREA">FORÇA AÉREA</option>
-                    </select>
-                </div>
-                <div class="col-lg-4">
-                    <label class="form-label fw-semibold">OM 1ª Fase</label>
-                    <select id="om_1_fase_filtro" name="om_1_fase_filtro[]" style="width: 100%" class="chosen-select" multiple>
-                        <option value="">OM - 1ª Fase</option>
-                        <?php
-                        foreach ($todas_oms_1_fase as $value) {
-                            echo "<option value='" . htmlspecialchars($value['abreviatura']) . "'>" . htmlspecialchars($value['abreviatura']) . "</option>";
-                        }
-                        ?>
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold">Já foi refratário</label>
+                    <select id="ja_foi_refratorio_filtro" name="ja_foi_refratorio_filtro" style="width: 100%" class="chosen-select">
+                        <option value="">Todos</option>
+                        <option value="SIM">Sim</option>
+                        <option value="NÃO">Não</option>
                     </select>
                 </div>
                 <div class="col-lg-2">
@@ -234,18 +273,9 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="C">C</option>
                     </select>
                 </div>
-                <div class="col-lg-4">
-                    <label class="form-label fw-semibold">OM 2ª Fase</label>
-                    <select id="om_2_fase_filtro" name="om_2_fase_filtro[]" style="width: 100%" class="chosen-select" multiple>
-                        <option value="">OM 2ª Fase</option>
-                        <?php
-                        foreach ($todas_oms_2_fase as $value) {
-                            echo "<option value='" . htmlspecialchars($value['abreviatura']) . "'>" . htmlspecialchars($value['abreviatura']) . "</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-lg-2">
+
+                <!-- Linha 6: Prioridade + Revisão + ISGRev + Incorporação (3+3+3+3=12) -->
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">Prioridade Força</label>
                     <select id="prioridade_forca_filtro" name="prioridade_forca_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Prioridade da Força</option>
@@ -257,18 +287,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="AME">AME</option>
                     </select>
                 </div>
-                <div class="col-lg-4">
-                    <label class="form-label fw-semibold">Dt Seleção Complementar</label>
-                    <select id="sel_complementar_filtro" name="sel_complementar_filtro[]" style="width: 100%" class="chosen-select" multiple>
-                        <option value="">Dt Seleção Complementar</option>
-                        <?php
-                        foreach ($todas_dt_sel_complementar as $value) {
-                            echo "<option value='" . htmlspecialchars($value['data']) . "'>" . trata_data($value['data']) . "</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">Resultado Revisão Médica</label>
                     <select id="resultado_revisao_filtro" name="resultado_revisao_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Resultado Revisão Médica</option>
@@ -277,7 +296,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="NÃO COMPARECEU">NÃO COMPARECEU</option>
                     </select>
                 </div>
-                <div class="col-lg-2">
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">ISGRev</label>
                     <select id="isgr_filtro" name="isgr_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Resultado ISGRev</option>
@@ -288,7 +307,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                         <option value="C">C</option>
                     </select>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <label class="form-label fw-semibold">Dt Incorporação</label>
                     <select id="incorporacao_filtro" name="incorporacao_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Dt Incorporação</option>
@@ -359,6 +378,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
 
                     // Adiciona filtros customizados à requisição
                     d.voluntario_filtro = $('#voluntario_filtro').val();
+                    d.ja_foi_refratorio_filtro = $('#ja_foi_refratorio_filtro').val();
                     d.dependentes_filtro = $('#dependentes_filtro').val();
                     d.faculdade_filtro = $('#faculdade_filtro').val();
                     d.jise_filtro = $('#jise_filtro').val();

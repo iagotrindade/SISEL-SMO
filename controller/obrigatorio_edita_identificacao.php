@@ -37,6 +37,7 @@ $endereco = filtra_campo_post('endereco');
 $prioridade_forca = filtra_campo_post('prioridade_forca');
 $crip = filtra_campo_post('crip');
 $voluntario = filtra_campo_post('voluntario');
+$ja_foi_refratorio = filtra_campo_post('ja_foi_refratorio');
 $documento_militar = filtra_campo_post('documento_militar');
 $numero_documento_militar = filtra_campo_post('numero_documento_militar');
 $data_expedicao = filtra_campo_post('data_expedicao');
@@ -151,6 +152,7 @@ try
     $obrigatorio_editar->setEndereco($endereco);
     $obrigatorio_editar->setPrioridadeForca($prioridade_forca);
     $obrigatorio_editar->setVoluntario($voluntario);
+    $obrigatorio_editar->setJaFoiRefratorio($ja_foi_refratorio);
     $obrigatorio_editar->setDocumentoMilitar($documento_militar);
     $obrigatorio_editar->setNumeroDocumentoMilitar($numero_documento_militar);
     $obrigatorio_editar->setDataExpedicao($data_expedicao);

@@ -38,6 +38,31 @@ ob_start();
     $dataexpedicao = $obrigatorio->getDataExpedicao();
     $dataexpedicao = trata_data($dataexpedicao);
 
+// Determina a formação a exibir na ficha:
+// Para médicos com especialidade, usa a especialidade de ano mais recente.
+$formacao_ficha = $obrigatorio->getFormacao();
+
+if (stripos($formacao_ficha, 'MÉDICO') !== false) {
+    $candidatas = [];
+    if ($obrigatorio->getEspecialidade()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade(), 'ano' => (int)($obrigatorio->getAnoResEspe1() ?: 0)];
+    }
+    if ($obrigatorio->getEspecialidade2()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade2(), 'ano' => (int)($obrigatorio->getAnoResEspe2() ?: 0)];
+    }
+    if ($obrigatorio->getEspecialidade3()) {
+        $candidatas[] = ['nome' => $obrigatorio->getEspecialidade3(), 'ano' => (int)($obrigatorio->getAnoResEspe3() ?: 0)];
+    }
+    if (!empty($candidatas)) {
+        usort($candidatas, fn($a, $b) => $b['ano'] - $a['ano']);
+        $nome_espec = mb_strtoupper($candidatas[0]['nome']);
+        if (mb_substr($nome_espec, 0, 8) === 'MÉDICO -') {
+            $nome_espec = trim(mb_substr($nome_espec, 8));
+        }
+        $formacao_ficha = 'MÉDICO - ' . $nome_espec;
+    }
+}
+
 $html = "
 <style>
     body { font-family: 'Times New Roman', Times, serif; }
@@ -67,7 +92,7 @@ $html = "
 </div>
 
 <div class='titulo-principal'>FICHA CADASTRAL</div>
-<div class='titulo-secundario'>" . $obrigatorio->getFormacao() . "</div>
+<div class='titulo-secundario'>" . $formacao_ficha . "</div>
 ";
 
  $html = $html. "
@@ -121,7 +146,7 @@ $html = "
 </tr>
 
 <tr>
-    <td><span class='campo-label'>Formação:</span> ".$obrigatorio->getFormacao()."</td>
+    <td><span class='campo-label'>Formação:</span> ".$formacao_ficha."</td>
     <td><span class='campo-label'>Ano de Formação:</span> ".$obrigatorio->getAnoFormacao()."</td>
 </tr>
 

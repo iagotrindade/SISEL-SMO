@@ -82,6 +82,11 @@ try {
         }
     }
 
+    // Filtro: Já foi refratário
+    if (isset($_GET['ja_foi_refratorio_filtro']) && !empty($_GET['ja_foi_refratorio_filtro'])) {
+        $filters['ja_foi_refratorio_filtro'] = $_GET['ja_foi_refratorio_filtro'];
+    }
+
     // Filtro: Dependentes
     if (isset($_GET['dependentes_filtro']) && !empty($_GET['dependentes_filtro'])) {
         $filters['dependentes_filtro'] = $_GET['dependentes_filtro'];

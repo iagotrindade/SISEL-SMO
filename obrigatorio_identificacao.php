@@ -107,6 +107,15 @@
                     </div>
 
                     <div class="col-md-4 form-group">
+                        <b>Já foi refratário?</b>
+                        <select name="ja_foi_refratorio" class="form-control">
+                            <option value="">Selecione a Opção</option>
+                            <option <?php if ($obrigatorio->getJaFoiRefratorio() == "SIM") echo " selected " ?> value="SIM">SIM</option>
+                            <option <?php if ($obrigatorio->getJaFoiRefratorio() == "NÃO") echo " selected " ?> value="NÃO">NÃO</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 form-group">
                         <b>Nacionalidade</b>
                         <select name="nacionalidade" class="form-control">
                             <option value="">Selecione a Opção</option>

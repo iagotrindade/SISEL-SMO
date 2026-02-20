@@ -22,6 +22,7 @@ class Obrigatorio
     private $endereco;
     private $prioridade_forca;
     private $voluntario;
+    private $ja_foi_refratorio;
     private $documento_militar;
     private $numero_documento_militar;
     private $data_expedicao;
@@ -118,6 +119,7 @@ class Obrigatorio
             'endereco' => $this->endereco,
             'prioridade_forca' => $this->prioridade_forca,
             'voluntario' => $this->voluntario,
+            'ja_foi_refratorio' => $this->ja_foi_refratorio,
             'documento_militar' => $this->documento_militar,
             'numero_documento_militar' => $this->numero_documento_militar,
             'data_expedicao' => $this->data_expedicao,
@@ -301,6 +303,13 @@ class Obrigatorio
         if ($voluntario == "SIM" || $voluntario == "NÃO" || $voluntario == "")
             $this->voluntario = $voluntario;
         else throw new Exception("O campo voluntário está incorreto");
+    }
+
+    public function setJaFoiRefratorio($ja_foi_refratorio)
+    {
+        if ($ja_foi_refratorio == "SIM" || $ja_foi_refratorio == "NÃO" || $ja_foi_refratorio == "")
+            $this->ja_foi_refratorio = $ja_foi_refratorio;
+        else throw new Exception("O campo já foi refratário está incorreto");
     }
 
     public function setDocumentoMilitar($documento_militar)
@@ -900,6 +909,11 @@ class Obrigatorio
             return $this->voluntario;
     }
 
+    public function getJaFoiRefratorio()
+    {
+        if ($this->ja_foi_refratorio == "SIM" || $this->ja_foi_refratorio == "NÃO" || $this->ja_foi_refratorio == "")
+            return $this->ja_foi_refratorio;
+    }
 
     public function getImprimeTransitouJulgado()
     {

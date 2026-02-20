@@ -60,6 +60,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
         </div>
         <div class="card-body">
             <div class="row g-3">
+                <!-- Linha 1: OM + Situação Militar -->
                 <div class="col-lg-6">
                     <label class="form-label fw-semibold">OM 1ª Fase</label>
                     <select id="om_1_fase_filtro" name="om_1_fase_filtro[]" style="width: 100%" class="chosen-select" multiple>
@@ -93,7 +94,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-
+                <!-- Linha 2: Designação -->
                 <div class="col-lg-4">
                     <label class="form-label fw-semibold">Designação - Compareceu?</label>
                     <select id="compareceu_designacao_filtro" name="compareceu_designacao_filtro" style="width: 100%" class="chosen-select">
@@ -128,6 +129,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
+                <!-- Linha 3: Revisão médica + Incorporação -->
                 <div class="col-lg-6">
                     <label class="form-label fw-semibold">Resultado Revisão Médica</label>
                     <select id="resultado_revisao_filtro" name="resultado_revisao_filtro[]" style="width: 100%" class="chosen-select" multiple>
@@ -150,6 +152,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
+                <!-- Linha 4: Datas de seleção geral -->
                 <div class="col-lg-6">
                     <label class="form-label fw-semibold">Data Seleção Geral SEMESTRE</label>
                     <select id="data_selecao_geral_semestre_filtro" name="data_selecao_geral_semestre_filtro" style="width: 100%" class="chosen-select">
@@ -177,6 +180,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
+                <!-- Linha 5: Especialidade -->
                 <div class="col-lg-12">
                     <label class="form-label fw-semibold">Especialidade</label>
                     <select id="especialidade_filtro" name="especialidade_filtro[]" style="width: 100%" class="chosen-select" multiple>
@@ -190,6 +194,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
+                <!-- Linha 6: Filtros pequenos (6 × col-2 = 12) -->
                 <div class="col-lg-2">
                     <label class="form-label fw-semibold">Formação</label>
                     <select id="formacao_filtro" name="formacao_filtro" style="width: 100%" class="chosen-select">
@@ -209,30 +214,20 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                 </div>
 
                 <div class="col-lg-2">
+                    <label class="form-label fw-semibold">Já foi refratário</label>
+                    <select id="ja_foi_refratorio_filtro" name="ja_foi_refratorio_filtro" style="width: 100%" class="chosen-select">
+                        <option value="">Todos</option>
+                        <option value="SIM">Sim</option>
+                        <option value="NÃO">Não</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
                     <label class="form-label fw-semibold">Dependentes</label>
                     <select id="dependentes_filtro" name="dependentes_filtro" style="width: 100%" class="chosen-select">
                         <option value="">Dependentes</option>
                         <option value="nenhum">Nenhum Dependente</option>
                         <option value="possui_dependente">Com dependentes</option>
-                    </select>
-                </div>
-
-                <div class="col-lg-2">
-                    <label class="form-label fw-semibold">FISEMI - RM Destino</label>
-                    <select id="rm_destino" name="rm_destino" style="width: 100%" class="chosen-select">
-                        <option value="">FISEMI - RM Destino</option>
-                        <option value="1">1ª RM</option>
-                        <option value="2">2ª RM</option>
-                        <option value="3">3ª RM</option>
-                        <option value="4">4ª RM</option>
-                        <option value="5">5ª RM</option>
-                        <option value="6">6ª RM</option>
-                        <option value="7">7ª RM</option>
-                        <option value="8">8ª RM</option>
-                        <option value="9">9ª RM</option>
-                        <option value="10">10ª RM</option>
-                        <option value="11">11ª RM</option>
-                        <option value="12">12ª RM</option>
                     </select>
                 </div>
 
@@ -258,7 +253,27 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-                <div class="col-lg-3">
+                <!-- Linha 7: FISEMI + Prioridade + Guarnição + IE Grad + Distribuição (2+2+3+3+2=12) -->
+                <div class="col-lg-2">
+                    <label class="form-label fw-semibold">FISEMI - RM Destino</label>
+                    <select id="rm_destino" name="rm_destino" style="width: 100%" class="chosen-select">
+                        <option value="">FISEMI - RM Destino</option>
+                        <option value="1">1ª RM</option>
+                        <option value="2">2ª RM</option>
+                        <option value="3">3ª RM</option>
+                        <option value="4">4ª RM</option>
+                        <option value="5">5ª RM</option>
+                        <option value="6">6ª RM</option>
+                        <option value="7">7ª RM</option>
+                        <option value="8">8ª RM</option>
+                        <option value="9">9ª RM</option>
+                        <option value="10">10ª RM</option>
+                        <option value="11">11ª RM</option>
+                        <option value="12">12ª RM</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
                     <label class="form-label fw-semibold">Prioridade da Força</label>
                     <select id="prioridade_forca_filtro" name="prioridade_forca_filtro" style="width: 100%" class="chosen-select">
                         <option value="">Prioridade da Força</option>
@@ -312,7 +327,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     </select>
                 </div>
 
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                     <label class="form-label fw-semibold">Distribuição</label>
                     <select id="distribuicao_filtro" name="distribuicao_filtro[]" style="width: 100%" class="chosen-select" multiple>
                         <option value="">Distribuição</option>
@@ -441,6 +456,7 @@ if (!isset($_SESSION['mensagem'])) $_SESSION['mensagem'] = null;
                     d.especialidade_filtro = $('#especialidade_filtro').val();
                     d.formacao_filtro = $('#formacao_filtro').val();
                     d.voluntario_filtro = $('#voluntario_filtro').val();
+                    d.ja_foi_refratorio_filtro = $('#ja_foi_refratorio_filtro').val();
                     d.dependentes_filtro = $('#dependentes_filtro').val();
                     d.rm_destino = $('#rm_destino').val();
                     d.jise_filtro = $('#jise_filtro').val();
